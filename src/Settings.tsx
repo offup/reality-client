@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getVersion } from "@tauri-apps/api/app";
 import { Check } from "lucide-react";
 import type { AfterLaunch } from "./launcher";
 import "./Settings.css";
@@ -81,6 +82,13 @@ function Settings({
   onAfterLaunch,
 }: Props) {
   const [tab, setTab] = useState<Tab>("background");
+  const [appVersion, setAppVersion] = useState("");
+
+  useEffect(() => {
+    getVersion()
+      .then(setAppVersion)
+      .catch(() => setAppVersion("dev"));
+  }, []);
   const memoryFill =
     ((memoryMb - MEMORY_MIN) / (MEMORY_MAX - MEMORY_MIN)) * 100;
   const fill =
@@ -172,6 +180,15 @@ function Settings({
               </span>
             </div>
             <span className="settings-list-value">Fabric</span>
+          </div>
+          <div className="settings-list-row">
+            <div className="settings-list-text">
+              <span className="settings-list-title">Launcher version</span>
+              <span className="settings-list-sub">
+                Updates install from the notice at the top left
+              </span>
+            </div>
+            <span className="settings-list-value">{appVersion}</span>
           </div>
         </div>
       )}
