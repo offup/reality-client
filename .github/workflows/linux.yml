@@ -35,6 +35,8 @@ jobs:
       - uses: swatinem/rust-cache@v2
         with:
           workspaces: "src-tauri -> target"
+          # Keep compiled dependencies even when the app itself fails to build
+          cache-on-failure: true
 
       - run: npm ci
 
