@@ -1,0 +1,365 @@
+/* Profile tab: player on the left; skin bar and cape list on the right */
+.profile {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 20px;
+  color: #fff;
+}
+
+.profile button {
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.profile button:focus {
+  outline: none;
+}
+
+.profile button:disabled {
+  cursor: default;
+}
+
+/* ---------------------------------------------------------------- stage */
+
+.profile-stage {
+  position: relative;
+  width: 400px;
+  flex: none;
+  border: 1px solid #2a2a2a;
+  background: radial-gradient(ellipse 60% 55% at 50% 38%, #161616, #0b0b0b 75%);
+  overflow: hidden;
+  transition: border-color 150ms;
+}
+
+.profile.is-dragging .profile-stage {
+  border-color: #fff;
+}
+
+.profile-stage .skin-view {
+  top: 50%;
+}
+
+/* Soft light on the floor under the feet */
+.profile-floor {
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  width: 240px;
+  height: 40px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0) 70%);
+}
+
+.profile-dropping {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(8, 8, 8, 0.78);
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  animation: profile-fade 120ms ease-out;
+}
+
+@keyframes profile-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------- right side */
+
+.profile-side {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Skin bar: who you are on the left, model and upload on the right */
+.profile-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 76px;
+  padding: 0 18px;
+  flex: none;
+  box-sizing: border-box;
+  border: 1px solid #2a2a2a;
+  background: #0c0c0c;
+}
+
+.profile-who {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.profile-face {
+  flex: none;
+  image-rendering: pixelated;
+}
+
+.profile-who-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.profile-name {
+  font-family: var(--font-minecraft);
+  font-size: 20px;
+  line-height: 1;
+  text-shadow: 2px 2px 0 #3f3f3f;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-sub {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0;
+  color: #666;
+  white-space: nowrap;
+}
+
+.profile-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+.profile-segments {
+  display: flex;
+  border: 1px solid #2a2a2a;
+}
+
+.profile-segments button {
+  padding: 11px 16px;
+  border: 0;
+  background: none;
+  color: #777;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background 120ms, color 120ms;
+}
+
+.profile-segments button + button {
+  border-left: 1px solid #2a2a2a;
+}
+
+.profile-segments button:hover:not(:disabled) {
+  color: #ddd;
+}
+
+.profile-segments button.is-active {
+  background: #1c1c1c;
+  color: #fff;
+}
+
+.profile-upload {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid #fff;
+  background: #fff;
+  color: #000;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background 120ms, opacity 120ms;
+}
+
+.profile-upload:hover:not(:disabled) {
+  background: #ddd;
+}
+
+.profile-upload:disabled {
+  opacity: 0.5;
+}
+
+/* Cape list: one big row per cape, the active one lit */
+.profile-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid #2a2a2a;
+  background: #0c0c0c;
+}
+
+.profile-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.profile-list::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+}
+
+.profile-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 18px;
+  border: 0;
+  border-bottom: 1px solid #191919;
+  background: none;
+  color: #fff;
+  text-align: left;
+  transition: background 120ms;
+}
+
+.profile-row:hover:not(:disabled):not(.is-active) {
+  background: #121212;
+}
+
+.profile-row.is-active {
+  background: #161616;
+  box-shadow: inset 2px 0 0 #fff;
+}
+
+.profile-row:disabled:not(.is-active) {
+  opacity: 0.55;
+}
+
+/* Texture 64×32 at 2.6×: the front (10×16 at 1,1) becomes 26×41.6 */
+.profile-cape-art {
+  width: 26px;
+  height: 41.6px;
+  flex: none;
+  background-repeat: no-repeat;
+  background-size: 166.4px 83.2px;
+  background-position: -2.6px -2.6px;
+  image-rendering: pixelated;
+}
+
+.profile-cape-art.is-none {
+  box-sizing: border-box;
+  border: 1px dashed #444;
+  background: repeating-linear-gradient(45deg, transparent 0 5px, #1c1c1c 5px 6px);
+}
+
+.profile-row-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-row-name {
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-row-sub {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0;
+  color: #666;
+}
+
+.profile-row-action {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid #333;
+  color: #999;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: border-color 120ms, color 120ms;
+}
+
+.profile-row:hover:not(:disabled) .profile-row-action:not(.is-active) {
+  border-color: #666;
+  color: #fff;
+}
+
+.profile-row-action.is-active {
+  border-color: #fff;
+  color: #fff;
+}
+
+.profile-list-empty {
+  display: block;
+  padding: 18px;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0;
+  color: #666;
+}
+
+/* ---------------------------------------------------------------- status */
+
+.profile-toast {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  max-width: calc(100% - 28px);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid #2a2a2a;
+  background: #111;
+  animation: profile-fade 150ms ease-out;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0;
+  color: #aaa;
+}
+
+.profile-toast.is-error {
+  color: #f0a0a0;
+}
+
+/* ---------------------------------------------------------------- no account */
+
+.profile-empty {
+  flex: 1;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 1px dashed #2a2a2a;
+}
+
+.profile-empty-title {
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.profile-empty-text {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0;
+  color: #777;
+}

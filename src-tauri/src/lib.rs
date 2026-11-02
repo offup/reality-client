@@ -1,5 +1,6 @@
 mod auth;
 mod launcher;
+mod modrinth;
 
 use std::sync::atomic::Ordering;
 use tauri::Manager;
@@ -59,6 +60,79 @@ fn delete_instance(
     launcher::delete_instance(&app, &instance_id)
 }
 
+// ---------------------------------------------------------------- profile (skin, cape)
+
+#[tauri::command]
+async fn profile_details(store: tauri::State<'_, auth::TokenStore>, uuid: String) -> Result<auth::ProfileDetails, String> {
+    auth::profile_details(&store, &uuid).await
+}
+
+/// The PNG arrives base64 encoded from the file input in the page
+#[tauri::command]
+async fn profile_upload_skin(
+    store: tauri::State<'_, auth::TokenStore>,
+    uuid: String,
+    png_base64: String,
+    slim: bool,
+) -> Result<auth::ProfileDetails, String> {
+    use base64::Engine;
+    let png = base64::engine::general_purpose::STANDARD.decode(png_base64.trim()).map_err(|_| "Could not read the file".to_string())?;
+    auth::upload_skin(&store, &uuid, png, slim).await
+}
+
+#[tauri::command]
+async fn profile_set_cape(
+    store: tauri::State<'_, auth::TokenStore>,
+    uuid: String,
+    cape_id: Option<String>,
+) -> Result<auth::ProfileDetails, String> {
+    auth::set_cape(&store, &uuid, cape_id).await
+}
+
+// ---------------------------------------------------------------- mods (Modrinth)
+
+#[tauri::command]
+async fn modrinth_search(
+    query: String,
+    game_version: String,
+    category: Option<String>,
+    sort: Option<String>,
+    offset: Option<u32>,
+) -> Result<modrinth::SearchResult, String> {
+    modrinth::search(&query, &game_version, category.as_deref(), sort.as_deref().unwrap_or("relevance"), offset.unwrap_or(0)).await
+}
+
+#[tauri::command]
+fn mods_list(app: tauri::AppHandle, instance_id: String) -> Result<Vec<modrinth::InstalledMod>, String> {
+    modrinth::list(&launcher::instance_dir(&app, &instance_id)?)
+}
+
+/// Installs a Modrinth project and its required dependencies into the instance
+#[tauri::command]
+async fn mods_install(
+    app: tauri::AppHandle,
+    instance_id: String,
+    project_id: String,
+    game_version: String,
+) -> Result<Vec<modrinth::InstalledMod>, String> {
+    modrinth::install(&launcher::instance_dir(&app, &instance_id)?, &project_id, &game_version).await
+}
+
+#[tauri::command]
+fn mods_set_enabled(
+    app: tauri::AppHandle,
+    instance_id: String,
+    filename: String,
+    enabled: bool,
+) -> Result<Vec<modrinth::InstalledMod>, String> {
+    modrinth::set_enabled(&launcher::instance_dir(&app, &instance_id)?, &filename, enabled)
+}
+
+#[tauri::command]
+fn mods_remove(app: tauri::AppHandle, instance_id: String, filename: String) -> Result<Vec<modrinth::InstalledMod>, String> {
+    modrinth::remove(&launcher::instance_dir(&app, &instance_id)?, &filename)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -78,7 +152,15 @@ pub fn run() {
             list_versions,
             launch_game,
             open_instance_folder,
-            delete_instance
+            delete_instance,
+            modrinth_search,
+            mods_list,
+            mods_install,
+            mods_set_enabled,
+            mods_remove,
+            profile_details,
+            profile_upload_skin,
+            profile_set_cape
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

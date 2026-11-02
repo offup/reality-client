@@ -19,11 +19,46 @@
         "plugin:updater|check": null,
         "plugin:window|is_maximized": false,
       };
+      // ?account=1: a fake signed-in account with three capes, for the profile tab (nothing leaves the page)
+      if (new URLSearchParams(location.search).get("account")) {
+        const capeArt = (a, b) => {
+          const c = document.createElement("canvas");
+          c.width = 64; c.height = 32;
+          const g = c.getContext("2d");
+          g.fillStyle = a; g.fillRect(0, 0, 22, 17);
+          g.fillStyle = b; g.fillRect(3, 5, 6, 6);
+          return c.toDataURL();
+        };
+        const account = { uuid: "f00d", name: "Steve", skin: "/skins/guest.png", model: "default", cape: null };
+        const capes = [
+          { id: "c1", name: "Migrator", texture: capeArt("#3a6fd8", "#9fd0ff"), active: true },
+          { id: "c2", name: "Pan", texture: capeArt("#2f8a3a", "#f0d060"), active: false },
+          { id: "c3", name: "Common", texture: capeArt("#7a2a2a", "#f2f2f2"), active: false },
+        ];
+        const details = () => ({ account: { ...account, cape: capes.find((c) => c.active)?.texture ?? null }, capes });
+        localStorage.setItem("reality.accounts.v2", JSON.stringify({ accounts: [account], activeId: account.uuid }));
+        replies.profile_details = details;
+        replies.profile_set_cape = ({ capeId }) => {
+          capes.forEach((c) => (c.active = c.id === capeId));
+          return details();
+        };
+        replies.profile_upload_skin = ({ slim }) => {
+          account.model = slim ? "slim" : "default";
+          return details();
+        };
+      } else {
+        localStorage.removeItem("reality.accounts.v2");
+      }
       window.__TAURI_INTERNALS__ = {
         metadata: { currentWindow: { label: "main" }, currentWebview: { label: "main", windowLabel: "main" } },
         transformCallback: () => Math.floor(Math.random() * 1e9),
         unregisterCallback: () => {},
-        invoke: async (cmd) => (cmd in replies ? replies[cmd] : null),
+        invoke: async (cmd, args) => {
+          const reply = cmd in replies ? replies[cmd] : null;
+          if (typeof reply !== "function") return reply;
+          await new Promise((r) => setTimeout(r, 300));
+          return reply(args);
+        },
         convertFileSrc: (p) => p,
       };
       window.__TAURI_EVENT_PLUGIN_INTERNALS__ = { unregisterListener: () => {} };
@@ -54,6 +89,7 @@
           if (panel === "accounts") click(".dock-add-account");
           if (panel === "instances") click(".dock-launch-arrow");
           if (panel === "palette") click(".bgc-card:nth-child(3) .bgc-color");
+          if (panel === "profile") [...document.querySelectorAll(".settings-tabs button")].find((b) => b.textContent === "Profile")?.click();
         }, 400);
       }, 600);
     </script>

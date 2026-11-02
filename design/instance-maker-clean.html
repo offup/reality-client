@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Instance creator · clean</title>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 28px 24px 60px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 6px; letter-spacing: .1em; }
+  .note { font-family: var(--ui); font-size: 13px; color: #666; margin: 0 0 24px; letter-spacing: 0; }
+  #grid { display: grid; grid-template-columns: repeat(2, 640px); gap: 30px 24px; }
+  .lab { font-size: 15px; margin: 10px 0 0; }
+  .lab small { display: block; color: #777; font-size: 12px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; max-width: 620px; }
+  .frame { width: 640px; height: 400px; overflow: hidden; border: 1px solid #2a2a2a; }
+  .win { position: relative; width: 1280px; height: 800px; background: #0a0a0a; transform: scale(.5); transform-origin: 0 0; overflow: hidden; }
+  .abs { position: absolute; }
+  .flex { display: flex; } .col { display: flex; flex-direction: column; } .center { align-items: center; } .between { justify-content: space-between; }
+
+  /* ---- clean design system */
+  .sheet { background: #0c0c0c; border: 1px solid #2a2a2a; box-sizing: border-box; }
+  .t1 { font-size: 20px; letter-spacing: .08em; text-transform: uppercase; }
+  .t2 { font-size: 32px; letter-spacing: .08em; text-transform: uppercase; line-height: 1; }
+  .lbl { font-size: 11px; letter-spacing: .16em; color: #777; text-transform: uppercase; }
+  .ui { font-family: var(--ui); letter-spacing: 0; }
+  .sub { font-family: var(--ui); font-size: 13px; color: #777; letter-spacing: 0; line-height: 1.5; }
+  .hint { font-family: var(--ui); font-size: 12px; color: #666; letter-spacing: 0; }
+  .in { height: 46px; border: 1px solid #2a2a2a; background: #111; display: flex; align-items: center; gap: 10px; padding: 0 14px; font-family: var(--ui); font-size: 15px; color: #fff; letter-spacing: 0; box-sizing: border-box; }
+  .in.focus { border-color: #fff; }
+  .in.line { border-width: 0 0 1px; background: none; padding: 0; height: 56px; font-size: 28px; }
+  .in.line.focus { border-color: #fff; }
+  .ph { color: #555; }
+  .caret { display: inline-block; width: 1px; height: 1.1em; background: #fff; vertical-align: -3px; }
+  .seg { display: flex; border: 1px solid #2a2a2a; }
+  .seg span { flex: 1; height: 42px; display: flex; align-items: center; justify-content: center; font-family: var(--mc); font-size: 13px; color: #888; border-left: 1px solid #2a2a2a; }
+  .seg span:first-child { border-left: 0; }
+  .seg span.on { background: #fff; color: #000; }
+  .primary { height: 46px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 26px; background: #fff; color: #000; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; box-sizing: border-box; }
+  .ghost { height: 46px; display: flex; align-items: center; justify-content: center; padding: 0 22px; border: 1px solid #2a2a2a; color: #bbb; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; box-sizing: border-box; }
+  .tile { display: flex; align-items: center; justify-content: center; border: 1px solid #2a2a2a; background: #141414; font-size: 15px; color: #ddd; flex: none; box-sizing: border-box; }
+  .row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 1px solid #2a2a2a; background: #0c0c0c; box-sizing: border-box; }
+  .row.quiet { border-color: #1c1c1c; }
+  .rn { font-size: 15px; letter-spacing: .06em; }
+  .rs { font-family: var(--ui); font-size: 12px; color: #777; letter-spacing: 0; }
+  .tag { padding: 3px 8px; border: 1px solid #333; font-family: var(--ui); font-size: 10px; letter-spacing: .08em; color: #aaa; text-transform: uppercase; }
+  .tag.on { border-color: #fff; color: #fff; }
+  .kv { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-top: 1px solid #1c1c1c; }
+  .kv .k { font-family: var(--ui); font-size: 13px; color: #777; letter-spacing: 0; }
+  .kv .v { font-family: var(--mc); font-size: 13px; color: #fff; }
+  .kbd { min-width: 22px; height: 22px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #333; font-family: var(--ui); font-size: 11px; color: #999; letter-spacing: 0; }
+  .slider { position: relative; height: 2px; background: #2a2a2a; }
+  .slider i { position: absolute; left: 0; top: 0; bottom: 0; background: #fff; }
+  .slider b { position: absolute; top: -6px; width: 14px; height: 14px; margin-left: -7px; background: #fff; }
+  .sw { width: 40px; height: 22px; border: 1px solid #444; background: #141414; position: relative; box-sizing: border-box; flex: none; }
+  .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; background: #666; }
+  .sw.on { border-color: #fff; } .sw.on::after { left: 21px; background: #fff; }
+  .x { width: 18px; height: 18px; color: #666; }
+  .dim { position: absolute; inset: 0; background: rgba(5,5,5,.72); z-index: 3; }
+  .over { z-index: 4; }
+  .step { display: flex; align-items: center; gap: 14px; }
+  .step b { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border: 1px solid #333; font-weight: normal; font-family: var(--ui); font-size: 12px; color: #777; box-sizing: border-box; }
+  .step span { font-size: 13px; letter-spacing: .14em; color: #555; text-transform: uppercase; }
+  .step.on b { background: #fff; color: #000; border-color: #fff; } .step.on span { color: #fff; }
+  .step.done b { border-color: #777; color: #ddd; } .step.done span { color: #999; }
+  .vline { width: 1px; height: 36px; background: #2a2a2a; margin-left: 13px; }
+  .vcard { border: 1px solid #2a2a2a; background: #0c0c0c; padding: 22px 20px; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; }
+  .vcard.on { border-color: #fff; box-shadow: inset 0 0 0 1px #fff; }
+  .vcard .n { font-family: var(--mc); font-size: 26px; }
+
+  /* ---- chrome */
+  .notch { position: absolute; top: 0; right: 0; width: 150px; height: 46px; background: #2a2a2a; clip-path: polygon(0 0, 100% 0, 100% 100%, 20px 100%); z-index: 9; }
+  .notch .in2 { position: absolute; inset: 0 0 1px 1px; background: #0c0c0c; clip-path: polygon(0 0, 100% 0, 100% 100%, 20px 100%); }
+  .dock { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); display: flex; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; z-index: 6; }
+  .di { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #777; position: relative; }
+  .di svg { width: 22px; height: 22px; } .di.on { color: #fff; } .di.on::after { content: ""; position: absolute; left: 15px; right: 15px; bottom: 7px; height: 2px; background: #fff; }
+  .launch { display: flex; margin: 0 12px; border: 1px solid #555; background: #1a1a1a; }
+  .launch .lm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0 32px 0 20px; min-width: 200px; height: 52px; box-sizing: border-box; }
+  .launch .lt { font-size: 22px; line-height: 1; letter-spacing: .05em; } .launch .ls { font-family: var(--mc); font-size: 11px; color: #9a9a9a; }
+  .launch .la { width: 52px; display: flex; align-items: center; justify-content: center; color: #bbb; border-left: 1px solid #555; } .launch .la svg { width: 20px; height: 20px; }
+  .launch .tl { width: 52px; display: flex; align-items: center; justify-content: center; padding-left: 4px; }
+  .face { width: 32px; height: 32px; image-rendering: pixelated; background: url(skin.png) -32px -32px / 256px 256px; position: relative; flex: none; }
+  .face::after { content: ""; position: absolute; inset: 0; background: url(skin.png) -160px -32px / 256px 256px; image-rendering: pixelated; }
+</style>
+</head>
+<body>
+<h1>Instance creator · clean · full window at 50 %</h1>
+<p class="note">Modern and quiet: space, thin lines, one white accent. No pixel art. Every one creates a Fabric instance on Minecraft 26.x.</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.33 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+</svg>
+<div id="grid"></div>
+<script>
+  const sv = (id, size = 20, sw = 1.75) => `<svg style="width:${size}px;height:${size}px;display:block;flex:none" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  const V = ["26.3", "26.2", "26.1.2", "26.1.1", "26.1"];
+  const D = ["Oct 2026", "Jul 2026", "May 2026", "Apr 2026", "Mar 2026"];
+  const caret = `<span class="caret"></span>`;
+  const notch = `<div class="notch"><div class="in2"></div></div>`;
+  const dock = `<div class="dock"><span class="di">${sv("home", 22)}</span><span class="di on">${sv("box", 22)}</span><span class="launch"><span class="tl"><span class="face"></span></span><span class="lm"><span class="lt">LAUNCH</span><span class="ls">Survival · 26.3</span></span><span class="la">${sv("chev")}</span></span><span class="di">${sv("bell", 22)}</span><span class="di">${sv("hex", 22)}</span></div>`;
+  const tile = (letter, size = 36) => `<span class="tile" style="width:${size}px;height:${size}px;font-size:${Math.round(size * .42)}px">${letter}</span>`;
+  const seg = (sel = 0, list = V) => `<div class="seg">${list.map((v, i) => `<span class="${i === sel ? "on" : ""}">${v}</span>`).join("")}</div>`;
+  const INST = [["S", "Survival", "26.3", "2 h ago"], ["P", "PvP", "26.2", "yesterday"], ["H", "Shaders", "26.1.2", "3 days ago"]];
+  const rows = (w = 1120, quiet = false) => INST.map(([l, n, v, t]) => `<div class="row${quiet ? " quiet" : ""}" style="width:${w}px">${tile(l)}<div class="col" style="gap:5px;flex:1"><span class="rn">${n.toUpperCase()}</span><span class="rs">Fabric ${v}</span></div><span class="rs">${t}</span></div>`).join("");
+  const listPage = (extraTop = "") => `<div class="abs col" style="left:80px;right:80px;top:64px;gap:10px"><div class="flex between center" style="margin-bottom:8px"><span class="t1">Instances</span><span class="ghost" style="height:40px;gap:8px">${sv("plus", 16)}NEW</span></div>${extraTop}${rows()}</div>`;
+  const memory = (w = 220) => `<div class="flex center" style="gap:14px"><span class="slider" style="width:${w}px"><i style="width:14%"></i><b style="left:14%"></b></span><span class="v" style="font-family:var(--mc);font-size:13px">4 GB</span></div>`;
+
+  const ideas = [
+    ["1 · Centered sheet", "One quiet panel in the middle over the dimmed list. Name, version, one line for options, Create. Nothing else.",
+      `<div class="abs" style="inset:0">${listPage()}</div><div class="dim"></div>` + notch + `<div class="abs sheet col over" style="left:50%;top:50%;transform:translate(-50%,-54%);width:560px;padding:30px 32px 32px;gap:22px"><div class="flex between center"><span class="t1">New instance</span><span class="x">${sv("x", 18)}</span></div><div class="col" style="gap:10px"><span class="lbl">Name</span><div class="in focus">My World${caret}</div></div><div class="col" style="gap:10px"><span class="lbl">Minecraft version</span>${seg(0)}</div><div class="flex between center"><span class="hint">Fabric · 4 GB · Fabric API included</span><span class="hint" style="color:#aaa">Advanced ▾</span></div><div class="flex" style="gap:10px;margin-top:6px"><span class="ghost" style="flex:1">Cancel</span><span class="primary" style="flex:2">Create</span></div></div>` + dock],
+    ["2 · Form with live summary", "A settings-style form on the left, labels in their own column. On the right a summary card that fills in as you type, with Create at its bottom.",
+      notch + `<div class="abs col" style="left:80px;top:64px;width:620px;gap:34px"><div class="col" style="gap:8px"><span class="t2">New instance</span><span class="sub">Worlds, mods and settings live in their own folder.</span></div>${[["Name", `<div class="in focus" style="width:380px">My World${caret}</div>`], ["Version", `<div style="width:380px">${seg(0)}</div>`], ["Memory", memory(300)], ["Fabric API", `<span class="sw on"></span>`]].map(([k, c]) => `<div class="flex center" style="gap:30px"><span class="lbl" style="width:120px;text-align:right">${k}</span>${c}</div>`).join("")}</div><div class="abs sheet col" style="right:80px;top:64px;width:360px;padding:26px"><div class="flex center" style="gap:14px;margin-bottom:10px">${tile("M", 48)}<div class="col" style="gap:5px"><span class="rn" style="font-size:17px">MY WORLD</span><span class="rs">Not created yet</span></div></div>${[["Version", "26.3"], ["Loader", "Fabric 0.20.1"], ["Memory", "4 GB"], ["Mods", "1 (Fabric API)"]].map(([k, v]) => `<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("")}<span class="primary" style="margin-top:20px">Create</span></div>` + dock],
+    ["3 · Inline row", "No dialog: \"New\" turns the top of the list into an editable row. Name, version, Create, all in one line. Esc puts it back.",
+      notch + listPage(`<div class="row" style="width:1120px;border-color:#fff;padding:12px 14px;gap:14px">${tile("M")}<div class="in focus" style="flex:1;height:40px">My World${caret}</div><div style="width:360px">${seg(0, V.slice(0, 4)).replace(/42px/g, "40px")}</div><span class="primary" style="height:40px">Create</span></div>`) + dock],
+    ["4 · Command palette", "Raycast-style: one input, type the name, the first result creates it on the newest version. Arrow down picks another version. Everything by keyboard.",
+      `<div class="abs" style="inset:0">${listPage()}</div><div class="dim"></div>` + notch + `<div class="abs sheet col over" style="left:50%;top:150px;transform:translateX(-50%);width:680px"><div class="flex center" style="height:64px;padding:0 22px;gap:14px;border-bottom:1px solid #1c1c1c"><span style="color:#666">${sv("search", 20)}</span><span class="ui" style="font-size:17px;color:#fff">new instance My World${caret}</span></div><div class="col" style="padding:8px 0">${[["Create “My World” on 26.3", "Fabric · newest", true], ["Create “My World” on 26.2", "Fabric", false], ["Create “My World” on 26.1.2", "Fabric", false], ["Duplicate Survival as “My World”", "Worlds and mods come along", false]].map(([t, s, on]) => `<div class="flex between center" style="padding:12px 22px;${on ? "background:#161616" : ""}"><div class="col" style="gap:4px"><span class="ui" style="font-size:14px;color:${on ? "#fff" : "#bbb"}">${t}</span><span class="hint">${s}</span></div>${on ? '<span class="kbd">↵</span>' : ""}</div>`).join("")}</div><div class="flex" style="gap:18px;padding:12px 22px;border-top:1px solid #1c1c1c"><span class="hint"><span class="kbd">↑↓</span> choose</span><span class="hint"><span class="kbd">↵</span> create</span><span class="hint"><span class="kbd">esc</span> close</span></div></div>` + dock],
+    ["5 · Left-aligned page", "A page, not a popup: heading top left, the fields in a narrow column, lots of air on the right. Create and a quiet Cancel at the bottom.",
+      notch + `<div class="abs col" style="left:160px;top:90px;width:460px;gap:28px"><div class="col" style="gap:10px"><span class="t2">New instance</span><span class="sub">You can change everything later.</span></div><div class="col" style="gap:10px"><span class="lbl">Name</span><div class="in focus">My World${caret}</div></div><div class="col" style="gap:10px"><span class="lbl">Minecraft version</span>${seg(0)}<span class="hint">26.3 is the newest · Fabric 0.20.1</span></div><div class="col" style="gap:10px"><span class="lbl">Memory</span>${memory(400)}</div><div class="flex center" style="gap:22px;margin-top:10px"><span class="primary" style="width:200px">Create</span><span class="hint" style="color:#aaa">Cancel</span></div></div>` + dock],
+    ["6 · Vertical steps", "Three small steps down the left side: Name, Version, Review. The right side shows only the current step. Clear for first-time users.",
+      notch + `<div class="abs col" style="left:120px;top:100px"><div class="step done"><b>${sv("check", 12, 2.5)}</b><span>Name</span></div><div class="vline"></div><div class="step on"><b>2</b><span>Version</span></div><div class="vline"></div><div class="step"><b>3</b><span>Review</span></div></div><div class="abs col" style="left:400px;top:90px;width:560px;gap:18px"><span class="t2" style="font-size:26px">Pick a version</span><span class="sub">Only versions Fabric supports are listed.</span><div class="col" style="gap:6px;margin-top:6px">${V.map((v, i) => `<div class="row${i === 0 ? "" : " quiet"}" style="${i === 0 ? "border-color:#fff" : ""}"><span style="font-family:var(--mc);font-size:16px;width:70px">${v}</span><span class="rs" style="flex:1">${D[i]}</span>${i === 0 ? '<span class="tag on">Latest</span>' : ""}</div>`).join("")}</div><div class="flex between" style="margin-top:10px"><span class="ghost">Back</span><span class="primary" style="width:200px">Continue</span></div></div>` + dock],
+    ["7 · Version cards", "Name on top, versions as five clean cards with date and a Latest tag, Create bottom right. Good when the version is the real decision.",
+      notch + `<div class="abs col" style="left:80px;right:80px;top:64px;gap:26px"><div class="flex between center"><span class="t2" style="font-size:26px">New instance</span><span class="x">${sv("x", 18)}</span></div><div class="in focus line" style="width:600px">My World${caret}</div><div class="col" style="gap:12px"><span class="lbl">Minecraft version</span><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">${V.map((v, i) => `<div class="vcard${i === 0 ? " on" : ""}"><span class="n">${v}</span><span class="rs">${D[i]}</span>${i === 0 ? '<span class="tag on" style="align-self:flex-start">Latest</span>' : '<span style="height:19px"></span>'}</div>`).join("")}</div></div><div class="flex between center"><span class="hint">Fabric 0.20.1 · 4 GB · you can change this later</span><span class="primary" style="width:220px">Create</span></div></div>` + dock],
+    ["8 · Right drawer", "The list stays, a 440px drawer slides in from the right with the fields stacked and Cancel / Create pinned to its bottom edge.",
+      `<div class="abs" style="inset:0">${listPage()}</div><div class="dim"></div>` + notch + `<div class="abs sheet col over" style="right:0;top:0;bottom:0;width:440px;border-width:0 0 0 1px;padding:70px 32px 0"><div class="flex between center" style="margin-bottom:28px"><span class="t1">New instance</span><span class="x">${sv("x", 18)}</span></div><div class="col" style="gap:24px"><div class="col" style="gap:10px"><span class="lbl">Name</span><div class="in focus">My World${caret}</div></div><div class="col" style="gap:10px"><span class="lbl">Version</span>${V.slice(0, 3).map((v, i) => `<div class="row${i === 0 ? "" : " quiet"}" style="padding:10px 14px;${i === 0 ? "border-color:#fff" : ""}"><span style="font-family:var(--mc);font-size:14px;width:60px">${v}</span><span class="rs" style="flex:1">${D[i]}</span>${i === 0 ? '<span class="tag on">Latest</span>' : ""}</div>`).join("")}<span class="hint">Show older ▾</span></div><div class="flex between center"><span class="lbl">Memory</span>${memory(200)}</div></div><div class="flex" style="gap:10px;margin-top:auto;padding:24px 0 28px;border-top:1px solid #1c1c1c"><span class="ghost" style="flex:1">Cancel</span><span class="primary" style="flex:2">Create</span></div></div>` + dock.replace('class="dock"', 'class="dock" style="left:420px"')],
+    ["9 · Bottom bar", "A bar rises from the dock with everything in one row: name, version, memory, Create. The list behind dims. Fast and compact.",
+      `<div class="abs" style="inset:0">${listPage()}</div><div class="dim"></div>` + notch + `<div class="abs sheet flex center over" style="left:80px;right:80px;bottom:118px;height:88px;padding:0 22px;gap:18px;border-color:#555">${tile("M", 44)}<div class="in focus" style="flex:1.2">My World${caret}</div><div style="flex:1.6">${seg(0, V.slice(0, 4))}</div><div class="flex center" style="gap:10px"><span class="lbl">Memory</span>${memory(120)}</div><span class="primary" style="width:160px">Create</span></div>` + dock],
+    ["10 · Just a line", "The least possible: one big underlined name field in the middle, the version as a small chip beside it, a line of hints below. Enter creates.",
+      notch + `<div class="abs col center" style="left:0;right:0;top:270px;gap:26px"><span class="lbl">New instance</span><div class="flex center" style="gap:18px"><div class="in focus line" style="width:520px;font-size:34px">My World${caret}</div><span class="tag on" style="font-family:var(--mc);font-size:13px;padding:8px 12px">26.3 ▾</span></div><div class="flex" style="gap:26px"><span class="hint"><span class="kbd">↵</span> create</span><span class="hint"><span class="kbd">tab</span> version</span><span class="hint"><span class="kbd">esc</span> cancel</span></div></div>` + dock],
+  ];
+
+  const q = new URLSearchParams(location.search);
+  const row = Number(q.get("row") || 0);
+  const shown = row ? ideas.slice((row - 1) * 2, row * 2) : ideas;
+  const grid = document.getElementById("grid");
+  for (const [t, s, html] of shown) {
+    const c = document.createElement("div");
+    c.innerHTML = `<div class="frame"><div class="win">${html}</div></div><div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  }
+</script>
+</body>
+</html>

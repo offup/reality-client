@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Instances + Modrinth · 6 clean layouts</title>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; --green: #1bd96a; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 28px 24px 60px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 6px; letter-spacing: .1em; }
+  .note { font-family: var(--ui); font-size: 13px; color: #666; margin: 0 0 24px; letter-spacing: 0; }
+  #grid { display: grid; grid-template-columns: repeat(2, 640px); gap: 30px 24px; }
+  .lab { font-size: 15px; margin: 10px 0 0; }
+  .lab small { display: block; color: #777; font-size: 12px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; max-width: 620px; }
+  .frame { width: 640px; height: 400px; overflow: hidden; border: 1px solid #2a2a2a; }
+  .win { position: relative; width: 1280px; height: 800px; background: #0a0a0a; transform: scale(.5); transform-origin: 0 0; overflow: hidden; }
+  .abs { position: absolute; }
+  .win svg { width: 18px; height: 18px; flex: none; }
+  .box { background: #0c0c0c; border: 1px solid #2a2a2a; box-sizing: border-box; }
+  .flex { display: flex; } .col { display: flex; flex-direction: column; } .center { align-items: center; } .between { justify-content: space-between; }
+  .ui { font-family: var(--ui); letter-spacing: 0; }
+  .cap { font-size: 12px; letter-spacing: .14em; color: #777; text-transform: uppercase; }
+  .ver { font-family: var(--mc); font-size: 11px; color: #888; }
+  .t { font-size: 15px; letter-spacing: .07em; text-transform: uppercase; }
+  .desc { font-family: var(--ui); font-size: 12px; color: #777; letter-spacing: 0; line-height: 1.35; }
+  .dl { font-family: var(--ui); font-size: 11px; color: #666; letter-spacing: 0; }
+  .search { height: 42px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border: 1px solid #2e2e2e; background: #111; color: #888; box-sizing: border-box; }
+  .search span { font-family: var(--ui); font-size: 14px; letter-spacing: 0; }
+  .search svg { width: 17px; height: 17px; flex: none; }
+  .mono { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-family: var(--mc); font-size: 15px; border: 1px solid #333; box-sizing: border-box; flex: none; }
+  .btn { height: 34px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 14px; border: 1px solid #444; background: #161616; font-size: 13px; letter-spacing: .1em; box-sizing: border-box; flex: none; }
+  .btn.white { background: #fff; color: #000; border-color: #fff; }
+  .btn.done { border-color: #2a2a2a; background: none; color: var(--green); }
+  .btn svg { width: 15px; height: 15px; }
+  .tg { width: 36px; height: 20px; border: 1px solid #555; background: #141414; position: relative; box-sizing: border-box; flex: none; }
+  .tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; background: #666; }
+  .tg.on { border-color: #fff; } .tg.on::after { left: 19px; background: #fff; }
+  .row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; }
+  .row + .row { border-top: 1px solid #181818; }
+  .irow { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+  .irow.on { background: #181818; box-shadow: inset 2px 0 0 #fff; }
+  .seg { display: flex; border: 1px solid #2a2a2a; } .seg span { padding: 9px 16px; font-size: 13px; letter-spacing: .1em; color: #777; } .seg span + span { border-left: 1px solid #2a2a2a; } .seg span.on { background: #1a1a1a; color: #fff; }
+  .tab { position: relative; font-size: 16px; letter-spacing: .1em; color: #555; padding-bottom: 10px; } .tab.on { color: #fff; } .tab.on::after { content: ""; position: absolute; left: 0; bottom: 0; width: 22px; height: 2px; background: #fff; }
+  .pill { padding: 6px 12px; border: 1px solid #2a2a2a; font-size: 12px; letter-spacing: .1em; color: #999; } .pill.on { border-color: #fff; color: #fff; background: #1a1a1a; }
+  .play { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 1px solid #555; background: #1a1a1a; box-sizing: border-box; }
+  .play b { font-weight: normal; font-size: 20px; letter-spacing: .05em; line-height: 1; } .play span { font-family: var(--mc); font-size: 10px; color: #999; line-height: 1; }
+  .badge { font-family: var(--ui); font-size: 10px; letter-spacing: .04em; padding: 2px 6px; border: 1px solid #333; color: #999; }
+  .notch { position: absolute; top: 0; right: 0; width: 150px; height: 46px; background: #2a2a2a; clip-path: polygon(0 0, 100% 0, 100% 100%, 20px 100%); z-index: 9; }
+  .notch .in { position: absolute; inset: 0 0 1px 1px; background: #0c0c0c; clip-path: polygon(0 0, 100% 0, 100% 100%, 20px 100%); display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding-right: 8px; }
+  .notch .in span { width: 38px; height: 32px; display: flex; align-items: center; justify-content: center; color: #8a8a8a; } .notch svg { width: 17px; height: 17px; }
+  .dock { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); display: flex; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; z-index: 8; }
+  .di { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #777; position: relative; }
+  .di svg { width: 22px; height: 22px; } .di.on { color: #fff; } .di.on::after { content: ""; position: absolute; left: 15px; right: 15px; bottom: 7px; height: 2px; background: #fff; }
+  .launch { display: flex; margin: 0 12px; border: 1px solid #555; background: #1a1a1a; }
+  .launch .lm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0 32px 0 20px; min-width: 200px; height: 52px; box-sizing: border-box; }
+  .launch .lt { font-size: 22px; line-height: 1; letter-spacing: .05em; } .launch .ls { font-family: var(--mc); font-size: 11px; color: #9a9a9a; }
+  .launch .la { width: 52px; display: flex; align-items: center; justify-content: center; color: #bbb; border-left: 1px solid #555; } .launch .la svg { width: 20px; height: 20px; }
+  .launch .tl { width: 52px; display: flex; align-items: center; justify-content: center; padding-left: 4px; }
+  .face { width: 32px; height: 32px; image-rendering: pixelated; background: url(skin.png) -32px -32px / 256px 256px; position: relative; flex: none; }
+  .face::after { content: ""; position: absolute; inset: 0; background: url(skin.png) -160px -32px / 256px 256px; image-rendering: pixelated; }
+</style>
+</head>
+<body>
+<h1>Instances + Modrinth mods · 6 clean layouts · full window at 50 %</h1>
+<p class="note">No covers, no import. Instances are plain text rows; mods come straight from Modrinth (filtered to Fabric and the instance's version), required dependencies like Fabric API install automatically.</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.33 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="min" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="sq" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="down" viewBox="0 0 24 24"><path d="M12 4v12M6 10l6 6 6-6M5 20h14"/></symbol>
+  <symbol id="trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+  <symbol id="folder" viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z"/></symbol>
+</svg>
+<div id="grid"></div>
+<script>
+  const sv = (id) => `<svg fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  const notch = `<div class="notch"><div class="in"><span>${sv("min")}</span><span>${sv("sq")}</span><span>${sv("x")}</span></div></div>`;
+  const dock = `<div class="dock"><span class="di">${sv("home")}</span><span class="di on">${sv("box")}</span><span class="launch"><span class="tl"><span class="face"></span></span><span class="lm"><span class="lt">LAUNCH</span><span class="ls">Survival · 26.3</span></span><span class="la">${sv("chev")}</span></span><span class="di">${sv("bell")}</span><span class="di">${sv("hex")}</span></div>`;
+  const INST = [["Survival", "26.3", 24, "2 h ago"], ["PvP", "26.2", 8, "Yesterday"], ["Shaders", "26.1.2", 41, "3 days ago"], ["Hardcore", "26.3", 12, "Never"]];
+  const MODS = [
+    ["Sodium", "Rendering engine that greatly improves frame rates", "54M", true, "S", "#5ec8ff"],
+    ["Fabric API", "Core library for most Fabric mods", "120M", true, "F", "#dbb87a"],
+    ["Iris Shaders", "Shader support that works together with Sodium", "38M", false, "I", "#b98cff"],
+    ["Lithium", "General purpose optimization for the game logic", "31M", true, "L", "#7fe08a"],
+    ["Mod Menu", "Adds a mod menu to view your installed mods", "45M", false, "M", "#ff9a5e"],
+    ["Xaero's Minimap", "Minimap that shows your surroundings", "22M", false, "X", "#ffd45e"],
+    ["Entity Culling", "Skips rendering entities you can't see", "18M", true, "E", "#ff6b9a"],
+  ];
+  const mono = (m, size = 34) => `<span class="mono" style="width:${size}px;height:${size}px;color:${m[5]};border-color:${m[5]}55">${m[4]}</span>`;
+  const instRows = (sel = 0) => INST.map((i, k) => `<div class="irow${k === sel ? " on" : ""}"><div style="flex:1"><div class="t">${i[0]}</div><div class="ver" style="margin-top:5px">Fabric ${i[1]} · ${i[2]} mods</div></div></div>`).join("");
+  const installedRows = (n = 5) => MODS.filter((m) => m[3]).concat(MODS.filter((m) => m[3])).slice(0, n).map((m, k) => `<div class="row">${mono(m)}<div style="flex:1;min-width:0"><div class="t" style="font-size:14px">${m[0]}</div><div class="desc">${m[1]}</div></div><span class="tg${k === 2 ? "" : " on"}"></span><span style="color:#666;width:18px">${sv("trash")}</span></div>`).join("");
+  const browseRows = (n = 5, withDesc = true) => MODS.slice(0, n).map((m) => `<div class="row">${mono(m)}<div style="flex:1;min-width:0"><div class="flex center" style="gap:10px"><span class="t" style="font-size:14px">${m[0]}</span><span class="dl">${m[2]} downloads</span></div>${withDesc ? `<div class="desc">${m[1]}</div>` : ""}</div>${m[3] ? `<span class="btn done">${sv("check")} INSTALLED</span>` : `<span class="btn white">${sv("down")} INSTALL</span>`}</div>`).join("");
+  const search = (text = "Search Modrinth…", w = "100%") => `<div class="search" style="width:${w}">${sv("search")}<span>${text}</span><span style="margin-left:auto" class="badge">FABRIC 26.3</span></div>`;
+  const header = `<div class="flex center" style="gap:14px"><div style="flex:1"><div class="t" style="font-size:24px">Survival</div><div class="ver" style="margin-top:6px">Fabric 26.3 · 24 mods · played 2 h ago</div></div><span class="btn" style="width:40px;padding:0">${sv("folder")}</span><span class="play" style="width:170px;height:48px"><b>PLAY</b><span>26.3</span></span></div>`;
+  const body = (style) => `<div class="abs" style="left:80px;right:80px;top:64px;bottom:140px;${style}">`;
+
+  const ideas = [
+    ["1 · List + mods tab", "Instances as text rows on the left. Right: the selected instance with tabs \"Mods\" and \"Settings\". Add mods opens Modrinth search in the same place.",
+      notch + body("display:flex;gap:16px") + `<div class="box col" style="width:290px"><div class="flex center between" style="padding:14px"><span class="cap">Instances</span><span class="btn" style="height:30px;padding:0 10px">${sv("plus")} NEW</span></div>${instRows()}</div><div class="col" style="flex:1;gap:16px">${header}<div class="flex center between"><div class="flex" style="gap:26px"><span class="tab on">MODS</span><span class="tab">SETTINGS</span></div><span class="btn white">${sv("plus")} ADD MODS</span></div><div class="box" style="flex:1;overflow:hidden">${installedRows(5)}</div></div></div>` + dock],
+    ["2 · Three panes", "Instances, installed mods and Modrinth side by side. Everything visible at once, drag-free: Install moves a mod straight into the middle list.",
+      notch + body("display:grid;grid-template-columns:220px 1fr 1.2fr;gap:12px") + `<div class="box col"><div style="padding:14px" class="cap">Instances</div>${instRows()}</div><div class="box col"><div class="flex center between" style="padding:14px"><span class="cap">Installed · 24</span></div>${installedRows(5)}</div><div class="box col" style="padding:12px;gap:10px"><span class="cap">Modrinth</span>${search()}<div style="margin:0 -12px">${browseRows(5, false)}</div></div></div>` + dock],
+    ["3 · One column, two views", "Centered and calm: instance header with Play, then a switch between \"Installed\" and \"Browse Modrinth\". The instance switcher sits in the header dropdown.",
+      notch + `<div class="abs col" style="left:50%;transform:translateX(-50%);top:64px;width:860px;gap:16px">${header.replace('<div class="t" style="font-size:24px">Survival</div>', `<div class="flex center" style="gap:10px"><span class="t" style="font-size:24px">Survival</span><span style="color:#888;width:20px">${sv("chev")}</span></div>`)}<div class="flex center between"><div class="seg"><span>INSTALLED · 24</span><span class="on">BROWSE MODRINTH</span></div><span class="badge">FABRIC 26.3</span></div>${search("Search mods…")}<div class="box">${browseRows(5)}</div></div>` + dock],
+    ["4 · Mod browser with categories", "A full Modrinth browser: search, category chips (Optimization, Utility, Visual, …) and sorting. The instance is a compact bar on top.",
+      notch + body("display:flex;flex-direction:column;gap:12px") + `<div class="box flex center" style="padding:10px 14px;gap:14px"><span class="t">Survival</span><span class="ver">Fabric 26.3 · 24 mods</span><span style="margin-left:auto" class="seg"><span>INSTALLED</span><span class="on">BROWSE</span></span></div><div class="flex center" style="gap:10px">${search("sodium", "460px")}${["ALL", "OPTIMIZATION", "UTILITY", "VISUAL", "MAPS"].map((c, k) => `<span class="pill${k === 1 ? " on" : ""}">${c}</span>`).join("")}<span class="pill" style="margin-left:auto">MOST DOWNLOADS ▾</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${MODS.slice(0, 6).map((m) => `<div class="box flex center" style="padding:14px;gap:14px">${mono(m, 44)}<div style="flex:1;min-width:0"><div class="t" style="font-size:14px">${m[0]}</div><div class="desc" style="margin-top:3px">${m[1]}</div><div class="dl" style="margin-top:5px">${m[2]} downloads</div></div>${m[3] ? `<span class="btn done">${sv("check")}</span>` : `<span class="btn white">${sv("down")}</span>`}</div>`).join("")}</div></div>` + dock],
+    ["5 · Search first", "Like a command palette: a big search field is the main element, results with one-click Install below. Installed mods are a small counter that opens the list.",
+      notch + `<div class="abs col" style="left:50%;transform:translateX(-50%);top:70px;width:820px;gap:14px"><div class="flex center between"><div class="flex center" style="gap:12px"><span class="t" style="font-size:20px">Survival</span><span class="ver">Fabric 26.3</span></div><span class="btn">INSTALLED · 24 ${sv("chev")}</span></div><div class="search" style="height:58px;border-color:#555">${sv("search")}<span style="font-size:17px;color:#fff">minimap</span><span style="margin-left:auto" class="badge">FABRIC 26.3</span></div><div class="box">${[MODS[5], ["JourneyMap", "Real-time mapping in game or in a browser", "15M", false, "J", "#5ee0c8"], ["VoxelMap", "Minimap with waypoints and cave mode", "6M", false, "V", "#c8ff5e"], ["Map Atlases", "Atlas items that combine maps", "2M", false, "A", "#ff5ec8"]].map((m) => `<div class="row">${mono(m)}<div style="flex:1"><div class="flex center" style="gap:10px"><span class="t" style="font-size:14px">${m[0]}</span><span class="dl">${m[2]} downloads</span></div><div class="desc">${m[1]}</div></div><span class="btn white">${sv("down")} INSTALL</span></div>`).join("")}</div></div>` + dock],
+    ["6 · Settings-style list", "Matches your Settings page: instance rows on the left, the right side is a box list of installed mods with switches, and a slim \"Add from Modrinth\" bar at the top that expands into search.",
+      notch + body("display:flex;gap:16px") + `<div class="col" style="width:260px;gap:8px"><span class="cap" style="padding:6px 2px">Instances</span><div class="box">${instRows()}</div><span class="btn" style="justify-content:flex-start;border-style:dashed;color:#aaa">${sv("plus")} NEW INSTANCE</span></div><div class="col" style="flex:1;gap:14px">${header}<div class="box flex center" style="padding:10px 12px;gap:12px;border-color:#444"><span style="color:#888;width:18px">${sv("search")}</span><span class="ui" style="font-size:14px;color:#777">Add from Modrinth…</span><span style="margin-left:auto" class="badge">FABRIC 26.3</span></div><div class="box" style="flex:1;overflow:hidden">${installedRows(5)}</div></div></div>` + dock],
+  ];
+
+  const grid = document.getElementById("grid");
+  for (const [t, s, html] of ideas) {
+    const c = document.createElement("div");
+    c.innerHTML = `<div class="frame"><div class="win">${html}</div></div><div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  }
+</script>
+</body>
+</html>

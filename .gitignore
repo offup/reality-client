@@ -36,3 +36,6 @@ assets/*
 
 # Release output (installer, update file)
 release-out
+
+# Local Claude preview config
+.claude/

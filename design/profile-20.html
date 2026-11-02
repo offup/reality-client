@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Profile · 20 layouts</title>
+<script src="https://unpkg.com/skinview3d@3.1.0/bundles/skinview3d.bundle.js"></script>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 28px 24px 60px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 6px; letter-spacing: .1em; }
+  .note { font-family: var(--ui); font-size: 13px; color: #666; margin: 0 0 24px; letter-spacing: 0; }
+  #grid { display: grid; grid-template-columns: repeat(2, 640px); gap: 30px 24px; }
+  .lab { font-size: 15px; margin: 10px 0 0; }
+  .lab small { display: block; color: #777; font-size: 12px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; max-width: 620px; }
+  .frame { width: 640px; height: 400px; overflow: hidden; border: 1px solid #2a2a2a; }
+  .win { position: relative; width: 1280px; height: 800px; background: #0a0a0a; transform: scale(.5); transform-origin: 0 0; overflow: hidden; }
+  .abs { position: absolute; }
+  .box { background: #0c0c0c; border: 1px solid #2a2a2a; box-sizing: border-box; }
+  .cap { font-size: 13px; letter-spacing: .14em; color: #777; text-transform: uppercase; }
+  .muted { font-family: var(--ui); font-size: 13px; color: #6a6a6a; letter-spacing: 0; }
+  .flex { display: flex; } .col { display: flex; flex-direction: column; } .center { align-items: center; } .between { justify-content: space-between; }
+  .tab { position: relative; font-size: 24px; letter-spacing: .06em; color: #555; padding-bottom: 10px; line-height: 1; }
+  .tab.on { color: #fff; } .tab.on::after { content: ""; position: absolute; left: 0; bottom: 0; width: 22px; height: 2px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,.35); }
+  img.skin { position: absolute; pointer-events: none; }
+  .tag { font-family: var(--mc); text-shadow: 2px 2px 0 #3f3f3f; }
+
+  /* face from skin.png: 8×8 at 8,8 plus hat at 40,8 */
+  .face { image-rendering: pixelated; position: relative; flex: none; background: url(skin.png) no-repeat; }
+  .face::after { content: ""; position: absolute; inset: 0; background: url(skin.png) no-repeat; background-size: inherit; image-rendering: pixelated; }
+
+  /* buttons */
+  .btn { display: inline-flex; align-items: center; gap: 9px; height: 40px; padding: 0 18px; box-sizing: border-box; border: 1px solid #444; background: #161616; font-size: 14px; letter-spacing: .1em; white-space: nowrap; }
+  .btn.w { background: #fff; color: #000; border-color: #fff; }
+  .btn svg { width: 16px; height: 16px; }
+  .ib { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid #333; background: #121212; color: #bbb; box-sizing: border-box; }
+  .ib svg { width: 17px; height: 17px; }
+  .seg { display: flex; border: 1px solid #2a2a2a; position: relative; }
+  .seg span { padding: 11px 16px; font-size: 13px; letter-spacing: .1em; color: #777; }
+  .seg span + span { border-left: 1px solid #2a2a2a; }
+  .seg span.on { background: #1c1c1c; color: #fff; }
+  .pillseg { display: flex; padding: 3px; border: 1px solid #2f2f2f; background: rgba(12,12,12,.85); }
+  .pillseg span { padding: 8px 18px; font-size: 13px; letter-spacing: .1em; color: #777; }
+  .pillseg span.on { background: #fff; color: #000; }
+  .chk { position: absolute; top: 6px; right: 6px; width: 18px; height: 18px; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; z-index: 2; }
+  .chk svg { width: 12px; height: 12px; }
+  .drop { border: 1px dashed #3a3a3a; background: repeating-linear-gradient(135deg, #0d0d0d 0 10px, #0b0b0b 10px 20px); box-sizing: border-box; }
+  .flat { image-rendering: pixelated; background: #111 url(skin.png) center / contain no-repeat; flex: none; }
+  .flat.checker { background: url(skin.png) center / contain no-repeat, linear-gradient(45deg, #1b1b1b 25%, transparent 25%, transparent 75%, #1b1b1b 75%) 0 0 / 16px 16px, linear-gradient(45deg, #1b1b1b 25%, transparent 25%, transparent 75%, #1b1b1b 75%) 8px 8px / 16px 16px, #141414 !important; image-rendering: pixelated; }
+  .checker { background-color: #141414; background-image: linear-gradient(45deg, #1b1b1b 25%, transparent 25%, transparent 75%, #1b1b1b 75%), linear-gradient(45deg, #1b1b1b 25%, transparent 25%, transparent 75%, #1b1b1b 75%); background-size: 16px 16px; background-position: 0 0, 8px 8px; }
+
+  /* capes */
+  .ct { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid #2a2a2a; background: #101010; box-sizing: border-box; }
+  .ct.on { border-color: #fff; background: #171717; box-shadow: inset 0 0 0 1px #fff; }
+  .ct .nm { font-family: var(--ui); font-size: 12px; color: #aaa; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%; }
+  .ct.on .nm { color: #fff; }
+  .ca { image-rendering: pixelated; background-repeat: no-repeat; flex: none; }
+  .ca.none { border: 1px dashed #444; box-sizing: border-box; background: repeating-linear-gradient(45deg, transparent 0 6px, #1c1c1c 6px 7px); }
+
+  /* stage */
+  .floor { position: absolute; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(255,255,255,.14), rgba(255,255,255,0) 70%); }
+  .spot { position: absolute; background: radial-gradient(ellipse 50% 70% at 50% 0%, rgba(255,255,255,.09), transparent 70%); }
+  .glass { background: rgba(14,14,14,.55); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.1); box-sizing: border-box; }
+  .toast { display: inline-flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid #2a2a2a; background: #111; font-family: var(--ui); font-size: 13px; letter-spacing: 0; color: #ddd; }
+  .toast svg { width: 14px; height: 14px; }
+  .mcb { height: 40px; box-sizing: border-box; background: #6f6f6f; border: 2px solid #000; box-shadow: inset 2px 2px 0 #a8a8a8, inset -2px -2px 0 #3e3e3e; display: flex; align-items: center; justify-content: center; font-family: var(--mc); font-size: 15px; text-shadow: 2px 2px 0 #3f3f3f; }
+  .mcb.hv { background: #7e8fbf; box-shadow: inset 2px 2px 0 #b9c4e6, inset -2px -2px 0 #4a5683; }
+  .slot { background: #8b8b8b; box-shadow: inset 2px 2px 0 #373737, inset -2px -2px 0 #fff; display: flex; align-items: center; justify-content: center; position: relative; box-sizing: border-box; }
+  .slot.on { background: #a9a9a9; outline: 2px solid #fff; outline-offset: 1px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 16px 20px; }
+  .row + .row { border-top: 1px solid #1c1c1c; }
+
+  /* chrome */
+  .notch { position: absolute; top: 0; right: 0; width: 150px; height: 46px; background: #2a2a2a; clip-path: polygon(0 0, 100% 0, 100% 100%, 20px 100%); z-index: 9; }
+  .notch .in { position: absolute; inset: 0 0 1px 1px; background: #0c0c0c; clip-path: polygon(0 0, 100% 0, 100% 100%, 20px 100%); display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding-right: 8px; }
+  .notch .in span { width: 38px; height: 32px; display: flex; align-items: center; justify-content: center; color: #8a8a8a; } .notch svg { width: 17px; height: 17px; }
+  .dock { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); display: flex; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; z-index: 8; }
+  .di { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #777; position: relative; }
+  .di svg { width: 22px; height: 22px; } .di.on { color: #fff; } .di.on::after { content: ""; position: absolute; left: 15px; right: 15px; bottom: 7px; height: 2px; background: #fff; }
+  .launch { display: flex; margin: 0 12px; border: 1px solid #555; background: #1a1a1a; }
+  .launch .lm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0 32px 0 20px; min-width: 200px; height: 52px; box-sizing: border-box; }
+  .launch .lt { font-size: 22px; line-height: 1; letter-spacing: .05em; } .launch .ls { font-family: var(--mc); font-size: 11px; color: #9a9a9a; }
+  .launch .la { width: 52px; display: flex; align-items: center; justify-content: center; color: #bbb; border-left: 1px solid #555; } .launch .la svg { width: 20px; height: 20px; }
+  .launch .tl { width: 52px; display: flex; align-items: center; justify-content: center; padding-left: 4px; }
+</style>
+</head>
+<body>
+<h1>Profile · 20 layouts · full window at 50 %</h1>
+<p class="note">Same content everywhere: your player in 3D, name, skin upload (click or drop a PNG), Classic / Slim, and your capes with "None". Square black launcher style, Background tab next to it.</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.330 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+  <symbol id="min" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="sq" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="upload" viewBox="0 0 24 24"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></symbol>
+  <symbol id="rotate" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></symbol>
+  <symbol id="copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12"/><path d="M5 15H3V3h12v2"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+</svg>
+<div id="grid"></div>
+<canvas id="src" style="display:none"></canvas>
+<script>
+  const sv = (id, sw = 1.75) => `<svg fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  const NAME = "offup";
+  const notch = `<div class="notch"><div class="in"><span>${sv("min")}</span><span>${sv("sq")}</span><span>${sv("x")}</span></div></div>`;
+  const dock = `<div class="dock"><span class="di">${sv("home")}</span><span class="di">${sv("box")}</span><span class="launch"><span class="tl">${face(32)}</span><span class="lm"><span class="lt">LAUNCH</span><span class="ls">Survival · 26.3</span></span><span class="la">${sv("chev")}</span></span><span class="di">${sv("bell")}</span><span class="di on">${sv("hex")}</span></div>`;
+  const tabs = `<div class="abs flex" style="left:110px;top:64px;gap:30px"><span class="tab">BACKGROUND</span><span class="tab on">PROFILE</span></div>`;
+  const chrome = (html) => notch + tabs + html + dock;
+
+  function face(s) {
+    const k = s / 8;
+    return `<span class="face" style="width:${s}px;height:${s}px;background-size:${64 * k}px ${64 * k}px;background-position:-${8 * k}px -${8 * k}px"><style></style></span>`.replace("<style></style>", "") +
+      "";
+  }
+  // hat layer: separate span on top (pseudo element can't take a different position inline)
+  function faceH(s) {
+    const k = s / 8;
+    const bg = (x) => `background:url(skin.png) no-repeat -${x * k}px -${8 * k}px / ${64 * k}px ${64 * k}px;image-rendering:pixelated`;
+    return `<span style="position:relative;display:inline-block;flex:none;width:${s}px;height:${s}px;${bg(8)}"><span style="position:absolute;inset:0;${bg(40)}"></span></span>`;
+  }
+  const player = (x, y, w, h, back = false) => `<img class="skin" ${back ? "data-back" : "data-skin"} alt="" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">`;
+
+  // capes: real offup cape plus generated sample capes
+  const CAPES = [
+    { n: "offup", url: "/capes/offup.png" },
+    { n: "Migrator", c: ["#3a6fd8", "#9fd0ff", "diamond"] },
+    { n: "Pan", c: ["#2f7a3a", "#f0d060", "dot"] },
+    { n: "Common", c: ["#6b2a2a", "#e8e8e8", "stripe"] },
+    { n: "Cherry", c: ["#c86a8e", "#ffd6e6", "dot"] },
+    { n: "Vanilla", c: ["#2a2a33", "#7fa8ff", "stripe"] },
+  ];
+  function genCape([base, accent, kind]) {
+    const c = document.createElement("canvas");
+    c.width = 64; c.height = 32;
+    const g = c.getContext("2d");
+    g.fillStyle = base; g.fillRect(0, 0, 22, 17);
+    g.fillStyle = "rgba(0,0,0,.25)"; g.fillRect(1, 15, 10, 2);
+    g.fillStyle = accent;
+    if (kind === "diamond") { g.fillRect(5, 5, 2, 2); g.fillRect(4, 6, 4, 2); g.fillRect(5, 8, 2, 2); g.fillRect(12, 1, 10, 16); }
+    if (kind === "dot") { g.fillRect(4, 6, 4, 4); g.fillRect(14, 6, 4, 4); }
+    if (kind === "stripe") { g.fillRect(1, 3, 10, 2); g.fillRect(1, 11, 10, 1); g.fillRect(12, 3, 10, 2); }
+    return c.toDataURL();
+  }
+  for (const cape of CAPES) if (!cape.url) cape.url = genCape(cape.c);
+  const ACTIVE = 0;
+
+  // front of the cape (10×16 at 1,1), scaled by s
+  const capeArt = (i, s) => i < 0
+    ? `<span class="ca none" style="width:${10 * s}px;height:${16 * s}px"></span>`
+    : `<span class="ca" style="width:${10 * s}px;height:${16 * s}px;background-image:url(${CAPES[i].url});background-size:${64 * s}px ${32 * s}px;background-position:-${s}px -${s}px"></span>`;
+  const chk = `<span class="chk">${sv("check", 3.5)}</span>`;
+  function capeTile(i, w, h, s, name = true) {
+    const on = i === ACTIVE || (i < 0 && ACTIVE < 0);
+    return `<div class="ct${on ? " on" : ""}" style="width:${w}px;height:${h}px">${on ? chk : ""}${capeArt(i, s)}${name ? `<span class="nm">${i < 0 ? "None" : CAPES[i].n}</span>` : ""}</div>`;
+  }
+  const allCapes = (w, h, s, name = true, n = CAPES.length) => [-1, ...CAPES.keys()].slice(0, n + 1).map((i) => capeTile(i, w, h, s, name)).join("");
+  const upload = (label = "UPLOAD SKIN", w = true) => `<span class="btn${w ? " w" : ""}">${sv("upload", 2)}${label}</span>`;
+  const seg = `<div class="seg"><span class="on">CLASSIC</span><span>SLIM</span></div>`;
+  const pill = `<div class="pillseg"><span class="on">CLASSIC</span><span>SLIM</span></div>`;
+  const header = (fs = 26, fsize = 52) => `<div class="flex center" style="gap:16px">${faceH(fsize)}<div class="col" style="gap:5px"><span class="tag" style="font-size:${fs}px">${NAME}</span><span class="muted">Minecraft: Java Edition</span></div></div>`;
+  const dropzone = (w, h, flat = 84) => `<div class="drop flex center" style="width:${w}px;height:${h}px;gap:18px;padding:0 20px"><span class="flat checker" style="width:${flat}px;height:${flat}px;background-image:url(skin.png)"></span><div class="col" style="gap:6px"><span class="flex center" style="gap:9px;font-size:15px;letter-spacing:.1em">${sv("upload", 2).replace("<svg", '<svg style="width:16px;height:16px"')}UPLOAD SKIN</span><span class="muted">Drop a PNG here or click · 64×64</span></div></div>`;
+  const stage = (x, y, w, h, opts = {}) => `<div class="abs${opts.box ? " box" : ""}" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;${opts.bg || ""}">${opts.spot ? `<div class="spot" style="inset:0"></div>` : ""}<div class="floor" style="left:${w / 2 - 130}px;bottom:${opts.floor ?? 40}px;width:260px;height:44px"></div></div>`;
+  const toast = (x, y, text = "Cape saved") => `<div class="abs toast" style="left:${x}px;top:${y}px">${sv("check", 3)}${text}</div>`;
+
+  const ideas = [
+    ["1 · Wardrobe", "Player on a lit floor without a box, Classic/Slim as a pill under the feet. Right: name, a drop zone with your flat skin, big cape tiles.",
+      chrome(stage(110, 120, 450, 540) + player(170, 130, 330, 440) + `<div class="abs" style="left:335px;top:600px;transform:translateX(-50%)">${pill}</div>
+        <div class="abs col" style="left:600px;top:124px;width:570px;gap:24px">${header()}${dropzone(570, 120)}<div class="col" style="gap:12px"><div class="flex between"><span class="cap">Cape</span><span class="muted">6 owned</span></div><div class="flex" style="gap:10px;flex-wrap:wrap">${allCapes(72, 120, 4)}</div></div></div>`)],
+
+    ["2 · Three columns", "Skin on the left, player in the middle, capes on the right. Everything visible at once, symmetric.",
+      chrome(`<div class="abs box col" style="left:110px;top:124px;width:290px;height:520px;padding:22px;gap:18px"><span class="cap">Skin</span><span class="flat checker" style="width:244px;height:244px;background-image:url(skin.png)"></span>${upload()}${seg}</div>`
+        + stage(420, 124, 440, 520) + player(475, 130, 330, 440) + `<div class="abs tag" style="left:640px;top:600px;transform:translateX(-50%);font-size:24px">${NAME}</div>`
+        + `<div class="abs box col" style="left:880px;top:124px;width:290px;height:520px;padding:22px;gap:16px"><span class="cap">Cape</span><div class="flex" style="gap:10px;flex-wrap:wrap">${allCapes(76, 112, 4)}</div></div>`)],
+
+    ["3 · Cape list", "A slim skin bar on top (face, name, upload, model). Below the capes as a list with big rows, the player on the left shows the choice.",
+      chrome(`<div class="abs box" style="left:110px;top:124px;width:400px;height:520px"></div>` + stage(110, 124, 400, 520) + player(140, 140, 340, 450)
+        + `<div class="abs box flex center between" style="left:530px;top:124px;width:640px;height:76px;padding:0 18px">${header(20, 40)}<div class="flex center" style="gap:10px">${seg}${upload("UPLOAD", true)}</div></div>`
+        + `<div class="abs box col" style="left:530px;top:216px;width:640px;height:428px;overflow:hidden">${[-1, ...CAPES.keys()].map((i) => `<div class="row" style="padding:10px 18px${i === ACTIVE ? ";background:#161616" : ""}"><div class="flex center" style="gap:16px">${capeArt(i, 2.6)}<div class="col" style="gap:3px"><span style="font-size:15px;letter-spacing:.08em">${i < 0 ? "NO CAPE" : CAPES[i].n.toUpperCase()}</span><span class="muted">${i === ACTIVE ? "Shown in game" : "Owned"}</span></div></div>${i === ACTIVE ? `<span class="btn" style="height:32px;border-color:#fff">${sv("check", 3).replace("<svg", '<svg style="width:14px;height:14px"')}ACTIVE</span>` : `<span class="btn" style="height:32px;color:#999">EQUIP</span>`}</div>`).join("")}</div>`)],
+
+    ["4 · Front & back", "Two cards: Skin shows you from the front, Cape from behind. Each card has its own controls underneath.",
+      chrome([["Skin", false, `<div class="flex center" style="gap:10px">${upload()}${seg}</div>`], ["Cape", true, `<div class="flex" style="gap:8px">${allCapes(52, 70, 3, false)}</div>`]].map(([t, back, ctl], k) => {
+        const x = 110 + k * 540;
+        return `<div class="abs box" style="left:${x}px;top:124px;width:520px;height:520px"><span class="abs cap" style="left:20px;top:18px">${t}</span></div>${stage(x, 124, 520, 520, { floor: 130 })}${player(x + 120, 150, 280, 360, back)}<div class="abs" style="left:${x + 20}px;top:${560}px">${ctl}</div>`;
+      }).join(""))],
+
+    ["5 · Minimal", "No boxes at all. Name tag, player, under the feet one row of controls and the capes as small chips.",
+      chrome(`<div class="spot abs" style="left:340px;top:100px;width:600px;height:560px"></div>` + `<div class="floor" style="left:510px;top:478px;width:260px;height:44px"></div>` + player(485, 110, 310, 400) + `<div class="abs tag" style="left:640px;top:110px;transform:translateX(-50%);font-size:24px">${NAME}</div>`
+        + `<div class="abs flex center" style="left:640px;top:530px;transform:translateX(-50%);gap:12px">${upload()}${pill}</div>`
+        + `<div class="abs flex" style="left:640px;top:592px;transform:translateX(-50%);gap:8px">${allCapes(44, 58, 2.6, false)}</div>`)],
+
+    ["6 · Player card", "Your profile as a big ID card: face, name, UUID, model and cape. The 3D player stands next to it, actions inside the card.",
+      chrome(`<div class="abs box col" style="left:110px;top:124px;width:600px;height:520px;padding:32px;gap:26px;box-sizing:border-box">
+          <div class="flex center" style="gap:24px">${faceH(110)}<div class="col" style="gap:8px"><span class="tag" style="font-size:36px">${NAME}</span><span class="muted flex center" style="gap:8px">8f3c…a91e ${sv("copy").replace("<svg", '<svg style="width:13px;height:13px"')}</span></div></div>
+          <div style="height:1px;background:#1f1f1f"></div>
+          <div class="flex between center"><span class="cap">Skin</span><div class="flex center" style="gap:10px">${seg}${upload("UPLOAD", true)}</div></div>
+          <div class="col" style="gap:12px"><span class="cap">Cape</span><div class="flex" style="gap:8px">${allCapes(70, 96, 4)}</div></div></div>`
+        + stage(730, 124, 440, 520) + player(785, 140, 330, 440))],
+
+    ["7 · Sub tabs", "Player left. On the right a Skin | Cape switch, so each part gets the whole space (here: Cape open, big tiles).",
+      chrome(stage(110, 124, 440, 520, { box: true }) + player(165, 140, 330, 440)
+        + `<div class="abs col" style="left:580px;top:124px;width:590px;gap:20px"><div class="pillseg" style="align-self:flex-start"><span>SKIN</span><span class="on">CAPE</span></div><div class="flex" style="gap:12px;flex-wrap:wrap">${allCapes(130, 180, 7)}</div></div>`)],
+
+    ["8 · Big drop zone", "The right side is one large drop target with your skin texture big in the middle. Capes as a row under it.",
+      chrome(stage(110, 124, 420, 520, { box: true }) + player(155, 140, 330, 440)
+        + `<div class="abs drop col center" style="left:560px;top:124px;width:610px;height:330px;justify-content:center;gap:16px"><span class="flat checker" style="width:176px;height:176px;background-image:url(skin.png)"></span><span class="flex center" style="gap:10px;font-size:17px;letter-spacing:.1em">${sv("upload", 2).replace("<svg", '<svg style="width:18px;height:18px"')}DROP A SKIN</span><span class="muted">or click to choose a PNG · 64×64</span></div>`
+        + `<div class="abs flex between center" style="left:560px;top:468px;width:610px"><span class="cap">Model</span>${seg}</div>`
+        + `<div class="abs flex" style="left:560px;top:524px;gap:10px">${allCapes(78, 116, 4)}</div>`)],
+
+    ["9 · Texture & model", "Your skin file big and pixel-sharp next to the 3D player, so you see exactly what you upload. Capes below.",
+      chrome(`<div class="abs box col" style="left:110px;top:124px;width:400px;height:400px;padding:18px;gap:12px"><div class="flex between center"><span class="cap">Skin file</span><span class="muted">64×64</span></div><span class="flat checker" style="width:362px;height:322px;background-size:322px;background-image:url(skin.png)"></span></div>`
+        + stage(530, 124, 300, 400, { box: true }) + player(545, 128, 270, 360)
+        + `<div class="abs box col" style="left:850px;top:124px;width:320px;height:400px;padding:20px;gap:14px"><span class="cap">Skin</span>${upload()}${seg}<span class="muted">Drop a PNG anywhere on this page.</span></div>`
+        + `<div class="abs flex center" style="left:110px;top:544px;gap:10px"><span class="cap" style="width:70px">Cape</span>${allCapes(140, 100, 4)}</div>`)],
+
+    ["10 · Glass on your background", "The page keeps the home background and the player where it always stands. Two glass panels left and right.",
+      `<div class="abs" style="inset:0;background:#0a0a0a url(/previews/ascii.webp) center bottom / 100% 62% no-repeat"></div>` + chrome(player(490, 110, 300, 400)
+        + `<div class="abs glass col" style="left:110px;top:124px;width:320px;height:520px;padding:22px;gap:16px"><span class="cap">Skin</span><span class="flat" style="width:120px;height:120px;background:url(skin.png) center/contain no-repeat;image-rendering:pixelated"></span>${upload()}${seg}</div>`
+        + `<div class="abs glass col" style="left:850px;top:124px;width:320px;height:520px;padding:22px;gap:16px"><span class="cap">Cape</span><div class="flex" style="gap:10px;flex-wrap:wrap">${allCapes(84, 116, 4.2)}</div></div>`)],
+
+    ["11 · Player dock", "Big player in the middle, all controls in one floating bar under it, built like the launcher's dock.",
+      chrome(`<div class="spot abs" style="left:340px;top:90px;width:600px;height:520px"></div><div class="floor" style="left:510px;top:478px;width:260px;height:44px"></div>` + player(480, 100, 320, 410) + `<div class="abs tag" style="left:640px;top:104px;transform:translateX(-50%);font-size:22px">${NAME}</div>`
+        + `<div class="abs box flex center" style="left:640px;top:540px;transform:translateX(-50%);padding:10px;gap:10px"><span class="ib" style="width:52px;height:52px;color:#fff">${sv("upload", 2)}</span>${pill}<span style="width:1px;height:40px;background:#2a2a2a;margin:0 4px"></span>${[-1, ...CAPES.keys()].map((i) => `<span class="slotc" style="position:relative;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border:1px solid ${i === ACTIVE ? "#fff" : "#262626"};background:#111">${capeArt(i, 2.5)}</span>`).join("")}</div>`)],
+
+    ["12 · Spotlight rack", "The player under a spotlight in the middle, capes hang on both sides like on a rack. Skin actions small at the top.",
+      chrome(`<div class="spot abs" style="left:390px;top:110px;width:500px;height:550px"></div><div class="floor" style="left:510px;top:560px;width:260px;height:44px"></div>` + player(480, 170, 320, 410)
+        + `<div class="abs flex center" style="left:640px;top:126px;transform:translateX(-50%);gap:10px">${upload("UPLOAD", true)}${seg}</div>`
+        + `<div class="abs col" style="left:110px;top:200px;gap:12px">${[-1, 0, 1].map((i) => capeTile(i, 240, 130, 5)).join("")}</div>`.replace(/width:240px;height:130px/g, "width:240px;height:130px;flex-direction:row;gap:20px")
+        + `<div class="abs col" style="left:930px;top:200px;gap:12px">${[2, 3, 4].map((i) => capeTile(i, 240, 130, 5)).join("")}</div>`.replace(/width:240px;height:130px/g, "width:240px;height:130px;flex-direction:row;gap:20px"))],
+
+    ["13 · Cape gallery", "Capes are the star: a big 4 × 2 gallery. The player on the right turns around and shows the chosen cape from behind.",
+      chrome(`<div class="abs box flex center between" style="left:110px;top:124px;width:720px;height:68px;padding:0 16px">${header(18, 36)}<div class="flex center" style="gap:10px">${seg}${upload("UPLOAD", true)}</div></div>`
+        + `<div class="abs" style="left:110px;top:208px;width:720px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px">${[-1, ...CAPES.keys(), -2].map((i) => i === -2 ? `<div class="ct" style="height:210px;border-style:dashed"><span class="muted">Get capes at</span><span class="muted" style="color:#999">minecraft.net</span></div>` : capeTile(i, 171, 210, 7)).join("")}</div>`
+        + stage(850, 124, 320, 520, { box: true }) + player(860, 170, 300, 400, true))],
+
+    ["14 · Settings list", "Built like a settings page: one box with rows for skin, model and cape. Calm and familiar, the player on the left.",
+      chrome(stage(110, 124, 420, 520, { box: true }) + player(155, 140, 330, 440)
+        + `<div class="abs box" style="left:550px;top:124px;width:620px">
+          <div class="row"><div class="flex center" style="gap:14px"><span class="flat checker" style="width:48px;height:48px;background-image:url(skin.png)"></span><div class="col" style="gap:3px"><span style="font-size:15px;letter-spacing:.08em">SKIN</span><span class="muted">Drop a PNG or upload one</span></div></div>${upload("UPLOAD", false)}</div>
+          <div class="row"><div class="col" style="gap:3px"><span style="font-size:15px;letter-spacing:.08em">MODEL</span><span class="muted">Arm width of your skin</span></div>${seg}</div>
+          <div class="row" style="align-items:flex-start;flex-direction:column"><div class="col" style="gap:3px"><span style="font-size:15px;letter-spacing:.08em">CAPE</span><span class="muted">Shown on your back in game</span></div><div class="flex" style="gap:8px">${allCapes(76, 100, 3.6)}</div></div></div>`)],
+
+    ["15 · Turntable", "Player in the middle with turn buttons and a Front / Back switch. Skin on the left shelf, capes on the right shelf.",
+      chrome(`<div class="spot abs" style="left:390px;top:110px;width:500px;height:550px"></div><div class="floor" style="left:510px;top:520px;width:260px;height:44px"></div>` + player(480, 130, 320, 410, true)
+        + `<div class="abs flex center" style="left:640px;top:580px;transform:translateX(-50%);gap:10px"><span class="ib">${sv("left")}</span><div class="pillseg"><span>FRONT</span><span class="on">BACK</span></div><span class="ib">${sv("right")}</span></div>`
+        + `<div class="abs col" style="left:110px;top:150px;width:260px;gap:14px"><span class="cap">Skin</span><span class="flat checker" style="width:120px;height:120px;background-image:url(skin.png)"></span>${upload()}${seg}</div>`
+        + `<div class="abs col" style="left:910px;top:150px;width:260px;gap:14px"><span class="cap" style="text-align:right">Cape</span><div class="flex" style="gap:10px;flex-wrap:wrap;justify-content:flex-end">${allCapes(80, 108, 4)}</div></div>`)],
+
+    ["16 · Mirror", "One wide stage shows you from the front and from behind at the same time. Controls in a column on the right.",
+      chrome(`<div class="abs box" style="left:110px;top:124px;width:680px;height:520px"></div>` + `<div class="floor" style="left:180px;top:560px;width:240px;height:40px"></div><div class="floor" style="left:480px;top:560px;width:240px;height:40px"></div>` + player(150, 150, 300, 400) + player(450, 150, 300, 400, true)
+        + `<span class="abs cap" style="left:270px;top:612px">Front</span><span class="abs cap" style="left:575px;top:612px">Back</span>`
+        + `<div class="abs col" style="left:810px;top:124px;width:360px;gap:18px">${header(22, 44)}${upload()}${seg}<span class="cap" style="margin-top:6px">Cape</span><div class="flex" style="gap:8px;flex-wrap:wrap">${allCapes(80, 104, 3.8)}</div></div>`)],
+
+    ["17 · Recent skins", "Skins you uploaded are kept as thumbnails, so you can switch back with one click. Plus tile = upload. Capes below.",
+      chrome(stage(110, 124, 420, 520, { box: true }) + player(155, 140, 330, 440)
+        + `<div class="abs col" style="left:560px;top:124px;width:610px;gap:14px"><div class="flex between center"><span class="cap">Skins</span>${seg}</div><div class="flex" style="gap:10px">${[0, 1, 2, 3].map((k) => `<div class="ct${k === 0 ? " on" : ""}" style="width:110px;height:130px">${k === 0 ? chk : ""}<span class="flat" style="width:72px;height:72px;background:url(skin.png) center/contain no-repeat;image-rendering:pixelated;filter:${["none", "hue-rotate(140deg)", "grayscale(1)", "hue-rotate(260deg) saturate(2)"][k]}"></span><span class="nm">${["Current", "Yesterday", "3 days ago", "Last week"][k]}</span></div>`).join("")}<div class="ct" style="width:110px;height:130px;border-style:dashed;color:#aaa">${sv("plus").replace("<svg", '<svg style="width:26px;height:26px"')}<span class="nm">Upload</span></div></div>
+          <span class="cap" style="margin-top:14px">Cape</span><div class="flex" style="gap:10px">${allCapes(80, 118, 4.4)}</div></div>`)],
+
+    ["18 · Minecraft style", "Minecraft's own look: stone buttons and inventory slots for the capes, player in a dark slot frame.",
+      chrome(`<div class="abs" style="left:110px;top:124px;width:420px;height:520px;background:#000;box-shadow:inset 2px 2px 0 #373737,inset -2px -2px 0 #555;border:2px solid #555"></div>` + player(155, 150, 330, 430)
+        + `<div class="abs col" style="left:560px;top:124px;width:610px;gap:16px"><span class="tag" style="font-size:28px">${NAME}</span><div class="flex" style="gap:10px"><div class="mcb hv" style="width:240px">Upload skin</div><div class="mcb" style="width:150px">Classic</div><div class="mcb" style="width:150px;color:#aaa">Slim</div></div>
+          <span class="tag" style="font-size:16px;color:#ddd;margin-top:8px">Capes</span><div class="flex" style="gap:4px;padding:8px;background:#c6c6c6;box-shadow:inset 2px 2px 0 #fff,inset -2px -2px 0 #555;align-self:flex-start">${[-1, ...CAPES.keys()].map((i) => `<div class="slot${i === ACTIVE ? " on" : ""}" style="width:72px;height:96px">${capeArt(i, 4.2)}</div>`).join("")}</div>
+          <span class="tag" style="font-size:13px;color:#888">Hover: Migrator · click to wear</span></div>`)],
+
+    ["19 · Banner", "A wide banner on top with your face, name and the skin actions. Below: player left, a big cape grid right.",
+      chrome(`<div class="abs box flex center between" style="left:110px;top:124px;width:1060px;height:110px;padding:0 26px;background:linear-gradient(90deg,#141414,#0c0c0c)">${header(32, 70)}<div class="flex center" style="gap:12px">${seg}${upload()}</div></div>`
+        + stage(110, 250, 380, 394, { box: true }) + player(170, 256, 260, 340)
+        + `<div class="abs" style="left:510px;top:250px;width:660px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px">${[-1, ...CAPES.keys()].slice(0, 8).map((i) => capeTile(i, 156, 190, 6)).join("")}</div>`)],
+
+    ["20 · Home position", "The player stays exactly where it stands on the home screen, so nothing jumps. Plain dark boxes left (skin) and right (cape).",
+      chrome(`<div class="floor" style="left:510px;top:520px;width:260px;height:44px"></div>` + player(490, 110, 300, 420) + `<div class="abs tag" style="left:640px;top:104px;transform:translateX(-50%);font-size:22px">${NAME}</div>`
+        + `<div class="abs box col" style="left:110px;top:124px;width:320px;height:520px;padding:22px;gap:18px"><span class="cap">Skin</span>${dropzone(274, 150, 72).replace("gap:18px;padding:0 20px", "gap:14px;padding:0 14px;flex-direction:column;justify-content:center")}<span class="cap" style="margin-top:6px">Model</span>${seg}</div>`
+        + `<div class="abs box col" style="left:850px;top:124px;width:320px;height:520px;padding:22px;gap:16px"><span class="cap">Cape</span><div class="flex" style="gap:10px;flex-wrap:wrap">${allCapes(84, 116, 4.2)}</div>${toast(0, 0).replace('class="abs toast" style="left:0px;top:0px"', 'class="toast" style="margin-top:auto"')}</div>`)],
+  ];
+
+  const q = new URLSearchParams(location.search);
+  const row_ = Number(q.get("row") || 0);
+  const shown = row_ ? ideas.slice((row_ - 1) * 2, row_ * 2) : ideas;
+  const grid = document.getElementById("grid");
+  for (const [t, s, html] of shown) {
+    const c = document.createElement("div");
+    c.innerHTML = `<div class="frame"><div class="win">${html}</div></div><div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  }
+  // faces in the dock and headers use the hat-layer version
+  for (const el of document.querySelectorAll(".face")) el.outerHTML = faceH(parseInt(el.style.width));
+
+  (async () => {
+    const canvas = document.getElementById("src");
+    const viewer = new skinview3d.SkinViewer({ canvas, width: 600, height: 800, preserveDrawingBuffer: true });
+    await viewer.loadSkin("skin.png");
+    await viewer.loadCape("/capes/offup.png");
+    viewer.zoom = 0.78;
+    viewer.playerObject.cape.rotation.x += 0.07;
+    viewer.playerWrapper.rotation.y = -0.55;
+    viewer.render();
+    const front = canvas.toDataURL();
+    viewer.playerWrapper.rotation.y = Math.PI - 0.45;
+    viewer.render();
+    const back = canvas.toDataURL();
+    for (const img of document.querySelectorAll("img[data-skin]")) img.src = front;
+    for (const img of document.querySelectorAll("img[data-back]")) img.src = back;
+  })();
+</script>
+</body>
+</html>

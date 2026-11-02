@@ -135,6 +135,23 @@ struct MsToken {
 pub struct TokenStore {
     path: PathBuf,
     lock: Mutex<()>,
+    /// One sign-in at a time, a second request then uses the cached token
+    signing_in: tauri::async_runtime::Mutex<()>,
+}
+
+/// Minecraft tokens last 24 hours; renew well before that. They are kept in sessions.json
+/// so not every action and restart signs in again (Minecraft allows only a few per minute).
+const SESSION_MAX_AGE_SECS: u64 = 20 * 60 * 60;
+
+fn unix_now() -> u64 {
+    std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct SavedSession {
+    token: String,
+    /// Unix seconds when the token was issued
+    since: u64,
 }
 
 impl TokenStore {
@@ -142,6 +159,36 @@ impl TokenStore {
         Self {
             path,
             lock: Mutex::new(()),
+            signing_in: tauri::async_runtime::Mutex::new(()),
+        }
+    }
+
+    fn sessions_path(&self) -> PathBuf {
+        self.path.with_file_name("sessions.json")
+    }
+
+    fn load_sessions(&self) -> HashMap<String, SavedSession> {
+        std::fs::read_to_string(self.sessions_path())
+            .ok()
+            .and_then(|text| serde_json::from_str(&text).ok())
+            .unwrap_or_default()
+    }
+
+    fn cached_session(&self, uuid: &str) -> Option<String> {
+        let _guard = self.lock.lock().ok()?;
+        let saved = self.load_sessions().remove(uuid)?;
+        (unix_now().saturating_sub(saved.since) < SESSION_MAX_AGE_SECS).then_some(saved.token)
+    }
+
+    fn cache_session(&self, uuid: &str, token: Option<&str>) {
+        let Ok(_guard) = self.lock.lock() else { return };
+        let mut sessions = self.load_sessions();
+        match token {
+            Some(token) => sessions.insert(uuid.to_string(), SavedSession { token: token.to_string(), since: unix_now() }),
+            None => sessions.remove(uuid),
+        };
+        if let Ok(text) = serde_json::to_string(&sessions) {
+            let _ = std::fs::write(self.sessions_path(), text);
         }
     }
 
@@ -173,6 +220,7 @@ impl TokenStore {
     }
 
     pub fn remove(&self, uuid: &str) -> Result<(), String> {
+        self.cache_session(uuid, None);
         let _guard = self.lock.lock().map_err(|e| e.to_string())?;
         let mut tokens = self.load();
         if tokens.remove(uuid).is_some() {
@@ -232,8 +280,12 @@ struct ProfileSkin {
 
 #[derive(Deserialize)]
 struct ProfileCape {
+    #[serde(default)]
+    id: String,
     state: String,
     url: String,
+    #[serde(default)]
+    alias: String,
 }
 
 async fn fetch_as_data_url(client: &reqwest::Client, url: &str) -> Result<String, String> {
@@ -307,17 +359,19 @@ async fn minecraft_token(
         .map_err(|e| e.to_string())?;
 
     // 5. Minecraft token
-    let mc: McToken = client
+    let mc_response = client
         .post("https://api.minecraftservices.com/authentication/login_with_xbox")
         .json(&json!({ "identityToken": format!("XBL3.0 x={};{}", uhs, xsts.token) }))
         .send()
         .await
-        .map_err(|e| e.to_string())?
-        .error_for_status()
-        .map_err(|_| {
-            "Minecraft sign-in failed (is the Azure app approved for the Minecraft API?)"
-                .to_string()
-        })?
+        .map_err(|e| e.to_string())?;
+    match mc_response.status().as_u16() {
+        200..=299 => {}
+        429 => return Err("Minecraft is limiting sign-ins right now. Wait a minute and try again.".into()),
+        403 => return Err("Minecraft sign-in failed (is the Azure app approved for the Minecraft API?)".into()),
+        code => return Err(format!("Minecraft sign-in failed ({code})")),
+    }
+    let mc: McToken = mc_response
         .json()
         .await
         .map_err(|e| e.to_string())?;
@@ -429,9 +483,14 @@ pub async fn microsoft_login(
         store.set(&profile.id, refresh)?;
     }
 
+    account_from_profile(&client, &profile).await
+}
+
+/// Name, active skin (as data URL), model and active cape of a Minecraft profile
+async fn account_from_profile(client: &reqwest::Client, profile: &Profile) -> Result<Account, String> {
     let active_skin = profile.skins.iter().find(|s| s.state == "ACTIVE");
     let skin = match active_skin {
-        Some(s) => fetch_as_data_url(&client, &s.url).await?,
+        Some(s) => fetch_as_data_url(client, &s.url).await?,
         None => String::new(),
     };
     let model = match active_skin.map(|s| s.variant.as_str()) {
@@ -440,17 +499,10 @@ pub async fn microsoft_login(
     }
     .to_string();
     let cape = match profile.capes.iter().find(|c| c.state == "ACTIVE") {
-        Some(c) => Some(fetch_as_data_url(&client, &c.url).await?),
+        Some(c) => Some(fetch_as_data_url(client, &c.url).await?),
         None => None,
     };
-
-    Ok(Account {
-        uuid: profile.id,
-        name: profile.name,
-        skin,
-        model,
-        cape,
-    })
+    Ok(Account { uuid: profile.id.clone(), name: profile.name.clone(), skin, model, cape })
 }
 
 /// Error text the frontend recognises: the account has to be added again (no or expired token)
@@ -458,8 +510,19 @@ pub const SIGN_IN_AGAIN: &str = "SIGN_IN_AGAIN";
 
 /// Fresh Minecraft session for starting the game, from the stored refresh token
 pub async fn launch_session(store: &TokenStore, uuid: &str) -> Result<Session, String> {
-    let refresh = store.get(uuid).ok_or(SIGN_IN_AGAIN)?;
+    let _one_at_a_time = store.signing_in.lock().await;
     let client = reqwest::Client::new();
+
+    // A token from earlier in this run is enough while Minecraft still accepts it
+    if let Some(access_token) = store.cached_session(uuid) {
+        if let Ok(profile) = fetch_profile(&client, &access_token).await {
+            let xuid = xuid_from_token(&access_token).unwrap_or_else(|| "0".into());
+            return Ok(Session { uuid: profile.id, name: profile.name, access_token, xuid });
+        }
+        store.cache_session(uuid, None);
+    }
+
+    let refresh = store.get(uuid).ok_or(SIGN_IN_AGAIN)?;
     let response = client
         .post("https://login.microsoftonline.com/consumers/oauth2/v2.0/token")
         .form(&[
@@ -484,6 +547,7 @@ pub async fn launch_session(store: &TokenStore, uuid: &str) -> Result<Session, S
     }
     let access_token = minecraft_token(&client, &ms.access_token).await?;
     let profile = fetch_profile(&client, &access_token).await?;
+    store.cache_session(uuid, Some(&access_token));
     let xuid = xuid_from_token(&access_token).unwrap_or_else(|| "0".into());
     Ok(Session {
         uuid: profile.id,
@@ -546,4 +610,105 @@ fn urlencode(s: &str) -> String {
         }
     }
     out
+}
+
+// ---------------------------------------------------------------- profile page
+
+/// A cape the account owns
+#[derive(Serialize, Clone)]
+pub struct CapeInfo {
+    pub id: String,
+    pub name: String,
+    /// The cape texture as data URL (64×32, the front is the 10×16 area at 1,1)
+    pub texture: String,
+    pub active: bool,
+}
+
+#[derive(Serialize)]
+pub struct ProfileDetails {
+    pub account: Account,
+    pub capes: Vec<CapeInfo>,
+}
+
+const PROFILE_API: &str = "https://api.minecraftservices.com/minecraft/profile";
+
+async fn details(client: &reqwest::Client, token: &str) -> Result<ProfileDetails, String> {
+    let profile = fetch_profile(client, token).await?;
+    let account = account_from_profile(client, &profile).await?;
+    let mut capes = Vec::new();
+    for cape in &profile.capes {
+        capes.push(CapeInfo {
+            id: cape.id.clone(),
+            name: if cape.alias.is_empty() { "Cape".into() } else { cape.alias.clone() },
+            texture: fetch_as_data_url(client, &cape.url).await?,
+            active: cape.state == "ACTIVE",
+        });
+    }
+    Ok(ProfileDetails { account, capes })
+}
+
+/// Current skin, model and all capes of the account
+pub async fn profile_details(store: &TokenStore, uuid: &str) -> Result<ProfileDetails, String> {
+    let session = launch_session(store, uuid).await?;
+    details(&reqwest::Client::new(), &session.access_token).await
+}
+
+/// Width and height from a PNG header, without decoding the image
+fn png_size(bytes: &[u8]) -> Option<(u32, u32)> {
+    const SIGNATURE: [u8; 8] = [0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A];
+    if bytes.len() < 24 || bytes[..8] != SIGNATURE || &bytes[12..16] != b"IHDR" {
+        return None;
+    }
+    let w = u32::from_be_bytes([bytes[16], bytes[17], bytes[18], bytes[19]]);
+    let h = u32::from_be_bytes([bytes[20], bytes[21], bytes[22], bytes[23]]);
+    Some((w, h))
+}
+
+/// Uploads a skin PNG (64×64 or legacy 64×32) as the account's new skin
+pub async fn upload_skin(store: &TokenStore, uuid: &str, png: Vec<u8>, slim: bool) -> Result<ProfileDetails, String> {
+    match png_size(&png) {
+        Some((64, 64)) | Some((64, 32)) => {}
+        Some((w, h)) => return Err(format!("A skin has to be 64×64 pixels, this one is {w}×{h}")),
+        None => return Err("That file is not a PNG image".into()),
+    }
+    let session = launch_session(store, uuid).await?;
+    let client = reqwest::Client::new();
+    let part = reqwest::multipart::Part::bytes(png).file_name("skin.png").mime_str("image/png").map_err(|e| e.to_string())?;
+    let form = reqwest::multipart::Form::new().text("variant", if slim { "slim" } else { "classic" }).part("file", part);
+    let response = client
+        .post(format!("{PROFILE_API}/skins"))
+        .bearer_auth(&session.access_token)
+        .multipart(form)
+        .send()
+        .await
+        .map_err(|e| format!("No connection to Minecraft ({e})"))?;
+    match response.status().as_u16() {
+        200..=299 => {}
+        429 => return Err("Too many skin changes, wait a minute and try again".into()),
+        400 => return Err("Minecraft rejected this skin file".into()),
+        code => return Err(format!("Skin upload failed ({code})")),
+    }
+    details(&client, &session.access_token).await
+}
+
+/// Shows the given cape, or none
+pub async fn set_cape(store: &TokenStore, uuid: &str, cape_id: Option<String>) -> Result<ProfileDetails, String> {
+    let session = launch_session(store, uuid).await?;
+    let client = reqwest::Client::new();
+    let url = format!("{PROFILE_API}/capes/active");
+    let request = match &cape_id {
+        Some(id) => client.put(&url).json(&json!({ "capeId": id })),
+        None => client.delete(&url),
+    };
+    let response = request
+        .bearer_auth(&session.access_token)
+        .send()
+        .await
+        .map_err(|e| format!("No connection to Minecraft ({e})"))?;
+    match response.status().as_u16() {
+        200..=299 => {}
+        429 => return Err("Too many changes, wait a minute and try again".into()),
+        code => return Err(format!("Could not change the cape ({code})")),
+    }
+    details(&client, &session.access_token).await
 }

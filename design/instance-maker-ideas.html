@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Instance creator · 10 ideas</title>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 28px 24px 60px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 6px; letter-spacing: .1em; }
+  .note { font-family: var(--ui); font-size: 13px; color: #666; margin: 0 0 24px; letter-spacing: 0; }
+  #grid { display: grid; grid-template-columns: repeat(2, 640px); gap: 30px 24px; }
+  .lab { font-size: 15px; margin: 10px 0 0; }
+  .lab small { display: block; color: #777; font-size: 12px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; max-width: 620px; }
+  .frame { width: 640px; height: 400px; overflow: hidden; border: 1px solid #2a2a2a; }
+  .win { position: relative; width: 1280px; height: 800px; background: #0a0a0a; transform: scale(.5); transform-origin: 0 0; overflow: hidden; }
+  .abs { position: absolute; }
+  .box { background: #0c0c0c; border: 1px solid #2a2a2a; box-sizing: border-box; }
+  .flex { display: flex; } .col { display: flex; flex-direction: column; } .center { align-items: center; } .between { justify-content: space-between; }
+  .cap { font-size: 12px; letter-spacing: .14em; color: #777; text-transform: uppercase; }
+  .h { font-size: 24px; letter-spacing: .08em; text-transform: uppercase; }
+  .muted { font-family: var(--ui); font-size: 13px; color: #777; letter-spacing: 0; }
+  .mcv { font-family: var(--mc); font-size: 12px; color: #aaa; }
+  .mcname { font-family: var(--mc); font-size: 40px; line-height: 1.1; text-shadow: 3px 3px 0 #2a2a2a; }
+  .input { height: 46px; display: flex; align-items: center; padding: 0 14px; border: 1px solid #2e2e2e; background: #111; font-family: var(--mc); font-size: 16px; color: #fff; box-sizing: border-box; }
+  .input.big { height: 60px; font-size: 26px; border-width: 0 0 2px; border-color: #fff; background: none; padding: 0; }
+  .ph { color: rgba(255,255,255,.35); }
+  .caret { display: inline-block; width: 2px; height: 1em; background: #fff; margin-left: 2px; vertical-align: -2px; }
+  .vt { height: 38px; display: flex; align-items: center; justify-content: center; border: 1px solid #2a2a2a; background: #0c0c0c; font-family: var(--mc); font-size: 13px; color: #999; box-sizing: border-box; }
+  .vt.on { border-color: #fff; background: #1a1a1a; color: #fff; }
+  .btn { height: 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 1px solid #555; background: #1a1a1a; box-sizing: border-box; }
+  .btn .t { font-size: 22px; letter-spacing: .05em; line-height: 1; } .btn .s { font-family: var(--mc); font-size: 11px; color: #9a9a9a; line-height: 1; }
+  .ghost { height: 46px; display: flex; align-items: center; justify-content: center; padding: 0 18px; border: 1px solid #2a2a2a; color: #bbb; font-size: 14px; letter-spacing: .1em; box-sizing: border-box; }
+  .chip { padding: 4px 9px; border: 1px solid rgba(255,255,255,.35); background: rgba(0,0,0,.45); font-family: var(--mc); font-size: 11px; color: #ddd; }
+  .tg { width: 40px; height: 22px; border: 1px solid #444; background: #141414; position: relative; box-sizing: border-box; flex: none; }
+  .tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; background: #666; }
+  .tg.on { border-color: #fff; background: #1a1a1a; } .tg.on::after { left: 21px; background: #fff; }
+  .cover { position: relative; overflow: hidden; border: 1px solid #2a2a2a; background: #050505; }
+  .cover canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  .shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(5,5,5,.92) 0%, rgba(5,5,5,.5) 34%, transparent 62%); }
+  .icon { image-rendering: pixelated; display: block; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 8px 10px; }
+  .row.on { background: #181818; border: 1px solid #3a3a3a; }
+  .rn { font-size: 15px; letter-spacing: .06em; } .rv { font-family: var(--mc); font-size: 10px; color: #777; }
+  .step { display: flex; align-items: center; gap: 10px; font-size: 13px; letter-spacing: .12em; color: #555; }
+  .step b { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border: 1px solid #333; font-weight: normal; font-family: var(--mc); font-size: 12px; }
+  .step.on { color: #fff; } .step.on b { background: #fff; color: #000; border-color: #fff; } .step.done b { border-color: #777; color: #ddd; }
+  .mcb { height: 40px; box-sizing: border-box; background: #6f6f6f; border: 2px solid #000; box-shadow: inset 2px 2px 0 #a8a8a8, inset -2px -2px 0 #3e3e3e; display: flex; align-items: center; justify-content: center; font-family: var(--mc); font-size: 15px; text-shadow: 2px 2px 0 #3f3f3f; }
+  .mcb.hv { background: #7e8fbf; box-shadow: inset 2px 2px 0 #b9c4e6, inset -2px -2px 0 #4a5683; }
+  .mcin { height: 40px; box-sizing: border-box; border: 2px solid #a0a0a0; background: #000; display: flex; align-items: center; padding: 0 10px; font-family: var(--mc); font-size: 15px; }
+  .tab { position: relative; font-size: 18px; letter-spacing: .08em; color: #555; padding-bottom: 10px; }
+  .tab.on { color: #fff; } .tab.on::after { content: ""; position: absolute; left: 0; bottom: 0; width: 22px; height: 2px; background: #fff; }
+  .dock { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); display: flex; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; }
+  .di { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #777; position: relative; }
+  .di svg { width: 22px; height: 22px; } .di.on { color: #fff; } .di.on::after { content: ""; position: absolute; left: 15px; right: 15px; bottom: 7px; height: 2px; background: #fff; }
+  .launch { display: flex; margin: 0 12px; border: 1px solid #555; background: #1a1a1a; }
+  .launch .lm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0 32px 0 20px; min-width: 200px; height: 52px; box-sizing: border-box; }
+  .launch .lt { font-size: 22px; line-height: 1; letter-spacing: .05em; } .launch .ls { font-family: var(--mc); font-size: 11px; color: #9a9a9a; }
+  .launch .la { width: 52px; display: flex; align-items: center; justify-content: center; color: #bbb; border-left: 1px solid #555; } .launch .la svg { width: 20px; height: 20px; }
+  .launch .tl { width: 52px; display: flex; align-items: center; justify-content: center; padding-left: 4px; }
+  .face { width: 32px; height: 32px; image-rendering: pixelated; background: url(skin.png) -32px -32px / 256px 256px; position: relative; flex: none; }
+  .face::after { content: ""; position: absolute; inset: 0; background: url(skin.png) -160px -32px / 256px 256px; image-rendering: pixelated; }
+  .notch { position: absolute; top: 0; right: 0; width: 150px; height: 46px; background: #2a2a2a; clip-path: polygon(0 0, 100% 0, 100% 100%, 20px 100%); z-index: 9; }
+  .notch .in { position: absolute; inset: 0 0 1px 1px; background: #0c0c0c; clip-path: polygon(0 0, 100% 0, 100% 100%, 20px 100%); }
+  .dim::after { content: ""; position: absolute; inset: 0; background: rgba(5,5,5,.72); z-index: 3; }
+  .over { z-index: 4; }
+</style>
+</head>
+<body>
+<h1>Instance creator · 10 ideas · full window at 50 %</h1>
+<p class="note">How "New instance" could work. Same launcher parts as today: pixel cover, list on the right, Minecraft 26.x, always Fabric. Ideas marked "with mods" need the planned Modrinth mod support.</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.33 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="15" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/><circle cx="9" cy="15" r="1" fill="currentColor"/></symbol>
+  <symbol id="upload" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="m6 10 6-6 6 6"/><path d="M4 20h16"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12"/><path d="M16 8V4H4v12h4"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+</svg>
+<div id="grid"></div>
+<script>
+  const sv = (id, sw = 1.75) => `<svg style="width:20px;height:20px;display:block" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  const VERSIONS = ["26.3", "26.2", "26.1.2", "26.1.1", "26.1"];
+  const notch = `<div class="notch"><div class="in"></div></div>`;
+  const dock = `<div class="dock" style="z-index:6"><span class="di">${sv("home")}</span><span class="di on">${sv("box")}</span><span class="launch"><span class="tl"><span class="face"></span></span><span class="lm"><span class="lt">LAUNCH</span><span class="ls">Survival · 26.3</span></span><span class="la">${sv("chev")}</span></span><span class="di">${sv("bell")}</span><span class="di">${sv("hex")}</span></div>`;
+  const cover = (seed, w, h, style = "") => `<div class="cover" style="width:${w}px;height:${h}px;${style}"><canvas data-seed="${seed}" data-w="120" data-h="72"></canvas><div class="shade"></div></div>`;
+  const icon = (seed, size = 36) => `<canvas class="icon" data-icon="${seed}" width="8" height="8" style="width:${size}px;height:${size}px"></canvas>`;
+  const vtiles = (cols = 5, sel = 0) => `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:6px">${VERSIONS.map((v, i) => `<span class="vt${i === sel ? " on" : ""}">${v}</span>`).join("")}</div>`;
+  const list = (active = -1, extra = "") => `<div class="abs box col" style="right:80px;top:64px;bottom:140px;width:300px"><div class="flex between center" style="padding:16px 16px 12px"><span class="cap">Instances</span><span class="mcv" style="border:1px solid #333;padding:2px 6px">3</span></div>${extra}${[["survival", "Survival", "26.3"], ["pvp", "PvP", "26.2"], ["shaders", "Shaders", "26.1.2"]].map(([s, n, v], i) => `<div class="row${i === active ? " on" : ""}" style="margin:0 8px">${icon(s)}<div class="col" style="gap:5px"><span class="rn">${n.toUpperCase()}</span><span class="rv">Fabric ${v}</span></div></div>`).join("")}</div>`;
+  const nameRow = (name, ph = false) => `<span class="mcname${ph ? " ph" : ""}">${name}${ph ? "" : '<span class="caret"></span>'}</span>`;
+  const tmpl = (title, sub, mods, on = false) => `<div class="box col" style="padding:16px;gap:8px;${on ? "border-color:#fff;box-shadow:inset 0 0 0 1px #fff;" : ""}"><span style="font-size:16px;letter-spacing:.08em">${title}</span><span class="muted" style="font-size:12px">${sub}</span><div class="flex" style="gap:6px;flex-wrap:wrap;margin-top:4px">${mods.map((m) => `<span class="chip" style="font-size:10px">${m}</span>`).join("")}</div></div>`;
+
+  const ideas = [
+    ["1 · Today, refined", "The current creator, tidied: a dice button rolls a new cover, the name types right onto the picture, versions as tiles, one big Create.",
+      notch + `<div class="abs col" style="left:80px;top:64px;width:804px;bottom:140px;gap:12px"><div style="position:relative;flex:1">${cover("new1", 804, 440)}<div class="abs col" style="left:28px;bottom:24px;gap:10px"><span class="chip">New instance · Fabric</span>${nameRow("My World")}</div><span class="abs box flex center" style="right:14px;top:14px;width:40px;height:40px;justify-content:center;color:#ddd">${sv("dice")}</span></div>${vtiles(5)}<div class="btn"><span class="t">CREATE</span><span class="s">Fabric 26.3</span></div></div>` + list() + dock],
+    ["2 · Small dialog", "A compact window in the middle over the dimmed page: name, version, create. Fast, nothing else to look at.",
+      `<div class="abs dim" style="inset:0">${list(0)}</div>` + notch + `<div class="abs box col over" style="left:50%;top:50%;transform:translate(-50%,-58%);width:520px;padding:26px;gap:16px"><div class="flex between center"><span class="h" style="font-size:20px">New instance</span><span style="color:#888;width:20px">${sv("x")}</span></div><div class="flex center" style="gap:14px">${icon("dlg", 56)}<div class="input" style="flex:1">My World<span class="caret"></span></div></div><span class="cap">Version</span>${vtiles(5)}<div class="flex" style="gap:10px"><div class="ghost" style="flex:1">CANCEL</div><div class="btn" style="flex:2;height:46px"><span class="t" style="font-size:18px">CREATE</span></div></div></div>` + dock],
+    ["3 · Templates first (with mods)", "Start from a ready setup: Empty, Performance, PvP or Shaders, each with fitting Fabric mods. Then just give it a name.",
+      notch + `<div class="abs col" style="left:80px;top:64px;width:804px;gap:16px"><span class="h">Pick a start</span><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${tmpl("EMPTY", "Just Fabric, add mods later", ["Fabric"], false)}${tmpl("PERFORMANCE", "More FPS, faster loading", ["Sodium", "Lithium", "FerriteCore"], true)}${tmpl("PVP", "Clean HUD, zoom, keystrokes", ["Sodium", "Zoomify", "Keystrokes"])}${tmpl("SHADERS", "Iris shaders ready to go", ["Sodium", "Iris"])}</div><div class="flex center" style="gap:12px"><div class="input" style="flex:1">Performance<span class="caret"></span></div><span class="vt on" style="width:90px">26.3</span><div class="btn" style="width:200px;height:46px"><span class="t" style="font-size:18px">CREATE</span></div></div></div>` + list() + dock],
+    ["4 · Three steps", "A short guided flow with steps on top: Name & look, Version, Mods. Back and Next at the bottom, preview stays visible.",
+      notch + `<div class="abs col" style="left:80px;top:64px;width:804px;bottom:140px;gap:16px"><div class="flex" style="gap:28px"><span class="step done"><b>${sv("check", 3).replace("<svg", '<svg style="width:12px;height:12px"')}</b>NAME</span><span class="step on"><b>2</b>VERSION</span><span class="step"><b>3</b>MODS</span></div><div class="flex" style="gap:16px;flex:1"><div style="position:relative;width:420px">${cover("step", 420, 300)}<div class="abs col" style="left:20px;bottom:18px;gap:8px"><span class="chip">Fabric 26.3</span><span class="mcname" style="font-size:28px">My World</span></div></div><div class="col" style="flex:1;gap:10px"><span class="cap">Minecraft version</span>${VERSIONS.map((v, i) => `<span class="vt${i === 0 ? " on" : ""}" style="justify-content:space-between;padding:0 14px">${v}<span class="muted" style="font-size:11px">${i === 0 ? "newest" : ""}</span></span>`).join("")}</div></div><div class="flex between"><div class="ghost" style="width:160px">BACK</div><div class="btn" style="width:240px;height:46px"><span class="t" style="font-size:18px">NEXT</span></div></div></div>` + list() + dock],
+    ["5 · Right in the list", "No separate page: \"New instance\" turns into an editable row at the top of the list. Type a name, pick the version chip, Enter.",
+      notch + `<div class="abs" style="left:80px;top:64px;width:804px;height:596px">${cover("survival", 804, 596)}<div class="abs col" style="left:28px;bottom:24px;gap:10px"><span class="chip">Fabric 26.3</span><span class="mcname">Survival</span></div></div>` + list(-1, `<div class="col" style="margin:0 8px 8px;padding:10px;border:1px solid #fff;gap:10px">${'<div class="flex center" style="gap:10px">' + icon("inline") + '<span class="input" style="height:34px;flex:1;font-size:13px">My World<span class="caret"></span></span></div>'}<div class="flex" style="gap:6px">${VERSIONS.slice(0, 3).map((v, i) => `<span class="vt${i === 0 ? " on" : ""}" style="height:28px;flex:1;font-size:11px">${v}</span>`).join("")}</div><span class="muted" style="font-size:11px">Enter to create · Esc to cancel</span></div>`) + dock],
+    ["6 · Minecraft \"Create World\"", "Exactly like the game's Create New World screen: name field, a stone button that cycles the version, Create and Cancel.",
+      notch + `<div class="abs" style="inset:0;background:#0a0a0a url(/previews/ascii.webp) center bottom / 100% 60% no-repeat"></div><div class="abs" style="inset:0;background:rgba(0,0,0,.55)"></div><div class="abs col" style="left:50%;top:90px;transform:translateX(-50%);width:420px;gap:14px;align-items:center"><span style="font-family:var(--mc);font-size:22px;text-shadow:2px 2px 0 #3f3f3f">Create New Instance</span><span style="font-family:var(--mc);font-size:13px;color:#aaa;align-self:flex-start">Instance Name</span><div class="mcin" style="width:100%">My World<span class="caret"></span></div><div class="mcb hv" style="width:100%">Game Version: 26.3</div><div class="mcb" style="width:100%">Loader: Fabric</div><div class="mcb" style="width:100%;opacity:.55">More Options...</div><div class="flex" style="gap:10px;width:100%;margin-top:30px"><div class="mcb" style="flex:1">Create Instance</div><div class="mcb" style="flex:1">Cancel</div></div></div>` + dock],
+    ["7 · Live preview + form", "Left the instance as it will look (cover, icon, name update while you type), right a clean form with name, version, memory and a mods switch.",
+      notch + `<div class="abs flex" style="left:80px;right:80px;top:64px;bottom:140px;gap:16px"><div style="position:relative;flex:1.2">${cover("prev", 600, 596)}<div class="abs col" style="left:28px;bottom:24px;gap:10px"><div class="flex center" style="gap:12px">${icon("prev", 48)}<span class="chip">Fabric 26.3 · 4 GB</span></div><span class="mcname">My World</span></div></div><div class="box col" style="flex:1;padding:24px;gap:14px"><span class="h" style="font-size:20px">New instance</span><span class="cap">Name</span><div class="input">My World<span class="caret"></span></div><span class="cap">Version</span>${vtiles(3)}<span class="cap">Memory</span><div class="flex center" style="gap:12px"><span style="position:relative;flex:1;height:2px;background:#333"><i style="position:absolute;left:0;top:0;bottom:0;width:14%;background:#fff"></i><b style="position:absolute;left:14%;top:-6px;width:14px;height:14px;margin-left:-7px;background:#fff"></b></span><span class="mcv">4 GB</span></div><div class="flex between center"><span class="cap">Fabric API included</span><span class="tg on"></span></div><div class="btn" style="margin-top:auto"><span class="t">CREATE</span><span class="s">Fabric 26.3</span></div></div></div>` + dock],
+    ["8 · New / Import / Modpack", "Tabs on top: create from scratch, import a .mrpack or another launcher's folder, or search a Modrinth modpack. Shown with Modpack open (with mods).",
+      notch + `<div class="abs col" style="left:80px;top:64px;width:804px;gap:16px"><div class="flex" style="gap:28px"><span class="tab">NEW</span><span class="tab">IMPORT</span><span class="tab on">MODPACK</span></div><div class="input" style="gap:10px"><span style="width:18px;color:#888">${sv("search")}</span><span class="ph" style="font-family:var(--ui);font-size:14px">Search Modrinth modpacks…</span></div>${[["Fabulously Optimized", "Performance pack, 60 mods", "fo"], ["Simply Optimized", "Lightweight FPS boost", "so"], ["Cobblemon", "Pokémon in Minecraft", "cb"]].map(([n, d, s], i) => `<div class="box flex center" style="padding:12px 14px;gap:14px;${i === 0 ? "border-color:#fff" : ""}">${icon(s, 44)}<div class="col" style="gap:5px;flex:1"><span style="font-size:15px;letter-spacing:.06em">${n.toUpperCase()}</span><span class="muted" style="font-size:12px">${d}</span></div><span class="vt" style="width:80px">26.3</span><span class="ghost" style="height:36px">INSTALL</span></div>`).join("")}</div>` + list() + dock],
+    ["9 · Duplicate an instance", "Copy one you already have: worlds, mods and settings come along, just pick what to copy and give it a new name.",
+      `<div class="abs dim" style="inset:0">${list(0)}</div>` + notch + `<div class="abs box col over" style="left:50%;top:50%;transform:translate(-50%,-58%);width:540px;padding:26px;gap:14px"><div class="flex center" style="gap:12px"><span style="width:20px;color:#bbb">${sv("copy")}</span><span class="h" style="font-size:20px">Copy "Survival"</span></div><div class="input">Survival copy<span class="caret"></span></div>${[["Worlds", true], ["Mods", true], ["Settings & keybinds", true], ["Screenshots", false]].map(([n, on]) => `<div class="flex between center" style="padding:6px 0"><span style="font-size:14px;letter-spacing:.08em">${n.toUpperCase()}</span><span class="tg${on ? " on" : ""}"></span></div>`).join("")}<div class="flex" style="gap:10px;margin-top:6px"><div class="ghost" style="flex:1">CANCEL</div><div class="btn" style="flex:2;height:46px"><span class="t" style="font-size:18px">COPY</span></div></div></div>` + dock],
+    ["10 · Pick a world look", "The cover becomes a choice: Overworld, Night, Nether, End or Snow, plus a color. The icon follows. Makes every instance feel like its own world.",
+      notch + `<div class="abs col" style="left:80px;top:64px;width:804px;bottom:140px;gap:12px"><div style="position:relative;flex:1">${cover("look", 804, 380, "filter:hue-rotate(150deg)")}<div class="abs col" style="left:28px;bottom:24px;gap:10px"><span class="chip">Nether · Fabric 26.3</span>${nameRow("Nether Run")}</div></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">${[["OVERWORLD", "0deg"], ["NIGHT", "60deg"], ["NETHER", "150deg"], ["END", "240deg"], ["SNOW", "300deg"]].map(([n, h], i) => `<div style="position:relative;height:70px;${i === 2 ? "outline:2px solid #fff;outline-offset:2px" : ""}">${cover("look", 152, 70, `filter:hue-rotate(${h})`)}<span class="abs" style="left:8px;bottom:6px;font-size:11px;letter-spacing:.1em">${n}</span></div>`).join("")}</div><div class="flex" style="gap:12px">${vtiles(5).replace('style="display:grid', 'style="flex:1;display:grid')}<div class="btn" style="width:220px;height:38px"><span class="t" style="font-size:16px">CREATE</span></div></div></div>` + list() + dock],
+  ];
+
+  const q = new URLSearchParams(location.search);
+  const row = Number(q.get("row") || 0);
+  const shown = row ? ideas.slice((row - 1) * 2, row * 2) : ideas;
+  const grid = document.getElementById("grid");
+  for (const [t, s, html] of shown) {
+    const c = document.createElement("div");
+    c.innerHTML = `<div class="frame"><div class="win">${html}</div></div><div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  }
+
+  // Pixel art like the launcher's instanceArt: seeded icon and night landscape
+  const hashString = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  const seeded = (seed) => { let a = seed; return () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+  const hsl = (h, s, l) => `hsl(${Math.round(h)} ${s}% ${l}%)`;
+  for (const c of document.querySelectorAll("canvas[data-icon]")) {
+    const id = c.dataset.icon, rand = seeded(hashString(id)), hue = hashString(id) % 360, x2 = c.getContext("2d");
+    const shades = [hsl(hue, 45, 22), hsl(hue, 50, 34), hsl(hue, 55, 48), hsl(hue, 60, 64)];
+    for (let y = 0; y < 8; y++) for (let x = 0; x < 4; x++) { x2.fillStyle = shades[Math.floor(rand() * 4)]; x2.fillRect(x, y, 1, 1); x2.fillRect(7 - x, y, 1, 1); }
+  }
+  for (const c of document.querySelectorAll("canvas[data-seed]")) {
+    const id = c.dataset.seed, W = 120, H = 72; c.width = W; c.height = H;
+    const g = c.getContext("2d"), rand = seeded(hashString(id) ^ 0x9e3779b9), hue = hashString(id) % 360;
+    const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, hsl(hue, 35, 5)); sky.addColorStop(1, hsl(hue, 40, 14)); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 90; i++) { g.globalAlpha = 0.12 + rand() * 0.6; g.fillStyle = "#fff"; g.fillRect(Math.floor(rand() * W), Math.floor(rand() * 34), 1, 1); }
+    g.globalAlpha = 1; const mx = 10 + Math.floor(rand() * (W - 24)); g.fillStyle = "#ece9dc"; g.fillRect(mx, 7, 6, 6);
+    const heights = (base, range) => { const out = []; let h = base + rand() * range; for (let x = 0; x < W; x++) { h += (rand() - 0.5) * 1.6; h = Math.max(base, Math.min(base + range, h)); out.push(Math.round(h)); } return out; };
+    heights(32, 12).forEach((t, x) => { g.fillStyle = hsl(hue, 30, 14); g.fillRect(x, t, 1, H - t); });
+    const near = heights(44, 10);
+    near.forEach((t, x) => { g.fillStyle = hsl(hue, 55, 42 + rand() * 8); g.fillRect(x, t, 1, 1); for (let y = t + 1; y < H; y++) { const d = y - t; g.fillStyle = d < 2 ? hsl(hue, 45, 30 + rand() * 6) : d < 7 ? hsl(28, 32, 20 + rand() * 6) : rand() < 0.03 ? hsl(hue, 70, 60) : hsl(0, 0, 18 + rand() * 8); g.fillRect(x, y, 1, 1); } });
+    for (let x = 4; x < W - 4; x++) { if (rand() > 0.05) continue; const t = near[x], tr = 4 + Math.floor(rand() * 3); g.fillStyle = hsl(28, 35, 22); g.fillRect(x, t - tr, 1, tr); g.fillStyle = hsl(hue, 48, 26); g.fillRect(x - 2, t - tr - 4, 5, 4); g.fillStyle = hsl(hue, 50, 31); g.fillRect(x - 1, t - tr - 6, 3, 2); x += 7; }
+  }
+</script>
+</body>
+</html>

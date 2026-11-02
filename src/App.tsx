@@ -4,8 +4,7 @@ import Dock, { type View } from "./Dock";
 import SkinView from "./SkinView";
 import WindowMenu from "./WindowMenu";
 import UpdateNotice from "./UpdateNotice";
-import Instances from "./Instances";
-import { createInstance, type Instance } from "./instanceData";
+import type { Instance } from "./instanceData";
 import Settings, {
   DEFAULT_BACKGROUND,
   DEFAULT_EFFECT_COLOR,
@@ -24,10 +23,8 @@ import LiveEffect from "./effects/LiveEffect";
 import type { Account } from "./auth";
 import {
   SIGN_IN_AGAIN,
-  deleteInstanceFolder,
   forgetAccount,
   launchGame,
-  listVersions,
   onGameExited,
   onLaunchProgress,
   type AfterLaunch,
@@ -130,12 +127,12 @@ function App() {
   const [gridMoving, setGridMoving] = useState<boolean>(() => read(GRID_MOVING_KEY) === "1");
   const [effectColors, setEffectColors] = useState<EffectColors>(loadEffectColors);
   const [{ accounts, activeId }, setStored] = useState<Stored>(loadStored);
-  const [versions, setVersions] = useState<string[]>([]);
   const [{ instances, activeId: instanceId }, setInstanceStore] = useState<StoredInstances>(loadInstances);
-  const [memoryMb, setMemoryMb] = useState<number>(() =>
+  // Memory and after-launch have no UI right now; stored values still apply
+  const [memoryMb] = useState<number>(() =>
     loadNumber(MEMORY_KEY, MEMORY_MIN, MEMORY_MAX, MEMORY_DEFAULT),
   );
-  const [afterLaunch, setAfterLaunch] = useState<AfterLaunch>(() =>
+  const [afterLaunch] = useState<AfterLaunch>(() =>
     read(AFTER_LAUNCH_KEY) === "minimize" ? "minimize" : "keep",
   );
   const [launch, setLaunch] = useState<LaunchStatus>({ kind: "idle" });
@@ -148,18 +145,7 @@ function App() {
   useEffect(() => write(BACKGROUND_KEY, background), [background]);
   useEffect(() => write(GRID_MOVING_KEY, gridMoving ? "1" : "0"), [gridMoving]);
   useEffect(() => write(EFFECT_COLORS_KEY, JSON.stringify(effectColors)), [effectColors]);
-  useEffect(() => write(MEMORY_KEY, String(memoryMb)), [memoryMb]);
-  useEffect(() => write(AFTER_LAUNCH_KEY, afterLaunch), [afterLaunch]);
   useEffect(() => write(INSTANCES_KEY, JSON.stringify({ instances, activeId: instanceId })), [instances, instanceId]);
-
-  // Versions Fabric supports (26.x and newer); no instance is created automatically
-  useEffect(() => {
-    listVersions()
-      .then(setVersions)
-      .catch(() => {
-        // offline: instances keep their saved versions
-      });
-  }, []);
 
   // Progress while preparing, and back to normal when the game closes
   useEffect(() => {
@@ -197,26 +183,12 @@ function App() {
     }
   }
 
-  function addInstance(name: string, version: string, id?: string) {
-    const created = createInstance(name, version, id);
-    setInstanceStore((s) => ({ instances: [created, ...s.instances], activeId: created.id }));
-  }
-
   function updateInstance(id: string, change: Partial<Instance>) {
     setInstanceStore((s) => ({ ...s, instances: s.instances.map((i) => (i.id === id ? { ...i, ...change } : i)) }));
   }
 
   function selectInstance(id: string) {
     setInstanceStore((s) => ({ ...s, activeId: id }));
-  }
-
-  /** Deletes the folder first; the instance only disappears from the list when that worked */
-  async function removeInstance(id: string) {
-    await deleteInstanceFolder(id);
-    setInstanceStore((s) => {
-      const left = s.instances.filter((i) => i.id !== id);
-      return { instances: left, activeId: s.activeId === id ? (left[0]?.id ?? null) : s.activeId };
-    });
   }
 
   function addAccount(account: Account) {
@@ -226,6 +198,11 @@ function App() {
     }));
     // A fresh sign-in fixes a "sign in again" error
     setLaunch((s) => (s.kind === "error" && s.message === SIGN_IN_AGAIN ? { kind: "idle" } : s));
+  }
+
+  /** New skin or cape from the profile page: same account, new look */
+  function updateAccount(account: Account) {
+    setStored((s) => ({ ...s, accounts: s.accounts.map((a) => (a.uuid === account.uuid ? account : a)) }));
   }
 
   function selectAccount(uuid: string) {
@@ -272,23 +249,7 @@ function App() {
       <div className={"player-stage" + (showPlayer ? "" : " is-hidden")}>
         <SkinView skin={player.skin} cape={player.cape ?? undefined} model={player.model} name={player.name} />
       </div>
-      {view === "instances" && (
-        <Instances
-          instances={instances}
-          activeId={instanceId}
-          versions={versions}
-          running={launch.kind === "preparing" || launch.kind === "running"}
-          onSelect={selectInstance}
-          onCreate={addInstance}
-          onRename={(id, name) => updateInstance(id, { name })}
-          onDelete={removeInstance}
-          onPlay={(id) => {
-            selectInstance(id);
-            setView("home");
-            void startGame(instances.find((i) => i.id === id) ?? null);
-          }}
-        />
-      )}
+      {/* Instances page: empty for now, a new design comes later */}
       {view === "settings" && (
         <Settings
           background={background}
@@ -297,10 +258,8 @@ function App() {
           onGridMoving={setGridMoving}
           colors={effectColors}
           onColor={(id, color) => setEffectColors((c) => ({ ...c, [id]: color }))}
-          memoryMb={memoryMb}
-          onMemoryMb={setMemoryMb}
-          afterLaunch={afterLaunch}
-          onAfterLaunch={setAfterLaunch}
+          account={current}
+          onAccount={updateAccount}
         />
       )}
       <UpdateNotice />

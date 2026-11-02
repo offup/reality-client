@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Instances · 12 layouts</title>
+<script src="https://unpkg.com/skinview3d@3.1.0/bundles/skinview3d.bundle.js"></script>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 28px 24px 60px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 6px; letter-spacing: .1em; }
+  .note { font-family: var(--ui); font-size: 13px; color: #666; margin: 0 0 24px; letter-spacing: 0; }
+  #grid { display: grid; grid-template-columns: repeat(2, 640px); gap: 30px 24px; }
+  .lab { font-size: 15px; margin: 10px 0 0; }
+  .lab small { display: block; color: #777; font-size: 12px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; max-width: 620px; }
+  .frame { width: 640px; height: 400px; overflow: hidden; border: 1px solid #2a2a2a; }
+  .win { position: relative; width: 1280px; height: 800px; background: #0a0a0a; transform: scale(.5); transform-origin: 0 0; overflow: hidden; }
+  .abs { position: absolute; }
+  .box { background: #0c0c0c; border: 1px solid #2a2a2a; box-sizing: border-box; }
+  .flex { display: flex; } .col { display: flex; flex-direction: column; } .center { align-items: center; } .between { justify-content: space-between; }
+  .ui { font-family: var(--ui); letter-spacing: 0; }
+  .muted { font-family: var(--ui); font-size: 13px; color: #777; letter-spacing: 0; }
+  .cap { font-size: 12px; letter-spacing: .14em; color: #777; text-transform: uppercase; }
+  .h { font-size: 24px; letter-spacing: .08em; text-transform: uppercase; }
+  .mcn { font-family: var(--mc); }
+  .ver { font-family: var(--mc); font-size: 11px; color: #999; }
+  .cover { position: relative; overflow: hidden; background: #050505; }
+  .cover svg.art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .cover .shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(5,5,5,.9) 0%, rgba(5,5,5,.4) 40%, transparent 70%); }
+  .sel { outline: 2px solid #fff; outline-offset: -2px; }
+  .play { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 1px solid #555; background: #1a1a1a; box-sizing: border-box; }
+  .play b { font-weight: normal; font-size: 20px; letter-spacing: .05em; line-height: 1; }
+  .play span { font-family: var(--mc); font-size: 10px; color: #999; line-height: 1; }
+  .pbtn { display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 18px; background: #fff; color: #000; font-size: 15px; letter-spacing: .08em; }
+  .tool { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid #2a2a2a; background: #0c0c0c; color: #999; box-sizing: border-box; }
+  .tool svg { width: 17px; height: 17px; }
+  .chip { padding: 3px 8px; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.5); font-family: var(--mc); font-size: 10px; color: #ddd; }
+  .mcb { height: 40px; box-sizing: border-box; background: #6f6f6f; border: 2px solid #000; box-shadow: inset 2px 2px 0 #a8a8a8, inset -2px -2px 0 #3e3e3e; display: flex; align-items: center; justify-content: center; font-family: var(--mc); font-size: 14px; text-shadow: 2px 2px 0 #3f3f3f; }
+  .mcb.hv { background: #7e8fbf; box-shadow: inset 2px 2px 0 #b9c4e6, inset -2px -2px 0 #4a5683; }
+  .stat b { display: block; font-weight: normal; font-family: var(--mc); font-size: 22px; } .stat span { font-family: var(--ui); font-size: 11px; color: #777; letter-spacing: 0; }
+  img.skin { position: absolute; }
+
+  .notch { position: absolute; top: 0; right: 0; width: 150px; height: 46px; background: #2a2a2a; clip-path: polygon(0 0, 100% 0, 100% 100%, 20px 100%); z-index: 9; }
+  .notch .in { position: absolute; inset: 0 0 1px 1px; background: #0c0c0c; clip-path: polygon(0 0, 100% 0, 100% 100%, 20px 100%); display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding-right: 8px; }
+  .notch .in span { width: 38px; height: 32px; display: flex; align-items: center; justify-content: center; color: #8a8a8a; } .notch svg { width: 17px; height: 17px; }
+  .dock { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); display: flex; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; z-index: 8; }
+  .di { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #777; position: relative; }
+  .di svg { width: 22px; height: 22px; } .di.on { color: #fff; } .di.on::after { content: ""; position: absolute; left: 15px; right: 15px; bottom: 7px; height: 2px; background: #fff; }
+  .launch { display: flex; margin: 0 12px; border: 1px solid #555; background: #1a1a1a; }
+  .launch .lm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0 32px 0 20px; min-width: 200px; height: 52px; box-sizing: border-box; }
+  .launch .lt { font-size: 22px; line-height: 1; letter-spacing: .05em; } .launch .ls { font-family: var(--mc); font-size: 11px; color: #9a9a9a; }
+  .launch .la { width: 52px; display: flex; align-items: center; justify-content: center; color: #bbb; border-left: 1px solid #555; } .launch .la svg { width: 20px; height: 20px; }
+  .launch .tl { width: 52px; display: flex; align-items: center; justify-content: center; padding-left: 4px; }
+  .face { width: 32px; height: 32px; image-rendering: pixelated; background: url(skin.png) -32px -32px / 256px 256px; position: relative; flex: none; }
+  .face::after { content: ""; position: absolute; inset: 0; background: url(skin.png) -160px -32px / 256px 256px; image-rendering: pixelated; }
+</style>
+</head>
+<body>
+<h1>Instances · 12 layouts · full window at 50 %</h1>
+<p class="note">Five sample instances with their generated pixel covers and icons. Everything here exists already (name, version, last played, folder, play) plus a mod count, ready for the mods feature.</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.33 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+  <symbol id="right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="min" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="sq" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></symbol>
+  <symbol id="folder" viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z"/></symbol>
+  <symbol id="pencil" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+  <symbol id="trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="puzzle" viewBox="0 0 24 24"><path d="M9 4h4v3a2 2 0 1 0 4 0V4h3v5h-3a2 2 0 1 0 0 4h3v7h-7v-3a2 2 0 1 0-4 0v3H4v-7h3a2 2 0 1 0 0-4H4V4z"/></symbol>
+</svg>
+<div id="grid"></div>
+<canvas id="src" style="display:none"></canvas>
+<script>
+  // ---- pixel art from the launcher (src/instanceArt.tsx), as plain JS
+  const hashString = (t) => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  const seeded = (seed) => { let a = seed; return () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+  const hueOf = (id) => hashString(id) % 360;
+  const hsl = (h, s, l) => `hsl(${Math.round(h)} ${s}% ${l}%)`;
+  function icon(id, size = 36) {
+    const r = seeded(hashString(id)); const hue = hueOf(id);
+    const sh = [hsl(hue, 45, 22), hsl(hue, 50, 34), hsl(hue, 55, 48), hsl(hue, 60, 64)];
+    let c = "";
+    for (let y = 0; y < 8; y++) for (let x = 0; x < 4; x++) { const col = sh[Math.floor(r() * 4)]; c += `<rect x="${x}" y="${y}" width="1" height="1" fill="${col}"/><rect x="${7 - x}" y="${y}" width="1" height="1" fill="${col}"/>`; }
+    return `<svg width="${size}" height="${size}" viewBox="0 0 8 8" shape-rendering="crispEdges" style="flex:none;display:block">${c}</svg>`;
+  }
+  function art(id) {
+    const COLS = 120, ROWS = 72; const r = seeded(hashString(id) ^ 0x9e3779b9); const hue = hueOf(id); let s = "";
+    const px = (x, y, f, w = 1, h = 1, o) => { s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}"${o !== undefined ? ` opacity="${o.toFixed(2)}"` : ""}/>`; };
+    for (let i = 0; i < 90; i++) px(Math.floor(r() * COLS), Math.floor(r() * 34), "#fff", 1, 1, 0.12 + r() * 0.6);
+    const mx = 10 + Math.floor(r() * (COLS - 24)); px(mx, 7, "#ece9dc", 6, 6); px(mx + 3, 8, "#d3cfbd", 2, 2); px(mx + 1, 11, "#d3cfbd");
+    const heights = (base, range) => { const o = []; let h = base + r() * range; for (let x = 0; x < COLS; x++) { h += (r() - 0.5) * 1.6; h = Math.max(base, Math.min(base + range, h)); o.push(Math.round(h)); } return o; };
+    heights(32, 12).forEach((t, x) => px(x, t, hsl(hue, 30, 14), 1, ROWS - t));
+    const near = heights(44, 10);
+    near.forEach((t, x) => { px(x, t, hsl(hue, 55, 42 + r() * 8)); for (let y = t + 1; y < ROWS; y++) { const d = y - t; px(x, y, d < 2 ? hsl(hue, 45, 30 + r() * 6) : d < 7 ? hsl(28, 32, 20 + r() * 6) : r() < 0.03 ? hsl(hue, 70, 60) : hsl(0, 0, 18 + r() * 8)); } });
+    for (let x = 4; x < COLS - 4; x++) { if (r() > 0.05) continue; const t = near[x]; const tr = 4 + Math.floor(r() * 3); px(x, t - tr, hsl(28, 35, 22), 1, tr); px(x - 2, t - tr - 4, hsl(hue, 48, 26), 5, 4); px(x - 1, t - tr - 6, hsl(hue, 50, 31), 3, 2); x += 7; }
+    return `<svg class="art" viewBox="0 0 ${COLS} ${ROWS}" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges"><defs><linearGradient id="sky-${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${hsl(hue, 35, 5)}"/><stop offset="1" stop-color="${hsl(hue, 40, 14)}"/></linearGradient></defs><rect width="${COLS}" height="${ROWS}" fill="url(#sky-${id})"/>${s}</svg>`;
+  }
+
+  // ---- sample data
+  const I = [
+    { id: "k1x9-survival", name: "Survival", v: "26.3", played: "2 h ago", mods: 24, worlds: 3 },
+    { id: "m3p2-pvp", name: "PvP", v: "26.2", played: "Yesterday", mods: 8, worlds: 1 },
+    { id: "w2a7-shaders", name: "Shaders", v: "26.1.2", played: "3 days ago", mods: 41, worlds: 2 },
+    { id: "h7c3-hardcore", name: "Hardcore", v: "26.3", played: "Never", mods: 12, worlds: 0 },
+    { id: "c9r1-creative", name: "Creative", v: "26.2", played: "Last week", mods: 3, worlds: 5 },
+  ];
+  const sv = (id) => `<svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><use href="#${id}"/></svg>`;
+  const notch = `<div class="notch"><div class="in"><span>${sv("min")}</span><span>${sv("sq")}</span><span>${sv("x")}</span></div></div>`;
+  const dock = `<div class="dock"><span class="di">${sv("home")}</span><span class="di on">${sv("box")}</span><span class="launch"><span class="tl"><span class="face"></span></span><span class="lm"><span class="lt">LAUNCH</span><span class="ls">Survival · 26.3</span></span><span class="la">${sv("chev")}</span></span><span class="di">${sv("bell")}</span><span class="di">${sv("hex")}</span></div>`;
+  const cover = (i, style, inner = "", sel = false) => `<div class="cover${sel ? " sel" : ""}" style="${style}">${art(i.id)}<div class="shade"></div>${inner}</div>`;
+  const tools = `<span class="tool">${sv("folder")}</span><span class="tool">${sv("pencil")}</span><span class="tool">${sv("trash")}</span>`;
+  const skin = (x, y, w = 260, h = 350) => `<img class="skin" data-skin alt="" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">`;
+  const body = (style) => `<div class="abs" style="left:80px;right:80px;top:64px;bottom:140px;${style}">`;
+
+  const ideas = [
+    ["1 · Library grid", "Like a game library: every instance a cover card in a 3-column grid, name and version on it. The selected one has a frame, Play appears on hover.",
+      notch + body("display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:190px;gap:16px") + I.map((i, k) => cover(i, "border:1px solid #2a2a2a", `<div class="abs" style="left:16px;bottom:14px"><div class="mcn" style="font-size:22px;text-shadow:2px 2px 0 #222">${i.name}</div><div class="ver" style="margin-top:6px">Fabric ${i.v} · ${i.played}</div></div>${k === 0 ? `<span class="abs pbtn" style="right:14px;bottom:14px;height:34px;padding:0 14px;font-size:13px">${sv("play")} PLAY</span>` : ""}`, k === 0)).join("") + `<div class="flex center" style="border:1px dashed #444;justify-content:center;gap:10px;color:#aaa;font-size:15px;letter-spacing:.1em">${sv("plus")} NEW INSTANCE</div></div>` + dock],
+    ["2 · Carousel", "One instance big in the middle, the neighbors peek in left and right. Arrows or scroll to switch, Play right under it. Feels like picking a world.",
+      notch + cover(I[1], "position:absolute;left:-180px;top:110px;width:320px;height:300px;opacity:.35") + cover(I[2], "position:absolute;right:-180px;top:110px;width:320px;height:300px;opacity:.35") + cover(I[0], "position:absolute;left:260px;top:80px;width:760px;height:380px;border:1px solid #fff", `<div class="abs" style="left:28px;bottom:24px"><span class="chip">Fabric 26.3</span><div class="mcn" style="font-size:44px;margin-top:10px;text-shadow:3px 3px 0 #222">Survival</div></div>`) + `<span class="abs tool" style="left:190px;top:250px">${sv("left")}</span><span class="abs tool" style="right:190px;top:250px">${sv("right")}</span><div class="abs flex" style="left:260px;width:760px;top:478px;gap:8px"><div class="play" style="flex:1;height:58px"><b>PLAY</b><span>26.3 · 24 mods</span></div>${tools.replaceAll('class="tool"', 'class="tool" style="width:58px;height:58px"')}</div><div class="abs flex" style="left:50%;transform:translateX(-50%);top:552px;gap:6px">${I.map((_, k) => `<span style="width:${k === 0 ? 22 : 8}px;height:4px;background:${k === 0 ? "#fff" : "#444"}"></span>`).join("")}</div>` + dock],
+    ["3 · Shelves", "Rows like a streaming app: \"Continue playing\" big at the top, \"All instances\" as a scrolling row of smaller covers below.",
+      notch + body("display:flex;flex-direction:column;gap:14px") + `<span class="cap">Continue playing</span>${cover(I[0], "height:250px;border:1px solid #2a2a2a", `<div class="abs flex center" style="left:24px;right:24px;bottom:20px;gap:18px"><div style="flex:1"><div class="mcn" style="font-size:34px;text-shadow:3px 3px 0 #222">Survival</div><div class="ver" style="margin-top:6px">Fabric 26.3 · played 2 h ago · 24 mods</div></div><span class="pbtn">${sv("play")} PLAY</span></div>`)}<span class="cap" style="margin-top:4px">All instances</span><div class="flex" style="gap:12px">${I.slice(1).map((i) => cover(i, "width:240px;height:130px;border:1px solid #2a2a2a;flex:none", `<div class="abs" style="left:12px;bottom:10px"><div class="mcn" style="font-size:16px">${i.name}</div><div class="ver" style="margin-top:4px">${i.v}</div></div>`)).join("")}</div></div>` + dock],
+    ["4 · Table + detail", "A clean table with columns (name, version, mods, last played) like a file manager, details of the selected row on the right. Best with many instances.",
+      notch + body("display:flex;gap:16px") + `<div class="box" style="flex:1"><div class="flex" style="padding:12px 16px;border-bottom:1px solid #1c1c1c;gap:12px" class="cap"><span class="cap" style="flex:2">Name</span><span class="cap" style="flex:1">Version</span><span class="cap" style="flex:1">Mods</span><span class="cap" style="flex:1.2">Played</span></div>${I.map((i, k) => `<div class="flex center" style="padding:10px 16px;gap:12px;${k === 0 ? "background:#181818;box-shadow:inset 2px 0 0 #fff" : ""}"><span class="flex center" style="flex:2;gap:12px">${icon(i.id, 30)}<span style="font-size:15px;letter-spacing:.06em">${i.name.toUpperCase()}</span></span><span class="ver" style="flex:1">${i.v}</span><span class="ver" style="flex:1">${i.mods}</span><span class="ui" style="flex:1.2;font-size:12px;color:#888">${i.played}</span></div>`).join("")}</div><div class="box col" style="width:330px;padding:16px;gap:12px">${cover(I[0], "height:170px")}<div class="mcn" style="font-size:24px">Survival</div><div class="flex" style="gap:22px"><div class="stat"><b>24</b><span>mods</span></div><div class="stat"><b>3</b><span>worlds</span></div><div class="stat"><b>26.3</b><span>version</span></div></div><div class="flex" style="gap:8px;margin-top:auto"><div class="play" style="flex:1;height:44px"><b style="font-size:17px">PLAY</b></div>${tools}</div></div></div>` + dock],
+    ["5 · Minecraft world list", "Exactly like the singleplayer world list in the game: rows with icon, name and details, stone buttons below. Instantly familiar to every player.",
+      notch + `<div class="abs mcn" style="left:50%;top:74px;transform:translateX(-50%);font-size:22px;text-shadow:2px 2px 0 #3f3f3f">Select Instance</div><div class="abs col" style="left:50%;transform:translateX(-50%);top:118px;width:640px;gap:4px;background:rgba(0,0,0,.5);padding:8px 0">${I.map((i, k) => `<div class="flex center" style="gap:14px;padding:8px 14px;${k === 0 ? "outline:2px solid #fff;outline-offset:-2px" : ""}">${icon(i.id, 48)}<div><div class="mcn" style="font-size:16px">${i.name}</div><div class="mcn" style="font-size:12px;color:#888;margin-top:4px">Fabric ${i.v} · ${i.played} · ${i.mods} mods</div></div></div>`).join("")}</div><div class="abs" style="left:50%;transform:translateX(-50%);top:478px;width:640px;display:grid;grid-template-columns:1fr 1fr;gap:8px"><div class="mcb hv">Play Selected Instance</div><div class="mcb">Create New Instance</div><div class="mcb">Edit</div><div class="mcb">Delete</div></div>` + dock],
+    ["6 · Your player in every cover", "The cover cards show your skin standing in each instance's landscape, so every instance feels like a place you go to.",
+      notch + body("display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:280px;gap:16px") + I.slice(0, 3).map((i, k) => cover(i, "border:1px solid #2a2a2a", `<img class="skin" data-skin alt="" style="position:absolute;right:26px;bottom:44px;width:120px;height:160px"><div class="abs" style="left:16px;bottom:14px"><div class="mcn" style="font-size:22px">${i.name}</div><div class="ver" style="margin-top:6px">Fabric ${i.v}</div></div>`, k === 0)).join("") + `</div>` + dock],
+    ["7 · Compact strip above the dock", "No separate page: the home screen stays, instances sit as small cover tiles in a strip above the dock. Click one to select, the player stays visible.",
+      notch + skin(510, 110) + `<div class="abs mcn" style="left:640px;top:84px;transform:translateX(-50%);font-size:24px;text-shadow:2px 2px 0 #3f3f3f">offup</div><div class="abs box flex" style="left:50%;transform:translateX(-50%);bottom:124px;padding:10px;gap:10px">${I.map((i, k) => cover(i, `width:150px;height:84px;flex:none;${k === 0 ? "" : "opacity:.75"}`, `<span class="abs mcn" style="left:8px;bottom:6px;font-size:12px">${i.name}</span>`, k === 0)).join("")}<div class="flex center" style="width:84px;border:1px dashed #444;justify-content:center;color:#aaa">${sv("plus")}</div></div>` + dock],
+    ["8 · Hero + pills", "Today's big cover, but the instances switch through pill tabs above it instead of a side list. More room for the cover.",
+      notch + body("display:flex;flex-direction:column;gap:14px") + `<div class="flex center" style="gap:8px">${I.map((i, k) => `<span class="flex center" style="gap:8px;padding:6px 12px 6px 6px;border:1px solid ${k === 0 ? "#fff" : "#2a2a2a"};background:${k === 0 ? "#1a1a1a" : "#0c0c0c"}">${icon(i.id, 22)}<span style="font-size:13px;letter-spacing:.08em;color:${k === 0 ? "#fff" : "#999"}">${i.name.toUpperCase()}</span></span>`).join("")}<span class="flex center" style="gap:6px;padding:6px 12px;border:1px dashed #444;color:#aaa;font-size:13px">${sv("plus")}</span></div>${cover(I[0], "flex:1;border:1px solid #2a2a2a", `<div class="abs" style="left:28px;bottom:24px"><span class="chip">Fabric 26.3</span><div class="mcn" style="font-size:40px;margin-top:10px;text-shadow:3px 3px 0 #222">Survival</div><div class="ui" style="font-size:13px;color:#999;margin-top:6px">Played 2 h ago · 24 mods · 3 worlds</div></div><span class="abs pbtn" style="right:24px;bottom:24px;height:48px;padding:0 26px">${sv("play")} PLAY</span>`)}</div>` + dock],
+    ["9 · App icons", "Instances as big pixel icons in a grid, like apps on a phone. Clicking one slides a detail sheet in from the right with cover, stats and Play.",
+      notch + `<div class="abs" style="left:110px;top:90px;display:grid;grid-template-columns:repeat(4,130px);gap:26px 20px">${I.map((i, k) => `<div class="col center" style="gap:10px"><div style="padding:6px;${k === 0 ? "outline:2px solid #fff" : ""}">${icon(i.id, 96)}</div><span style="font-size:14px;letter-spacing:.08em">${i.name.toUpperCase()}</span><span class="ver">${i.v}</span></div>`).join("")}<div class="col center" style="gap:10px"><div class="flex center" style="width:108px;height:108px;border:1px dashed #444;justify-content:center;color:#aaa">${sv("plus")}</div><span style="font-size:14px;letter-spacing:.08em;color:#888">NEW</span></div></div><div class="abs box col" style="right:0;top:0;bottom:0;width:400px;border-width:0 0 0 1px;padding:64px 24px 140px;gap:14px">${cover(I[0], "height:200px")}<div class="mcn" style="font-size:28px">Survival</div><div class="flex" style="gap:24px"><div class="stat"><b>24</b><span>mods</span></div><div class="stat"><b>3</b><span>worlds</span></div><div class="stat"><b>2h</b><span>ago</span></div></div><div class="flex" style="gap:8px;margin-top:auto"><div class="play" style="flex:1;height:48px"><b style="font-size:18px">PLAY</b></div>${tools}</div></div>` + dock.replace('class="dock"', 'class="dock" style="left:440px"')],
+    ["10 · Stats dashboard", "The selected instance as a dashboard: cover on top, tiles for mods, worlds, playtime and version, a small activity bar. For people who like numbers.",
+      notch + body("display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:1.3fr 1fr;gap:12px") + cover(I[0], "grid-column:span 3;border:1px solid #2a2a2a", `<div class="abs flex center" style="left:24px;right:24px;bottom:20px;gap:16px">${icon(I[0].id, 54)}<div style="flex:1"><div class="mcn" style="font-size:32px">Survival</div><div class="ver" style="margin-top:6px">Fabric 26.3</div></div><span class="pbtn" style="height:48px">${sv("play")} PLAY</span></div>`) + `<div class="box col" style="padding:16px;gap:10px"><span class="cap">Playtime this week</span><div class="flex" style="gap:6px;align-items:flex-end;height:70px">${[30, 55, 20, 80, 60, 95, 40].map((h) => `<span style="flex:1;height:${h}%;background:${h > 90 ? "#fff" : "#333"}"></span>`).join("")}</div></div><div class="box col" style="padding:16px;justify-content:center"><div class="stat"><b style="font-size:34px">24</b><span>mods installed</span></div></div><div class="box col" style="padding:16px;justify-content:center"><div class="stat"><b style="font-size:34px">3</b><span>worlds</span></div></div></div>` + dock],
+    ["11 · Sidebar with groups", "A list sidebar grouped by version (26.3, 26.2, …) with search on top, a calm detail view right. Scales well and stays tidy.",
+      notch + body("display:flex;gap:16px") + `<div class="box col" style="width:300px;padding:12px;gap:10px"><div class="flex center" style="height:36px;gap:8px;padding:0 10px;border:1px solid #2a2a2a;color:#888">${sv("search")}<span class="ui" style="font-size:13px">Search…</span></div>${[["26.3", [I[0], I[3]]], ["26.2", [I[1], I[4]]], ["26.1.2", [I[2]]]].map(([v, list]) => `<span class="cap" style="margin-top:4px">${v}</span>${list.map((i) => `<div class="flex center" style="gap:10px;padding:6px 8px;${i === I[0] ? "background:#181818;box-shadow:inset 2px 0 0 #fff" : ""}">${icon(i.id, 28)}<span style="font-size:14px;letter-spacing:.06em">${i.name.toUpperCase()}</span></div>`).join("")}`).join("")}</div><div class="col" style="flex:1;gap:12px">${cover(I[0], "flex:1;border:1px solid #2a2a2a", `<div class="abs" style="left:24px;bottom:20px"><div class="mcn" style="font-size:36px">Survival</div><div class="ver" style="margin-top:6px">Fabric 26.3 · 24 mods · played 2 h ago</div></div>`)}<div class="flex" style="gap:8px"><div class="play" style="flex:1;height:52px"><b>PLAY</b></div>${tools}</div></div></div>` + dock],
+    ["12 · Split cover wall", "The left half is a wall of all covers in small tiles, the right half shows the selected one big with Play. Very visual, everything at a glance.",
+      notch + body("display:flex;gap:16px") + `<div style="width:420px;display:grid;grid-template-columns:repeat(2,1fr);grid-auto-rows:150px;gap:10px">${I.map((i, k) => cover(i, "border:1px solid #2a2a2a", `<span class="abs mcn" style="left:10px;bottom:8px;font-size:14px">${i.name}</span>`, k === 0)).join("")}<div class="flex center" style="border:1px dashed #444;justify-content:center;color:#aaa">${sv("plus")}</div></div>${cover(I[0], "flex:1;border:1px solid #2a2a2a", `<div class="abs" style="left:24px;right:24px;bottom:22px"><span class="chip">Fabric 26.3</span><div class="mcn" style="font-size:40px;margin:10px 0 14px">Survival</div><div class="flex" style="gap:8px"><span class="pbtn" style="flex:1;height:48px">${sv("play")} PLAY</span>${tools}</div></div>`)}</div>` + dock],
+  ];
+
+  const q = new URLSearchParams(location.search);
+  const row = Number(q.get("row") || 0);
+  const shown = row ? ideas.slice((row - 1) * 2, row * 2) : ideas;
+  const grid = document.getElementById("grid");
+  for (const [t, s, html] of shown) {
+    const c = document.createElement("div");
+    c.innerHTML = `<div class="frame"><div class="win">${html}</div></div><div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  }
+  (async () => {
+    const canvas = document.getElementById("src");
+    const viewer = new skinview3d.SkinViewer({ canvas, width: 600, height: 800, preserveDrawingBuffer: true });
+    await viewer.loadSkin("skin.png");
+    viewer.zoom = 0.78;
+    viewer.playerWrapper.rotation.y = -0.55;
+    viewer.render();
+    const url = canvas.toDataURL();
+    for (const img of document.querySelectorAll("img[data-skin]")) img.src = url;
+  })();
+</script>
+</body>
+</html>
