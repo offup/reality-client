@@ -1,18 +1,28 @@
 import { useEffect, useState } from "react";
 import { getVersion } from "@tauri-apps/api/app";
-import { Check } from "lucide-react";
 import type { AfterLaunch } from "./launcher";
+import BackgroundCards from "./BackgroundCards";
 import "./Settings.css";
 
 export type BackgroundId =
-  "grid" | "gradient" | "lightning" | "ascii" | "ghostfibers";
+  | "grid"
+  | "lightning"
+  | "ascii"
+  | "ghostfibers"
+  | "pixelsnow"
+  | "lightrays"
+  | "lightfall"
+  | "fluxlines";
 
 export const BACKGROUNDS: { id: BackgroundId; label: string }[] = [
   { id: "grid", label: "Grid" },
-  { id: "gradient", label: "Gradient" },
   { id: "lightning", label: "Lightning" },
   { id: "ascii", label: "ASCII" },
   { id: "ghostfibers", label: "Ghost fibers" },
+  { id: "pixelsnow", label: "Pixel snow" },
+  { id: "lightrays", label: "Light rays" },
+  { id: "lightfall", label: "Lightfall" },
+  { id: "fluxlines", label: "Flux lines" },
 ];
 
 export const DEFAULT_BACKGROUND: BackgroundId = "grid";
@@ -21,13 +31,22 @@ export function isBackgroundId(value: string): value is BackgroundId {
   return BACKGROUNDS.some((b) => b.id === value);
 }
 
-/** Backgrounds that use the color setting */
-export const COLORED_BACKGROUNDS: BackgroundId[] = [
-  "gradient",
+/** Backgrounds with their own color (each one remembers its own) */
+export type ColoredId = Exclude<BackgroundId, "grid">;
+export type EffectColors = Record<ColoredId, string>;
+export const COLORED_BACKGROUNDS: ColoredId[] = [
   "lightning",
   "ascii",
   "ghostfibers",
+  "pixelsnow",
+  "lightrays",
+  "lightfall",
+  "fluxlines",
 ];
+
+export function isColoredBackground(id: BackgroundId): id is ColoredId {
+  return (COLORED_BACKGROUNDS as BackgroundId[]).includes(id);
+}
 
 // Preset colors for the colored backgrounds; the last swatch is a free color picker
 export const COLOR_PRESETS = [
@@ -40,9 +59,6 @@ export const COLOR_PRESETS = [
 ];
 export const DEFAULT_EFFECT_COLOR = COLOR_PRESETS[0];
 
-// Strength = brightness of the whole background, 1 is the normal look
-export const STRENGTH_MIN = 0.25;
-export const STRENGTH_MAX = 2;
 
 // Memory for the game (MB); 4 GB is plenty for Fabric with a few mods
 export const MEMORY_MIN = 2048;
@@ -56,26 +72,22 @@ type Props = {
   onBackground: (id: BackgroundId) => void;
   gridMoving: boolean;
   onGridMoving: (on: boolean) => void;
-  effectColor: string;
-  onEffectColor: (color: string) => void;
-  strength: number;
-  onStrength: (value: number) => void;
+  colors: EffectColors;
+  onColor: (id: ColoredId, color: string) => void;
   memoryMb: number;
   onMemoryMb: (value: number) => void;
   afterLaunch: AfterLaunch;
   onAfterLaunch: (value: AfterLaunch) => void;
 };
 
-// Settings: big background cards, options for grid, strength and color below
+// Settings: Background tab with the cards (each with its own color button), Game tab with the rows
 function Settings({
   background,
   onBackground,
   gridMoving,
   onGridMoving,
-  effectColor,
-  onEffectColor,
-  strength,
-  onStrength,
+  colors,
+  onColor,
   memoryMb,
   onMemoryMb,
   afterLaunch,
@@ -91,20 +103,10 @@ function Settings({
   }, []);
   const memoryFill =
     ((memoryMb - MEMORY_MIN) / (MEMORY_MAX - MEMORY_MIN)) * 100;
-  const fill =
-    ((strength - STRENGTH_MIN) / (STRENGTH_MAX - STRENGTH_MIN)) * 100;
-  const colorEnabled = COLORED_BACKGROUNDS.includes(background);
-  const customColor = !COLOR_PRESETS.includes(effectColor);
 
   return (
     <div
       className="settings"
-      style={
-        {
-          "--effect-color": effectColor,
-          "--effect-strength": strength,
-        } as React.CSSProperties
-      }
       onMouseDown={(e) => e.stopPropagation()}
     >
       <header className="settings-tabs">
@@ -194,105 +196,14 @@ function Settings({
       )}
 
       {tab === "background" && (
-        <>
-          <div className="settings-cards">
-            {BACKGROUNDS.map(({ id, label }) => (
-              <button
-                key={id}
-                className={
-                  "settings-card" + (background === id ? " is-selected" : "")
-                }
-                onClick={() => onBackground(id)}
-              >
-                <span className="settings-card-preview">
-                  <span
-                    className={`settings-tile-preview bg-${id}${id === "grid" && gridMoving ? " is-moving" : ""}`}
-                  />
-                  {background === id && (
-                    <span className="settings-card-check">
-                      <Check size={13} strokeWidth={2.5} />
-                    </span>
-                  )}
-                </span>
-                <span className="settings-card-name">{label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Toolbar in dock style; only the options the selected background uses are shown */}
-          <div className="settings-toolbar">
-            {background === "grid" && (
-              <div className="settings-tool">
-                <span className="settings-tool-label">Moving grid</span>
-                <button
-                  className={"settings-switch" + (gridMoving ? " is-on" : "")}
-                  role="switch"
-                  aria-checked={gridMoving}
-                  aria-label="Moving grid"
-                  onClick={() => onGridMoving(!gridMoving)}
-                >
-                  <span className="settings-switch-knob" />
-                </button>
-              </div>
-            )}
-
-            <div className="settings-tool">
-              <span className="settings-tool-label">Strength</span>
-              <input
-                className="settings-slider"
-                type="range"
-                min={STRENGTH_MIN}
-                max={STRENGTH_MAX}
-                step={0.05}
-                value={strength}
-                aria-label="Strength"
-                style={{ "--fill": `${fill}%` } as React.CSSProperties}
-                onChange={(e) => onStrength(Number(e.target.value))}
-                onDoubleClick={() => onStrength(1)}
-                title="Double-click to reset"
-              />
-              <span className="settings-slider-value">
-                {Math.round(strength * 100)}%
-              </span>
-            </div>
-
-            {colorEnabled && (
-              <div className="settings-tool">
-                <div className="settings-swatches">
-                  {COLOR_PRESETS.map((color) => (
-                    <button
-                      key={color}
-                      className={
-                        "settings-swatch" +
-                        (effectColor === color ? " is-selected" : "")
-                      }
-                      style={{ background: color }}
-                      aria-label={color}
-                      onClick={() => onEffectColor(color)}
-                    />
-                  ))}
-                  <label
-                    className={
-                      "settings-swatch settings-swatch-custom" +
-                      (customColor ? " is-selected" : "")
-                    }
-                    title="Pick any color"
-                    style={{
-                      background: customColor ? effectColor : undefined,
-                    }}
-                  >
-                    <input
-                      type="color"
-                      value={effectColor}
-                      onChange={(e) => onEffectColor(e.target.value)}
-                    />
-                    {!customColor && <span>+</span>}
-                  </label>
-                </div>
-              </div>
-            )}
-          </div>
-        </>
+        <BackgroundCards
+          background={background}
+          onBackground={onBackground}
+          gridMoving={gridMoving}
+          onGridMoving={onGridMoving}
+          colors={colors}
+          onColor={onColor}
+        />
       )}
     </div>
   );

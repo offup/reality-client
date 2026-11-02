@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Color button · 12 ideas</title>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; --c: #89cff0; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 28px 24px 48px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 6px; letter-spacing: .1em; }
+  .note { font-family: var(--ui); font-size: 13px; color: #666; margin: 0 0 24px; letter-spacing: 0; }
+  #grid { display: grid; grid-template-columns: repeat(2, 640px); gap: 28px 24px; }
+  .lab { font-size: 15px; margin: 8px 0 0; }
+  .lab small { display: block; color: #777; font-size: 12px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; max-width: 620px; }
+  .pair { display: flex; gap: 8px; }
+
+  /* the bottom-right corner of a real card (1:1) */
+  .card { position: relative; width: 316px; height: 150px; overflow: hidden; border: 1px solid #fff; box-shadow: inset 0 0 0 1px #fff; background: #0a0a0a url(/previews/ascii.webp) center bottom / 640px auto no-repeat; }
+  .card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(8,8,8,.85) 0%, rgba(8,8,8,0) 60%); }
+  .card .nm { position: absolute; left: 18px; bottom: 16px; font-size: 17px; letter-spacing: .1em; }
+  .card .tag { position: absolute; left: 10px; top: 8px; font-family: var(--ui); font-size: 11px; color: rgba(255,255,255,.6); letter-spacing: 0; }
+  .ctl { position: absolute; right: 12px; bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .ic { width: 17px; height: 17px; }
+
+  /* 1 glow square */
+  .b1 { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,.75); background: var(--c); box-shadow: 0 0 14px -2px var(--c); color: #000; box-sizing: border-box; }
+  .b1.hv { transform: scale(1.07); border-color: #fff; box-shadow: 0 0 22px 2px var(--c); }
+  /* 2 round dot */
+  .b2 { width: 26px; height: 26px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px #0a0a0a, 0 0 0 3.5px rgba(255,255,255,.8); }
+  .b2.hv { box-shadow: 0 0 0 2px #0a0a0a, 0 0 0 4px #fff, 0 0 16px 2px var(--c); transform: scale(1.1); }
+  /* 3 rainbow ring around a round swatch */
+  .b3 { width: 32px; height: 32px; border-radius: 50%; padding: 3px; box-sizing: border-box; background: conic-gradient(#ff3b3b, #ffb23b, #e8ff3b, #3bff6a, #3bf5ff, #3b6aff, #b03bff, #ff3bb0, #ff3b3b); }
+  .b3 span { display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--c); border: 2px solid #0a0a0a; box-sizing: border-box; }
+  .b3.hv { transform: rotate(40deg) scale(1.08); }
+  /* 4 hex code chip */
+  .b4 { height: 32px; display: flex; align-items: center; gap: 9px; padding: 0 12px 0 8px; border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.6); }
+  .b4 i { width: 16px; height: 16px; background: var(--c); display: block; }
+  .b4 span { font-family: var(--mc); font-size: 11px; color: #ddd; letter-spacing: .02em; }
+  .b4.hv { border-color: #fff; }
+  /* 5 hue bar with marker */
+  .b5 { width: 96px; height: 30px; display: flex; align-items: center; padding: 0 8px; border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.6); box-sizing: border-box; }
+  .b5 span { position: relative; flex: 1; height: 8px; background: linear-gradient(90deg, #ff3b3b, #ffb23b, #e8ff3b, #3bff6a, #3bf5ff, #3b6aff, #b03bff, #ff3bb0, #ff3b3b); }
+  .b5 span b { position: absolute; top: -5px; bottom: -5px; left: 54%; width: 4px; margin-left: -2px; background: #fff; box-shadow: 0 0 0 1px #000; }
+  .b5.hv { border-color: #fff; }
+  /* 6 fan of three squares */
+  .b6 { position: relative; width: 40px; height: 34px; }
+  .b6 i { position: absolute; bottom: 2px; width: 20px; height: 26px; border: 1px solid rgba(0,0,0,.6); box-sizing: border-box; transform-origin: 50% 100%; transition: transform .2s; }
+  .b6 i:nth-child(1) { left: 10px; background: #3b6aff; transform: rotate(-18deg); }
+  .b6 i:nth-child(2) { left: 10px; background: #b03bff; transform: rotate(18deg); }
+  .b6 i:nth-child(3) { left: 10px; background: var(--c); border-color: #fff; }
+  .b6.hv i:nth-child(1) { transform: rotate(-30deg); } .b6.hv i:nth-child(2) { transform: rotate(30deg); }
+  /* 7 pixel swatch (3x3 shades) */
+  .b7 { display: grid; grid-template-columns: repeat(3, 10px); gap: 1px; padding: 3px; background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.3); }
+  .b7 i { width: 10px; height: 10px; }
+  .b7.hv { border-color: #fff; box-shadow: 0 0 14px -2px var(--c); }
+  /* 8 split square */
+  .b8 { width: 32px; height: 32px; border: 1px solid rgba(255,255,255,.75); box-sizing: border-box; background: linear-gradient(135deg, var(--c) 0 50%, transparent 50%), conic-gradient(from 90deg, #ff3b3b, #ffb23b, #e8ff3b, #3bff6a, #3bf5ff, #3b6aff, #b03bff, #ff3bb0, #ff3b3b); }
+  .b8.hv { border-color: #fff; transform: scale(1.07); }
+  /* 9 drop icon + color underline */
+  .b9 { width: 36px; height: 34px; display: flex; align-items: center; justify-content: center; position: relative; border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.6); color: #fff; box-sizing: border-box; }
+  .b9::after { content: ""; position: absolute; left: 7px; right: 7px; bottom: 4px; height: 3px; background: var(--c); box-shadow: 0 0 8px var(--c); }
+  .b9.hv { border-color: #fff; }
+  /* 10 glass with colored glow behind */
+  .b10 { isolation: isolate; position: relative; width: 36px; height: 34px; display: flex; align-items: center; justify-content: center; color: #fff; border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.08); backdrop-filter: blur(6px); box-sizing: border-box; }
+  .b10::before { content: ""; position: absolute; inset: 6px; background: var(--c); filter: blur(10px); opacity: .9; z-index: -1; }
+  .b10.hv { border-color: #fff; background: rgba(255,255,255,.14); }
+  /* 11 inline expand: dot that opens into the preset row */
+  .b11 { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 6px; border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.65); }
+  .b11 i { width: 18px; height: 18px; display: block; border: 1px solid rgba(255,255,255,.2); box-sizing: border-box; }
+  .b11 i.sel { outline: 2px solid #fff; outline-offset: 1px; }
+  /* 12 big color tab on the card edge */
+  .b12 { position: absolute; right: 0; bottom: 0; width: 46px; height: 46px; background: var(--c); clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+  .b12.hv { width: 62px; height: 62px; }
+  .b12 + .tipicon { position: absolute; right: 6px; bottom: 6px; color: #000; }
+
+  .pop { position: absolute; right: 8px; bottom: 54px; padding: 10px; background: #0f0f0f; border: 1px solid #2e2e2e; display: flex; gap: 6px; }
+  .pop i { width: 18px; height: 18px; display: block; border: 1px solid #333; box-sizing: border-box; }
+  .pop i.sel { outline: 2px solid #fff; outline-offset: 1px; }
+  .cur { position: absolute; width: 14px; height: 20px; z-index: 5; }
+</style>
+</head>
+<body>
+<h1>Color button · 12 ideas · real size</h1>
+<p class="note">The bottom-right corner of a selected card at 1:1 (ASCII, light blue). Left: normal. Right: mouse over it.</p>
+<div id="grid"></div>
+<script>
+  const pal = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1 0 1.5-.8 1.5-1.5 0-1.3-1-1.5-1-2.5S13.3 15 14.5 15H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="15" cy="7.5" r="1"/></svg>`;
+  const drop = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>`;
+  const brush = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 4 6 6-8 8-6-6z"/><path d="M6 12c-2 1-3 3-3 6 3 0 5-1 6-3"/></svg>`;
+  const cur = (x, y) => `<svg class="cur" style="left:${x}px;top:${y}px" viewBox="0 0 14 20"><path d="M1 1v15l4-4 3 7 2.5-1-3-7h5.5z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
+  const shades = ["#1d4f66", "#3b8fb5", "#89cff0", "#2a6f8f", "#89cff0", "#c4e8f8", "#89cff0", "#5fb3da", "#a8dcf4"];
+  const presets = ["#16222e", "#1f1633", "#0f2a1f", "#2a1818", "#2a2410", "#89cff0"];
+  const card = (ctl, hover = false, extra = "") => `<div class="card"><span class="nm">ASCII</span><div class="ctl">${ctl(hover)}</div>${extra}<span class="tag">${hover ? "hover" : "normal"}</span></div>`;
+  const pair = (ctl, extraHover = "") => `<div class="pair">${card(ctl)}${card(ctl, true, extraHover)}</div>`;
+  const hv = (h) => (h ? " hv" : "");
+
+  const ideas = [
+    ["1 · Glow square (now)", "Square in the color, soft glow in the same color, palette icon on top.", pair((h) => `<span class="b1${hv(h)}">${pal}</span>`, cur(296, 122))],
+    ["2 · Round dot", "Just a round dot in the color with a thin white ring. The only round shape on the card, so it reads as \"color\" immediately.", pair((h) => `<span class="b2${hv(h)}"></span>`, cur(290, 122))],
+    ["3 · Rainbow ring", "Round swatch inside a thin rainbow ring; the ring turns a bit on hover.", pair((h) => `<span class="b3${hv(h)}"><span></span></span>`, cur(292, 122))],
+    ["4 · Hex chip", "Swatch plus the color code in the Minecraft font. Clear and techy.", pair((h) => `<span class="b4${hv(h)}"><i></i><span>#89CFF0</span></span>`, cur(290, 124))],
+    ["5 · Hue bar", "A small rainbow bar with a marker where your color sits. Shows at once that you can pick any color.", pair((h) => `<span class="b5${hv(h)}"><span><b></b></span></span>`, cur(280, 124))],
+    ["6 · Color fan", "Three cards fanned out like paint samples, your color in front. They spread a bit more on hover.", pair((h) => `<span class="b6${hv(h)}"><i></i><i></i><i></i></span>`, cur(292, 122))],
+    ["7 · Pixel swatch", "3×3 pixels in shades of your color, like a block texture. Fits Minecraft.", pair((h) => `<span class="b7${hv(h)}">${shades.map((c) => `<i style="background:${c}"></i>`).join("")}</span>`, cur(292, 124))],
+    ["8 · Split square", "Half your color, half rainbow, cut diagonally. Says \"current color, change it\".", pair((h) => `<span class="b8${hv(h)}"></span>`, cur(292, 122))],
+    ["9 · Drop + color line", "Glass button with a paint drop, a short glowing line in your color underneath.", pair((h) => `<span class="b9${hv(h)}">${drop}</span>`, cur(292, 122))],
+    ["10 · Glass glow", "Frosted button, your color glows blurred behind it. Soft and modern.", pair((h) => `<span class="b10${hv(h)}">${brush}</span>`, cur(292, 122))],
+    ["11 · Opens in place", "A small dot that grows into the six presets right on the card on hover. No popup needed for the presets.", `<div class="pair">${card(() => `<span class="b11"><i class="sel" style="background:#89cff0"></i></span>`)}${card(() => `<span class="b11">${presets.map((c, i) => `<i class="${i === 5 ? "sel" : ""}" style="background:${c}"></i>`).join("")}<i style="border-style:dashed;border-color:#666"></i></span>`, true, cur(270, 124))}</div>`],
+    ["12 · Color corner", "The bottom-right corner of the card is cut in your color, a triangle you can click. Grows on hover.", `<div class="pair">${card(() => "", false, `<span class="b12"></span><span class="tipicon">${pal}</span>`)}${card(() => "", true, `<span class="b12 hv"></span><span class="tipicon">${pal}</span>${cur(296, 128)}`)}</div>`],
+  ];
+  const grid = document.getElementById("grid");
+  for (const [t, s, html] of ideas) {
+    const d = document.createElement("div");
+    d.innerHTML = `${html}<div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(d);
+  }
+</script>
+</body>
+</html>

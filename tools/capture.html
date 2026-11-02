@@ -11,7 +11,7 @@
   </head>
   <body>
     <!-- Dev-only helper: renders one background effect full-size so its tile preview can be screenshotted.
-         Usage: /tools/capture.html?effect=lightning|ascii|ghostfibers&color=%2316222e -->
+         Usage: /tools/capture.html?effect=lightning|ascii|ghostfibers|pixelsnow|lightrays|lightfall|fluxlines&color=%2316222e -->
     <div id="root"></div>
     <script type="module">
       import React from "react";
@@ -19,10 +19,14 @@
       import Lightning from "/src/effects/Lightning.tsx";
       import GradientAscii from "/src/effects/GradientAscii.tsx";
       import GhostFibers from "/src/effects/GhostFibers.tsx";
+      import PixelSnow from "/src/effects/PixelSnow.tsx";
+      import LightRays from "/src/effects/LightRays.tsx";
+      import Lightfall from "/src/effects/Lightfall.tsx";
+      import FluxLines from "/src/effects/FluxLines.tsx";
 
       const params = new URLSearchParams(location.search);
       const color = params.get("color") || "#16222e";
-      const effects = { lightning: Lightning, ascii: GradientAscii, ghostfibers: GhostFibers };
+      const effects = { lightning: Lightning, ascii: GradientAscii, ghostfibers: GhostFibers, pixelsnow: PixelSnow, lightrays: LightRays, lightfall: Lightfall, fluxlines: FluxLines };
       const Effect = effects[params.get("effect")] || Lightning;
       createRoot(document.getElementById("root")).render(React.createElement(Effect, { color }));
     </script>

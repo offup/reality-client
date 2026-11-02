@@ -4,8 +4,7 @@
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  /* No own fill (the page behind is the same #0a0a0a), so Strength only brightens what the effect draws */
-  filter: brightness(var(--effect-strength, 1));
+  /* No own fill: the page behind is the same #0a0a0a */
   transition: opacity 260ms ease;
 }
 
@@ -33,13 +32,9 @@
   }
 }
 
-/* Gradient: a soft glow rising from the bottom, color comes from settings */
-.bg-gradient {
-  background-image: radial-gradient(ellipse 70% 60% at 50% 100%, var(--effect-color, #16222e), transparent 75%);
-}
-
 /* Shader effects render into a canvas that fills the layer */
-.effect-layer {
+.effect-layer,
+.effect-host {
   position: absolute;
   inset: 0;
 }

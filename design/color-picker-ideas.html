@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Color picker · 10 ideas</title>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 28px 24px 48px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 6px; letter-spacing: .1em; }
+  .note { font-family: var(--ui); font-size: 13px; color: #666; margin: 0 0 24px; letter-spacing: 0; }
+  #grid { display: grid; grid-template-columns: repeat(2, 640px); gap: 30px 24px; }
+  .lab { font-size: 15px; margin: 10px 0 0; }
+  .lab small { display: block; color: #777; font-size: 12px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; max-width: 620px; }
+
+  /* a selected card at 1:1 with the picker open over it */
+  .card { position: relative; width: 640px; height: 330px; overflow: hidden; border: 1px solid #fff; box-shadow: inset 0 0 0 1px #fff; box-sizing: border-box; background: #050505 url(/previews/ghostfibers.webp) center / cover no-repeat; }
+  .card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(8,8,8,.85) 0%, rgba(8,8,8,0) 45%); }
+  .card .nm { position: absolute; left: 18px; bottom: 16px; font-size: 17px; letter-spacing: .1em; }
+  .chip { position: absolute; right: 12px; bottom: 12px; height: 34px; display: flex; align-items: center; gap: 9px; padding: 0 12px 0 8px; border: 1px solid #fff; background: rgba(0,0,0,.55); box-sizing: border-box; }
+  .chip i { width: 16px; height: 16px; border: 1px solid rgba(255,255,255,.35); box-sizing: border-box; display: block; }
+  .chip span { font-family: var(--mc); font-size: 11px; }
+  .pop { position: absolute; right: 8px; bottom: 56px; padding: 14px; background: #0f0f0f; border: 1px solid #2e2e2e; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; }
+  .ttl { font-size: 11px; letter-spacing: .14em; color: #777; display: flex; justify-content: space-between; }
+  .ttl b { font-weight: normal; font-family: var(--mc); letter-spacing: .02em; color: #ddd; }
+
+  .sw { width: 22px; height: 22px; border: 1px solid #333; box-sizing: border-box; flex: none; display: block; }
+  .sw.sel { outline: 2px solid #fff; outline-offset: 2px; }
+  .row { display: flex; gap: 6px; align-items: center; }
+  .rainbow { background: linear-gradient(90deg, #ff3b3b, #ffb23b, #e8ff3b, #3bff6a, #3bf5ff, #3b6aff, #b03bff, #ff3bb0, #ff3b3b); }
+  .track { position: relative; height: 12px; }
+  .track b { position: absolute; top: -4px; bottom: -4px; width: 6px; margin-left: -3px; background: #fff; box-shadow: 0 0 0 1px #000; }
+  .lbl { font-size: 11px; letter-spacing: .12em; color: #888; width: 14px; }
+  .num { font-family: var(--mc); font-size: 11px; color: #ccc; width: 30px; text-align: right; }
+  .field { height: 30px; display: flex; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid #2e2e2e; background: #111; font-family: var(--mc); font-size: 12px; color: #fff; box-sizing: border-box; }
+  .ic { width: 16px; height: 16px; }
+  .knob { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border: 2px solid #fff; box-shadow: 0 0 0 1px #000; border-radius: 50%; box-sizing: border-box; }
+  .sq { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border: 2px solid #fff; box-shadow: 0 0 0 1px #000; box-sizing: border-box; }
+  .cur { position: absolute; width: 14px; height: 20px; z-index: 5; }
+</style>
+</head>
+<body>
+<h1>Color picker · 10 ideas · real size</h1>
+<p class="note">A selected card at 1:1 with its color picker open. All of them can pick white, grey, black and any color in between.</p>
+<div id="grid"></div>
+<script>
+  const PRESETS = ["#16222e", "#1f1633", "#0f2a1f", "#2a1818", "#2a2410", "#89cff0", "#ffffff"];
+  const cur = (x, y) => `<svg class="cur" style="left:${x}px;top:${y}px" viewBox="0 0 14 20"><path d="M1 1v15l4-4 3 7 2.5-1-3-7h5.5z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
+  const drop = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"/></svg>`;
+  const card = (color, pop, extra = "") => `<div class="card"><span class="nm">GHOST FIBERS</span><span class="chip"><i style="background:${color}"></i><span>${color.toUpperCase()}</span></span><div class="pop">${pop}</div>${extra}</div>`;
+  const presetRow = (sel = -1) => `<div class="row">${PRESETS.map((c, i) => `<span class="sw${i === sel ? " sel" : ""}" style="background:${c}"></span>`).join("")}</div>`;
+  const slider = (lbl, bg, pos, num) => `<div class="row" style="gap:10px"><span class="lbl">${lbl}</span><span class="track" style="flex:1;background:${bg}"><b style="left:${pos}%"></b></span><span class="num">${num}</span></div>`;
+
+  const ideas = [
+    ["1 · Square + hue strip", "The classic from design tools: a square for brightness and colorfulness, a rainbow strip for the hue. Top-left corner is white, bottom is black, so every color is reachable.",
+      card("#c9e9f8", `<div class="ttl">GHOST FIBERS COLOR<b>#C9E9F8</b></div><div style="position:relative;width:250px;height:150px;background:linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,hsl(200 100% 50%))"><span class="knob" style="left:22%;top:6%"></span></div><span class="track rainbow" style="width:250px"><b style="left:55%"></b></span>${presetRow()}`, cur(410, 120))],
+    ["2 · Three sliders: hue, saturation, brightness", "Like a mixer: three sliders whose tracks show what each one does. Saturation at zero gives grey, brightness up gives white.",
+      card("#ffffff", `<div class="ttl">GHOST FIBERS COLOR<b>#FFFFFF</b></div><div style="width:280px;display:flex;flex-direction:column;gap:14px">${slider("H", "linear-gradient(90deg,#ff3b3b,#ffb23b,#e8ff3b,#3bff6a,#3bf5ff,#3b6aff,#b03bff,#ff3bb0,#ff3b3b)", 55, "200")}${slider("S", "linear-gradient(90deg,#808080,hsl(200 100% 50%))", 0, "0%")}${slider("L", "linear-gradient(90deg,#000,hsl(200 100% 50%),#fff)", 100, "100%")}</div>${presetRow(6)}`)],
+    ["3 · RGB sliders", "Red, green and blue each from 0 to 255, with numbers. Precise, and white is simply everything at 255.",
+      card("#f0f0f0", `<div class="ttl">GHOST FIBERS COLOR<b>#F0F0F0</b></div><div style="width:280px;display:flex;flex-direction:column;gap:14px">${slider("R", "linear-gradient(90deg,rgb(0,240,240),rgb(255,240,240))", 94, "240")}${slider("G", "linear-gradient(90deg,rgb(240,0,240),rgb(240,255,240))", 94, "240")}${slider("B", "linear-gradient(90deg,rgb(240,240,0),rgb(240,240,255))", 94, "240")}</div>`)],
+    ["4 · Color wheel + brightness", "A round wheel (hue around, colorfulness to the center = white) and one brightness slider under it. Very visual, fun to drag.",
+      card("#9fd8f2", `<div class="ttl">GHOST FIBERS COLOR<b>#9FD8F2</b></div><div style="display:flex;gap:16px;align-items:center"><div style="position:relative;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,#fff 0%,transparent 70%),conic-gradient(from 90deg,#ff3b3b,#ffb23b,#e8ff3b,#3bff6a,#3bf5ff,#3b6aff,#b03bff,#ff3bb0,#ff3b3b)"><span class="knob" style="left:30%;top:62%"></span></div><div style="display:flex;flex-direction:column;gap:8px">${PRESETS.slice(0, 4).map((c) => `<span class="sw" style="background:${c}"></span>`).join("")}</div></div><span class="track" style="width:200px;background:linear-gradient(90deg,#000,#9fd8f2)"><b style="left:92%"></b></span>`)],
+    ["5 · Two strips: color + light", "Keeps today's rainbow strip and adds a second strip from black over the color to white. The smallest change, white finally possible.",
+      card("#ffffff", `<div class="ttl">GHOST FIBERS COLOR<b>#FFFFFF</b></div>${presetRow(6)}<span class="track rainbow" style="width:226px"><b style="left:55%"></b></span><span class="track" style="width:226px;background:linear-gradient(90deg,#000,hsl(200 80% 55%),#fff)"><b style="left:100%"></b></span>`)],
+    ["6 · Big swatch grid", "No sliders: 48 hand-picked colors in a grid, from white and greys over pastels to neon and dark tones. One click, always looks good.",
+      card("#ffffff", `<div class="ttl">GHOST FIBERS COLOR<b>#FFFFFF</b></div><div style="display:grid;grid-template-columns:repeat(8,22px);gap:6px">${["#ffffff","#d9d9d9","#a6a6a6","#737373","#4d4d4d","#262626","#121212","#000000","#ffd6d6","#ffe9c7","#fff8c2","#d8f5c8","#c7f0f5","#cfdcff","#e6d4ff","#ffd1ea","#ff6b6b","#ffa94d","#ffe066","#69db7c","#3bc9db","#4dabf7","#9775fa","#f783ac","#e03131","#e8590c","#f2c94c","#2f9e44","#1098ad","#1c7ed6","#7048e8","#c2255c","#16222e","#1f1633","#0f2a1f","#2a1818","#2a2410","#1b2b3a","#2b1b3a","#3a1b2b","#89cff0","#b5f0e0","#f0b5d8","#f0e0b5","#c0c0ff","#ffc0a0","#a0ffc0","#e0e0e0"].map((c, i) => `<span class="sw${i === 0 ? " sel" : ""}" style="background:${c}"></span>`).join("")}</div>`)],
+    ["7 · Base color + shades", "Pick a base color from the presets or the rainbow, then a row of shades from almost black to white right under it.",
+      card("#d4eefa", `<div class="ttl">GHOST FIBERS COLOR<b>#D4EEFA</b></div>${presetRow(5)}<span class="track rainbow" style="width:200px"><b style="left:55%"></b></span><span class="ttl" style="margin-top:2px">SHADES</span><div class="row">${["#0b1f29","#16404f","#2b6f8a","#4d9ec0","#89cff0","#b2e0f6","#d4eefa","#ffffff"].map((c, i) => `<span class="sw${i === 6 ? " sel" : ""}" style="width:24px;height:30px;background:${c}"></span>`).join("")}</div>`)],
+    ["8 · Hex field + picker + recent", "For people who know their color: type a code, use the eyedropper anywhere on screen, or pick from your last colors.",
+      card("#ffffff", `<div class="ttl">GHOST FIBERS COLOR</div><div class="row" style="gap:8px"><span class="sw" style="width:30px;height:30px;background:#fff"></span><span class="field" style="width:150px">#FFFFFF</span><span class="field" style="width:34px;justify-content:center;padding:0">${drop}</span></div><span class="ttl">RECENT</span><div class="row">${["#ffffff","#c43b3b","#89cff0","#16222e","#9775fa","#69db7c"].map((c) => `<span class="sw" style="background:${c}"></span>`).join("")}</div><span class="track rainbow" style="width:224px"><b style="left:55%"></b></span>`)],
+    ["9 · Spectrum field", "One rectangle with every color: hue from left to right, white at the top, black at the bottom. Click anywhere, done. Fast and playful.",
+      card("#bfe6f7", `<div class="ttl">GHOST FIBERS COLOR<b>#BFE6F7</b></div><div style="position:relative;width:270px;height:150px;background:linear-gradient(to bottom,#fff 0%,rgba(255,255,255,0) 45%,rgba(0,0,0,0) 55%,#000 100%),linear-gradient(90deg,#ff3b3b,#ffb23b,#e8ff3b,#3bff6a,#3bf5ff,#3b6aff,#b03bff,#ff3bb0,#ff3b3b)"><span class="sq" style="left:55%;top:18%"></span></div>${presetRow()}`)],
+    ["10 · Minecraft dyes", "The 16 dye colors from Minecraft as pixel tiles (white, light gray, … black), plus the rainbow strip for anything else. Fits the launcher.",
+      card("#f9fffe", `<div class="ttl">GHOST FIBERS COLOR<b>WHITE DYE</b></div><div style="display:grid;grid-template-columns:repeat(8,24px);gap:5px">${["#f9fffe","#9d9d97","#474f52","#1d1d21","#b02e26","#f9801d","#fed83d","#80c71f","#5e7c16","#169c9c","#3ab3da","#3c44aa","#8932b8","#c74ebd","#f38baa","#835432"].map((c, i) => `<span class="sw${i === 0 ? " sel" : ""}" style="width:24px;height:24px;background:${c};box-shadow:inset 2px 2px 0 rgba(255,255,255,.25),inset -2px -2px 0 rgba(0,0,0,.3)"></span>`).join("")}</div><span class="track rainbow" style="width:227px"><b style="left:55%"></b></span>`)],
+  ];
+  const grid = document.getElementById("grid");
+  for (const [t, s, html] of ideas) {
+    const d = document.createElement("div");
+    d.innerHTML = `${html}<div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(d);
+  }
+</script>
+</body>
+</html>

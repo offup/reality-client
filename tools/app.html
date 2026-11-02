@@ -27,6 +27,9 @@
         convertFileSrc: (p) => p,
       };
       window.__TAURI_EVENT_PLUGIN_INTERNALS__ = { unregisterListener: () => {} };
+      const bgParam = new URLSearchParams(location.search).get("bg");
+      localStorage.setItem("reality.effectColors", JSON.stringify({ lightning: "#c43b3b", ascii: "#89cff0", ghostfibers: "#16222e" }));
+      if (bgParam) localStorage.setItem("reality.background", bgParam);
       const now = Date.now();
       localStorage.setItem(
         "reality.instances",
@@ -50,6 +53,7 @@
           const panel = q.get("panel");
           if (panel === "accounts") click(".dock-add-account");
           if (panel === "instances") click(".dock-launch-arrow");
+          if (panel === "palette") click(".bgc-card:nth-child(3) .bgc-color");
         }, 400);
       }, 600);
     </script>

@@ -16,6 +16,19 @@ export function hexToVividness(hex: string): number {
   return Math.min(1, ((max - Math.min(r, g, b)) / max) * 1.6);
 }
 
+/** Hue (0..360) → "#rrggbb", saturated and mid-bright so every effect shows it clearly */
+export function hueToHex(hue: number, saturation = 0.7, lightness = 0.55): string {
+  const a = saturation * Math.min(lightness, 1 - lightness);
+  const channel = (n: number) => {
+    const k = (n + hue / 30) % 12;
+    const c = lightness - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    return Math.round(c * 255)
+      .toString(16)
+      .padStart(2, "0");
+  };
+  return `#${channel(0)}${channel(8)}${channel(4)}`;
+}
+
 /** "#rrggbb" → hue in degrees (0..360) */
 export function hexToHue(hex: string): number {
   const [r, g, b] = hexToRgb01(hex);

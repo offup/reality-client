@@ -12,14 +12,15 @@ import Settings, {
   MEMORY_DEFAULT,
   MEMORY_MAX,
   MEMORY_MIN,
-  STRENGTH_MAX,
-  STRENGTH_MIN,
+  COLORED_BACKGROUNDS,
   isBackgroundId,
+  isColoredBackground,
   type BackgroundId,
+  type ColoredId,
+  type EffectColors,
 } from "./Settings";
-import Lightning from "./effects/Lightning";
-import GradientAscii from "./effects/GradientAscii";
-import GhostFibers from "./effects/GhostFibers";
+import { EFFECTS } from "./effects";
+import LiveEffect from "./effects/LiveEffect";
 import type { Account } from "./auth";
 import {
   SIGN_IN_AGAIN,
@@ -38,8 +39,8 @@ const appWindow = getCurrentWindow();
 const STORAGE_KEY = "reality.accounts.v2";
 const BACKGROUND_KEY = "reality.background";
 const GRID_MOVING_KEY = "reality.gridMoving";
-const EFFECT_COLOR_KEY = "reality.effectColor";
-const STRENGTH_KEY = "reality.effectStrength";
+const EFFECT_COLOR_KEY = "reality.effectColor"; // old: one color for all, used as the start value
+const EFFECT_COLORS_KEY = "reality.effectColors";
 const INSTANCES_KEY = "reality.instances";
 const MEMORY_KEY = "reality.memoryMb";
 const AFTER_LAUNCH_KEY = "reality.afterLaunch";
@@ -93,9 +94,22 @@ function loadBackground(): BackgroundId {
 }
 
 // Any "#rrggbb" works (presets or the custom picker)
-function loadEffectColor(): string {
-  const raw = read(EFFECT_COLOR_KEY);
-  return raw && /^#[0-9a-f]{6}$/i.test(raw) ? raw : DEFAULT_EFFECT_COLOR;
+function loadEffectColors(): EffectColors {
+  const isHex = (v: unknown): v is string => typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v);
+  const old = read(EFFECT_COLOR_KEY);
+  const fallback = isHex(old) ? old : DEFAULT_EFFECT_COLOR;
+  let saved: Partial<Record<ColoredId, unknown>> = {};
+  try {
+    saved = JSON.parse(read(EFFECT_COLORS_KEY) ?? "{}");
+  } catch {
+    // broken data: start from the fallback
+  }
+  const colors = {} as EffectColors;
+  for (const id of COLORED_BACKGROUNDS) {
+    const value = saved[id];
+    colors[id] = isHex(value) ? value : fallback;
+  }
+  return colors;
 }
 
 function loadNumber(key: string, min: number, max: number, fallback: number): number {
@@ -114,8 +128,7 @@ function App() {
   const [view, setView] = useState<View>("home");
   const [background, setBackground] = useState<BackgroundId>(loadBackground);
   const [gridMoving, setGridMoving] = useState<boolean>(() => read(GRID_MOVING_KEY) === "1");
-  const [effectColor, setEffectColor] = useState<string>(() => loadEffectColor());
-  const [strength, setStrength] = useState<number>(() => loadNumber(STRENGTH_KEY, STRENGTH_MIN, STRENGTH_MAX, 1));
+  const [effectColors, setEffectColors] = useState<EffectColors>(loadEffectColors);
   const [{ accounts, activeId }, setStored] = useState<Stored>(loadStored);
   const [versions, setVersions] = useState<string[]>([]);
   const [{ instances, activeId: instanceId }, setInstanceStore] = useState<StoredInstances>(loadInstances);
@@ -134,8 +147,7 @@ function App() {
   useEffect(() => write(STORAGE_KEY, JSON.stringify({ accounts, activeId })), [accounts, activeId]);
   useEffect(() => write(BACKGROUND_KEY, background), [background]);
   useEffect(() => write(GRID_MOVING_KEY, gridMoving ? "1" : "0"), [gridMoving]);
-  useEffect(() => write(EFFECT_COLOR_KEY, effectColor), [effectColor]);
-  useEffect(() => write(STRENGTH_KEY, String(strength)), [strength]);
+  useEffect(() => write(EFFECT_COLORS_KEY, JSON.stringify(effectColors)), [effectColors]);
   useEffect(() => write(MEMORY_KEY, String(memoryMb)), [memoryMb]);
   useEffect(() => write(AFTER_LAUNCH_KEY, afterLaunch), [afterLaunch]);
   useEffect(() => write(INSTANCES_KEY, JSON.stringify({ instances, activeId: instanceId })), [instances, instanceId]);
@@ -242,15 +254,20 @@ function App() {
     (background === "grid" && gridMoving ? " is-moving" : "") +
     (view === "settings" || view === "instances" ? " is-hidden" : "");
 
+  // The big animated background runs only where it can be seen: the settings play their own
+  // small previews, and the instances page covers it
+  const backgroundShown = view !== "settings" && view !== "instances";
+  const MainEffect = backgroundShown && isColoredBackground(background) ? EFFECTS[background] : null;
+  const mainColor = isColoredBackground(background) ? (effectColors[background] ?? DEFAULT_EFFECT_COLOR) : "";
+
   return (
     <main className="app" onMouseDown={onMouseDown}>
-      <div
-        className={backgroundClass}
-        style={{ "--effect-color": effectColor, "--effect-strength": strength } as React.CSSProperties}
-      >
-        {background === "lightning" && <Lightning color={effectColor} />}
-        {background === "ascii" && <GradientAscii color={effectColor} />}
-        {background === "ghostfibers" && <GhostFibers color={effectColor} />}
+      <div className={backgroundClass}>
+        {MainEffect && (
+          <LiveEffect key={background}>
+            <MainEffect color={mainColor} />
+          </LiveEffect>
+        )}
       </div>
       <div className={"player-stage" + (showPlayer ? "" : " is-hidden")}>
         <SkinView skin={player.skin} cape={player.cape ?? undefined} model={player.model} name={player.name} />
@@ -278,10 +295,8 @@ function App() {
           onBackground={setBackground}
           gridMoving={gridMoving}
           onGridMoving={setGridMoving}
-          effectColor={effectColor}
-          onEffectColor={setEffectColor}
-          strength={strength}
-          onStrength={setStrength}
+          colors={effectColors}
+          onColor={(id, color) => setEffectColors((c) => ({ ...c, [id]: color }))}
           memoryMb={memoryMb}
           onMemoryMb={setMemoryMb}
           afterLaunch={afterLaunch}
