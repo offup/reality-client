@@ -1,11 +1,11 @@
-// Publishes a new version of Reality Client for Windows and macOS.
+// Publishes a new version of Reality Client for Windows, macOS and Linux.
 //
 //   npm run release -- 0.2.0 "What changed"
 //
 // 1. Sets the version in package.json, tauri.conf.json and Cargo.toml, commits, tags and pushes (private source repo)
-// 2. Builds the Windows installer here; the tag starts the macOS build on GitHub (.github/workflows/macos.yml)
-// 3. Waits for the Mac build, then creates one release in the public repo with both downloads and latest.json
-//    (read by the launcher's updater on Windows and macOS). Updates are signed with ~/.tauri/reality-client.key
+// 2. Builds the Windows installer here; the tag starts the macOS and Linux builds on GitHub (.github/workflows)
+// 3. Waits for both, then creates one release in the public repo with all downloads and latest.json
+//    (read by the launcher's updater on every system). Updates are signed with ~/.tauri/reality-client.key
 
 import { execFileSync, execSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
@@ -63,18 +63,23 @@ run("npm run tauri build -- --bundles nsis", {
 const built = join("src-tauri/target/release/bundle/nsis", `Reality Client_${version}_x64-setup.exe`);
 const windowsSignature = readFileSync(`${built}.sig`, "utf8").trim();
 
-// 3. macOS: wait for the GitHub build of this tag and download it
-console.log("\nWaiting for the macOS build on GitHub…");
-let runId = "";
-for (let i = 0; i < 60 && !runId; i++) {
-  runId = gh("run", "list", "--repo", SOURCE_REPO, "--workflow", "macos.yml", "--branch", tag, "--limit", "1", "--json", "databaseId", "--jq", ".[0].databaseId // empty");
-  if (!runId) pause(5);
+// 3. macOS and Linux: wait for the GitHub builds of this tag and download them
+function githubBuild(workflow, artifact) {
+  console.log(`\nWaiting for the ${artifact} build on GitHub…`);
+  let runId = "";
+  for (let i = 0; i < 60 && !runId; i++) {
+    runId = gh("run", "list", "--repo", SOURCE_REPO, "--workflow", workflow, "--branch", tag, "--limit", "1", "--json", "databaseId", "--jq", ".[0].databaseId // empty");
+    if (!runId) pause(5);
+  }
+  if (!runId) throw new Error(`No ${artifact} build started for ${tag}`);
+  ghLive("run", "watch", runId, "--repo", SOURCE_REPO, "--exit-status", "--interval", "20");
+  const dir = join("release-out", `${artifact}-${version}`);
+  rmSync(dir, { recursive: true, force: true });
+  ghLive("run", "download", runId, "--repo", SOURCE_REPO, "--name", artifact, "--dir", dir);
+  return dir;
 }
-if (!runId) throw new Error(`No macOS build started for ${tag}`);
-ghLive("run", "watch", runId, "--repo", SOURCE_REPO, "--exit-status", "--interval", "20");
-const macDir = join("release-out", `macos-${version}`);
-rmSync(macDir, { recursive: true, force: true });
-ghLive("run", "download", runId, "--repo", SOURCE_REPO, "--name", "macos", "--dir", macDir);
+const macDir = githubBuild("macos.yml", "macos");
+const linuxDir = githubBuild("linux.yml", "linux");
 
 const findFile = (dir, test) => {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -92,6 +97,10 @@ const macDmg = findFile(macDir, (n) => n.endsWith(".dmg"));
 const macTar = findFile(macDir, (n) => n.endsWith(".app.tar.gz"));
 const macSig = findFile(macDir, (n) => n.endsWith(".app.tar.gz.sig"));
 if (!macDmg || !macTar || !macSig) throw new Error("The macOS build is missing files");
+const linuxImage = findFile(linuxDir, (n) => n.endsWith(".AppImage"));
+const linuxSig = findFile(linuxDir, (n) => n.endsWith(".AppImage.sig"));
+const linuxDeb = findFile(linuxDir, (n) => n.endsWith(".deb"));
+if (!linuxImage || !linuxSig || !linuxDeb) throw new Error("The Linux build is missing files");
 
 // 4. Release files without spaces in the names, plus the update description for both systems
 mkdirSync("release-out", { recursive: true });
@@ -101,13 +110,20 @@ const tarName = `Reality-Client_${version}_macOS.app.tar.gz`;
 const setup = join("release-out", setupName);
 const dmg = join("release-out", dmgName);
 const tar = join("release-out", tarName);
+const imageName = `Reality-Client_${version}_linux-x86_64.AppImage`;
+const debName = `Reality-Client_${version}_amd64.deb`;
+const image = join("release-out", imageName);
+const deb = join("release-out", debName);
 copyFileSync(built, setup);
 copyFileSync(macDmg, dmg);
 copyFileSync(macTar, tar);
+copyFileSync(linuxImage, image);
+copyFileSync(linuxDeb, deb);
 
 const download = (name) => `https://github.com/${RELEASES_REPO}/releases/download/${tag}/${name}`;
 const windows = { signature: windowsSignature, url: download(setupName) };
 const mac = { signature: readFileSync(macSig, "utf8").trim(), url: download(tarName) };
+const linux = { signature: readFileSync(linuxSig, "utf8").trim(), url: download(imageName) };
 const latest = join("release-out", "latest.json");
 writeFileSync(
   latest,
@@ -121,6 +137,8 @@ writeFileSync(
         "windows-x86_64-nsis": windows,
         "darwin-aarch64": mac,
         "darwin-aarch64-app": mac,
+        "linux-x86_64": linux,
+        "linux-x86_64-appimage": linux,
       },
     },
     null,
@@ -133,8 +151,9 @@ const body = [
   "",
   `**Windows:** ${setupName}`,
   `**macOS:** ${dmgName} (Apple silicon, M1 and newer)`,
+  `**Linux:** ${imageName} (any distribution, e.g. Arch: make it executable and run it) or ${debName} (Debian, Ubuntu)`,
   "",
   "Already installed? The launcher shows the update at the top left, one click installs it.",
 ].join("\n");
-ghLive("release", "create", tag, setup, dmg, tar, latest, "--repo", RELEASES_REPO, "--title", `Reality Client ${tag}`, "--notes", body);
+ghLive("release", "create", tag, setup, dmg, tar, image, deb, latest, "--repo", RELEASES_REPO, "--title", `Reality Client ${tag}`, "--notes", body);
 console.log(`\n${tag} is live: https://github.com/${RELEASES_REPO}/releases/tag/${tag}`);
