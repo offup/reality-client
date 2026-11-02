@@ -1,0 +1,507 @@
+.dock {
+  position: absolute;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  padding: 10px;
+  background: #0c0c0c;
+  border: 1px solid #2a2a2a;
+  color: #fff;
+}
+
+/* Alle Regeln sind mit .dock geprefixt, damit keine die andere übersteuert */
+.dock button {
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  background: none;
+  font: inherit;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+  transition: color 120ms, background 120ms, border-color 120ms;
+}
+
+/* Kein Fokus-Rahmen bei Mausklick, nur bei Tastatur */
+.dock button:focus {
+  outline: none;
+}
+
+.dock button:focus-visible {
+  outline: 1px solid #fff;
+  outline-offset: -1px;
+}
+
+.dock .dock-item {
+  position: relative;
+  z-index: 1;
+  width: 52px;
+  height: 52px;
+}
+
+.dock .dock-item:hover {
+  color: #ddd;
+}
+
+.dock .dock-item:hover .dock-icon {
+  transform: translateY(-2px);
+}
+
+.dock .dock-icon {
+  display: flex;
+  transition: transform 160ms ease-out;
+}
+
+.dock .dock-item.is-active {
+  color: #fff;
+}
+
+.dock .dock-item.is-active:hover .dock-icon {
+  transform: none;
+}
+
+/* Gleitstrich: weißer Strich gleitet mit Feder unter den aktiven Button */
+.dock .dock-underline {
+  position: absolute;
+  left: 0;
+  bottom: 7px;
+  width: 22px;
+  height: 2px;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
+  transition: transform 380ms cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+.dock .dock-launch {
+  display: flex;
+  margin: 0 12px;
+  border: 1px solid #555;
+  background: #1a1a1a;
+}
+
+.dock .dock-launch-main {
+  flex-direction: column;
+  gap: 3px;
+  min-width: 200px;
+  padding: 0 32px;
+  height: 52px;
+  color: #fff;
+  border: 0;
+}
+
+.dock .dock-launch-main:hover,
+.dock .dock-launch-arrow:hover {
+  background: #262626;
+}
+
+/* Wie NoRisk (SmallCaps-Titel, MinecraftTen-Version), auf 52px Höhe skaliert */
+.dock .dock-launch-title {
+  font-family: var(--font-smallcaps);
+  font-size: 22px;
+  font-weight: normal;
+  line-height: 1;
+  letter-spacing: 0.05em;
+}
+
+.dock .dock-launch-sub {
+  font-family: var(--font-minecraft);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: #9a9a9a;
+}
+
+.dock .dock-launch-arrow {
+  width: 52px;
+  height: 52px;
+  color: #bbb;
+  border: 0;
+  border-left: 1px solid #555;
+}
+
+.dock .dock-launch-arrow:hover {
+  color: #fff;
+}
+
+/* Account hinzufügen: ganz links in der Launch-Gruppe, gestrichelte Box mit Plus, kein Trennstrich */
+.dock .dock-add-account {
+  width: 52px;
+  height: 52px;
+  border: 0;
+  padding-left: 4px;
+  color: #6a6a6a;
+  transition: background 120ms;
+}
+
+.dock .dock-add-account-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px dashed #555;
+  background: #1a1a1a; /* bleibt dunkel, auch wenn das Segment dahinter hovert */
+  transition: border-color 120ms, background 120ms, color 120ms;
+}
+
+/* Hover nur auf der gestrichelten Box, nicht auf dem ganzen Segment */
+.dock .dock-add-account-box:hover,
+.dock .dock-add-account.is-open .dock-add-account-box {
+  color: #fff;
+  border-color: #9a9a9a;
+  background: #262626;
+}
+
+.dock .dock-add-account + .dock-launch-main {
+  padding-left: 20px;
+}
+
+/* Launch und Account-Segment hovern als ein Stück, egal wo die Maus liegt */
+.dock .dock-launch:has(.dock-launch-main:hover, .dock-add-account:hover) .dock-add-account,
+.dock .dock-launch:has(.dock-launch-main:hover, .dock-add-account:hover) .dock-launch-main {
+  background: #262626;
+}
+
+/* Login-Panel: gleicher Look wie das Dock, gleiche Breite, mit Abstand darüber */
+.dock .dock-popover {
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  bottom: calc(100% + 12px);
+  padding: 10px;
+  background: #0c0c0c;
+  border: 1px solid #2a2a2a;
+  animation: dock-popover-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes dock-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Closing: slide down a bit and fade, then it unmounts */
+.dock .dock-popover.is-closing {
+  animation: dock-popover-out 170ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes dock-popover-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+}
+
+.dock .dock-login {
+  width: 100%;
+  height: 40px;
+  gap: 10px;
+  border: 1px solid #555;
+  background: #1a1a1a;
+  color: #fff;
+  font-family: var(--font-smallcaps);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+}
+
+.dock .dock-login:hover {
+  background: #262626;
+}
+
+/* Panel: Account-Liste oben, darunter Hinzufügen bzw. Warten/Fehler */
+.dock .dock-popover {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dock .dock-account-add-state {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+/* Immer zwei Spalten: zwei Accounts pro Reihe, ab dem dritten die nächste Reihe */
+.dock .dock-accounts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dock .dock-account {
+  min-width: 0;
+  display: flex;
+  border: 1px solid #2e2e2e;
+  background: none;
+  transition: border-color 120ms, background 120ms;
+}
+
+.dock .dock-account:hover {
+  border-color: #444;
+}
+
+.dock .dock-account.is-active {
+  border-color: #555;
+  background: #1a1a1a;
+}
+
+.dock .dock-account-main {
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-start;
+  gap: 12px;
+  height: 44px;
+  padding: 0 12px;
+  border: 0;
+  color: #ddd;
+  font-family: var(--font-smallcaps);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+}
+
+.dock .dock-account.is-active .dock-account-main {
+  color: #fff;
+}
+
+.dock .dock-account-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dock .dock-account-check {
+  margin-left: auto;
+  display: flex;
+  color: #4ade80;
+}
+
+.dock .dock-account-logout {
+  width: 40px;
+  border: 0;
+  border-left: 1px solid #2e2e2e;
+  color: #666;
+}
+
+.dock .dock-account.is-active .dock-account-logout {
+  border-left-color: #333;
+}
+
+.dock .dock-account-logout:hover {
+  color: #e24b4a;
+}
+
+/* "Hinzufügen" im freien Platz der Account-Reihe: gleiche Höhe wie eine Account-Zeile */
+.dock .dock-account-add-cell {
+  height: 46px;
+}
+
+/* Mit Account: statt Plus der Kopf, ohne gestrichelten Rahmen */
+.dock .dock-add-account.has-account .dock-add-account-box {
+  border: 0;
+  background: none;
+}
+
+.dock .dock-add-account.has-account.is-open .dock-add-account-box,
+.dock .dock-add-account.has-account .dock-add-account-box:hover {
+  background: none;
+  outline: 1px solid #9a9a9a;
+  outline-offset: 2px;
+}
+
+.dock .dock-login-status {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0;
+  color: #ddd;
+}
+
+.dock .dock-login-status.is-error {
+  color: #f0a0a0;
+}
+
+.dock .dock-login-ghost {
+  flex: 0 0 200px;
+  border-color: #2e2e2e;
+  background: none;
+  color: #bbb;
+}
+
+.dock .dock-login-ghost:hover {
+  color: #fff;
+  background: #161616;
+}
+
+.dock .dock-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #333;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: dock-spin 900ms linear infinite;
+  flex: none;
+}
+
+@keyframes dock-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Launch while preparing / running: no hover, a thin bar fills along the bottom edge */
+.dock .dock-launch-main {
+  position: relative;
+  overflow: hidden;
+}
+
+.dock .dock-launch-main.is-busy,
+.dock .dock-launch-arrow:disabled {
+  cursor: default;
+}
+
+.dock .dock-launch-main.is-busy:hover,
+.dock .dock-launch-arrow:disabled:hover {
+  background: none;
+}
+
+.dock .dock-launch-arrow:disabled {
+  color: #555;
+}
+
+.dock .dock-launch-arrow.is-open {
+  background: #262626;
+  color: #fff;
+}
+
+.dock .dock-launch-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: #2a2a2a;
+  overflow: hidden;
+}
+
+.dock .dock-launch-progress span {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  transform-origin: left;
+  transition: transform 160ms linear;
+}
+
+/* No total known yet: a short segment slides back and forth */
+.dock .dock-launch-progress.is-waiting span {
+  right: auto;
+  width: 30%;
+  animation: dock-progress-wait 1.1s ease-in-out infinite alternate;
+}
+
+@keyframes dock-progress-wait {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(340%);
+  }
+}
+
+/* Instance picker: one row per instance, name left, version right */
+.dock .dock-instances {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.dock .dock-instance {
+  justify-content: flex-start;
+  gap: 14px;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid #2e2e2e;
+  color: #ddd;
+}
+
+.dock .dock-instance:hover {
+  border-color: #444;
+}
+
+.dock .dock-instance.is-active {
+  border-color: #555;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.dock .dock-instance-name {
+  font-family: var(--font-smallcaps);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dock .dock-instance-version {
+  font-family: var(--font-minecraft);
+  font-size: 11px;
+  color: #888;
+  white-space: nowrap;
+}
+
+.dock .dock-instance .dock-account-check {
+  margin-left: auto;
+}
+
+.dock .dock-instances-manage {
+  flex: none;
+  width: 100%;
+}
+
+/* The dock and its panel stay above the pages and above the dimmed backdrop */
+.dock {
+  z-index: 15;
+}
+
+.dock-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 14;
+  background: rgba(5, 5, 5, 0.72);
+  animation: dock-backdrop-in 180ms ease-out;
+}
+
+.dock-backdrop.is-closing {
+  animation: dock-backdrop-out 170ms ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes dock-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dock-backdrop-out {
+  to {
+    opacity: 0;
+  }
+}

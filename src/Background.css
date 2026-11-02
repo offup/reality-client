@@ -1,0 +1,94 @@
+/* Background layer behind everything; the same classes drive the small previews in settings */
+.background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /* No own fill (the page behind is the same #0a0a0a), so Strength only brightens what the effect draws */
+  filter: brightness(var(--effect-strength, 1));
+  transition: opacity 260ms ease;
+}
+
+/* Hidden while settings are open */
+.background.is-hidden {
+  opacity: 0;
+}
+
+/* Grid: fine lines that fade out towards the edges */
+.bg-grid {
+  background-image: linear-gradient(#161616 1px, transparent 1px), linear-gradient(90deg, #161616 1px, transparent 1px);
+  background-size: 40px 40px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 70% at 50% 45%, #000 20%, transparent 100%);
+  mask-image: radial-gradient(ellipse 60% 70% at 50% 45%, #000 20%, transparent 100%);
+}
+
+/* Moving: the lines drift slowly up and to the left, one cell per cycle so it loops seamlessly */
+.bg-grid.is-moving {
+  animation: grid-drift 6s linear infinite;
+}
+
+@keyframes grid-drift {
+  to {
+    background-position: -40px -40px;
+  }
+}
+
+/* Gradient: a soft glow rising from the bottom, color comes from settings */
+.bg-gradient {
+  background-image: radial-gradient(ellipse 70% 60% at 50% 100%, var(--effect-color, #16222e), transparent 75%);
+}
+
+/* Shader effects render into a canvas that fills the layer */
+.effect-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.effect-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Small previews inside the settings tiles: same look, finer / faster, and static stand-ins for the shaders */
+.settings-tile-preview {
+  background-color: #0a0a0a;
+}
+
+.settings-tile-preview.bg-grid {
+  background-size: 16px 16px;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.settings-tile-preview.bg-grid.is-moving {
+  animation: grid-drift-small 2.4s linear infinite;
+}
+
+@keyframes grid-drift-small {
+  to {
+    background-position: -16px -16px;
+  }
+}
+
+/* Shader effects: real still frames of the effect (public/previews) */
+.settings-tile-preview.bg-lightning,
+.settings-tile-preview.bg-ascii,
+.settings-tile-preview.bg-ghostfibers {
+  background-size: cover;
+  background-position: center;
+}
+
+.settings-tile-preview.bg-lightning {
+  background-image: url("/previews/lightning.webp");
+}
+
+.settings-tile-preview.bg-ascii {
+  background-image: url("/previews/ascii.webp");
+}
+
+.settings-tile-preview.bg-ghostfibers {
+  background-image: url("/previews/ghostfibers.webp");
+}

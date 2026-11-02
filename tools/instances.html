@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Instances preview</title>
+  </head>
+  <body>
+    <!-- Dev-only helper: renders the Instances page with sample data (?create=1 shows the create view) -->
+    <div id="root" style="position: relative; width: 1280px; height: 800px"></div>
+    <script type="module">
+      import React from "react";
+      import { createRoot } from "react-dom/client";
+      import "/src/styles.css";
+      import "/src/Settings.css";
+      import Instances from "/src/Instances.tsx";
+
+      const now = Date.now();
+      const instances = [
+        { id: "k1x9-survival", name: "Survival", version: "26.3", created: now, lastPlayed: now - 2 * 3600e3 },
+        { id: "m3p2-pvp", name: "PvP 1.21", version: "1.21.11", created: now, lastPlayed: now - 3 * 86400e3 },
+        { id: "q8z1-fabric", name: "Fabric 26.2", version: "26.2", created: now },
+        { id: "w2a7-shaders", name: "Shaders", version: "26.1.2", created: now, lastPlayed: now - 600e3 },
+      ];
+      const versions = ["26.3", "26.2", "26.1.2", "26.1.1", "26.1", "1.21.11", "1.21.10", "1.21.9", "1.21.8", "1.21.7", "1.21.6", "1.21.5"];
+      const create = new URLSearchParams(location.search).get("create") === "1";
+      function App() {
+        const [list, setList] = React.useState(create ? instances : instances);
+        const [active, setActive] = React.useState(instances[0].id);
+        return React.createElement(Instances, {
+          instances: list,
+          activeId: active,
+          versions,
+          running: false,
+          onSelect: setActive,
+          onCreate: () => {},
+          onRename: () => {},
+          onDelete: async () => {},
+          onPlay: () => {},
+        });
+      }
+      createRoot(document.getElementById("root")).render(React.createElement(App));
+      if (create) setTimeout(() => document.querySelector(".inst-new")?.click(), 300);
+    </script>
+  </body>
+</html>

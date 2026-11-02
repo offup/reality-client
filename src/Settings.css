@@ -1,0 +1,412 @@
+/* Big cards straight on the background, no surrounding panel. Sits between the top edge and the dock. */
+.settings {
+  position: absolute;
+  left: 110px;
+  right: 110px;
+  top: 64px;
+  bottom: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  animation: settings-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes settings-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.settings-head h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 24px;
+  font-weight: normal;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* Cards: 3 per row, preview on top, name below */
+.settings-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #2a2a2a;
+  background: #0c0c0c;
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 120ms, transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.settings-card:hover {
+  border-color: #555;
+  transform: translateY(-2px);
+}
+
+.settings-card.is-selected {
+  border-color: #fff;
+  box-shadow: inset 0 0 0 1px #fff;
+}
+
+.settings-card.is-selected:hover {
+  transform: none;
+}
+
+.settings-card:focus {
+  outline: none;
+}
+
+.settings-card-preview {
+  position: relative;
+  display: block;
+  height: 150px;
+  overflow: hidden;
+  border-bottom: 1px solid #1c1c1c;
+}
+
+.settings-tile-preview {
+  position: absolute;
+  inset: 0;
+}
+
+.settings-card-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #000;
+}
+
+.settings-card-name {
+  padding: 14px 14px 15px;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Toolbar under the cards: same box as the dock, centered, segments split by thin lines */
+.settings-toolbar {
+  align-self: center;
+  display: flex;
+  align-items: center;
+  padding: 10px 4px;
+  background: #0c0c0c;
+  border: 1px solid #2a2a2a;
+}
+
+.settings-tool {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 34px;
+  padding: 0 18px;
+}
+
+.settings-tool + .settings-tool {
+  border-left: 1px solid #2a2a2a;
+}
+
+.settings-tool-label {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #bbb;
+}
+
+.settings-swatches {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-swatch {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #333;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.settings-swatch:hover {
+  transform: scale(1.08);
+}
+
+.settings-swatch:disabled {
+  cursor: default;
+  transform: none;
+}
+
+.settings-swatch.is-selected {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Custom color: dashed box with a plus, filled with the picked color once chosen */
+.settings-swatch-custom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-style: dashed;
+  border-color: #555;
+  background: #0c0c0c;
+  color: #aaa;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.settings-swatch-custom input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Previews follow the strength slider, so the change is visible while the real background is hidden */
+.settings-card-preview .settings-tile-preview {
+  filter: brightness(var(--effect-strength, 1));
+}
+
+/* Strength slider: thin track, white fill up to the square knob */
+.settings-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 180px;
+  height: 20px;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.settings-slider:focus {
+  outline: none;
+}
+
+.settings-slider::-webkit-slider-runnable-track {
+  height: 2px;
+  background: linear-gradient(to right, #fff var(--fill), #333 var(--fill));
+}
+
+.settings-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -6px;
+  background: #fff;
+  border: 0;
+  transition: transform 120ms;
+}
+
+.settings-slider:hover::-webkit-slider-thumb,
+.settings-slider:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+
+.settings-slider-value {
+  min-width: 40px;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0;
+  color: #ddd;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Switch in the same square language as the rest */
+.settings-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #444;
+  background: #141414;
+  cursor: pointer;
+  transition: border-color 160ms, background 160ms;
+}
+
+.settings-switch:disabled {
+  cursor: default;
+}
+
+.settings-switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  background: #666;
+  transition: transform 200ms cubic-bezier(0.34, 1.4, 0.64, 1), background 160ms;
+}
+
+.settings-switch.is-on {
+  border-color: #fff;
+  background: #1a1a1a;
+}
+
+.settings-switch.is-on .settings-switch-knob {
+  transform: translateX(20px);
+  background: #fff;
+}
+
+/* Tabs as the page title: the active one white with the dock's underline */
+.settings-tabs {
+  display: flex;
+  gap: 30px;
+}
+
+.settings-tabs button {
+  position: relative;
+  padding: 0 0 10px;
+  margin: 0;
+  border: 0;
+  background: none;
+  color: #555;
+  font: inherit;
+  font-size: 24px;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 120ms;
+}
+
+.settings-tabs button:hover {
+  color: #999;
+}
+
+.settings-tabs button.is-active {
+  color: #fff;
+}
+
+.settings-tabs button.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 22px;
+  height: 2px;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
+}
+
+.settings-tabs button:focus {
+  outline: none;
+}
+
+/* Game page: one box, one row per setting */
+.settings-list {
+  background: #0c0c0c;
+  border: 1px solid #2a2a2a;
+}
+
+.settings-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 22px;
+}
+
+.settings-list-row + .settings-list-row {
+  border-top: 1px solid #1c1c1c;
+}
+
+.settings-list-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-list-title {
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.settings-list-sub {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0;
+  color: #666;
+}
+
+.settings-list-control {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.settings-list-control .settings-slider {
+  width: 240px;
+}
+
+.settings-list-value {
+  font-family: var(--font-minecraft);
+  font-size: 12px;
+  color: #aaa;
+}
+
+.settings-segments {
+  display: flex;
+  border: 1px solid #2a2a2a;
+}
+
+.settings-segments button {
+  padding: 9px 16px;
+  margin: 0;
+  border: 0;
+  background: none;
+  color: #777;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+
+.settings-segments button + button {
+  border-left: 1px solid #2a2a2a;
+}
+
+.settings-segments button:hover {
+  color: #ddd;
+}
+
+.settings-segments button.is-active {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.settings-segments button:focus {
+  outline: none;
+}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Update notice preview</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/Dock.css" />
+    <link rel="stylesheet" href="/src/UpdateNotice.css" />
+    <style>
+      .stage { position: relative; height: 100px; border-bottom: 1px solid #1c1c1c; }
+      .update-notice { animation: none; }
+    </style>
+  </head>
+  <body>
+    <!-- Dev-only helper: the update notice in each of its states -->
+    <div id="list"></div>
+    <script>
+      const arrow = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></svg>';
+      const states = [
+        ["", "Update 0.2.0", "Click to install", ""],
+        [" is-busy", "Update 0.2.0", "Downloading 45%", '<span class="update-notice-bar"><span style="transform:scaleX(.45)"></span></span>'],
+        [" is-busy", "Update 0.2.0", "Installing, restarting…", '<span class="update-notice-bar is-waiting"><span></span></span>'],
+        [" is-error", "Update failed", "Click to try again", ""],
+      ];
+      document.getElementById("list").innerHTML = states
+        .map(([cls, t, s, bar]) => `<div class="stage"><button class="update-notice${cls}"><span class="update-notice-icon">${arrow}</span><span class="update-notice-text"><span class="update-notice-title">${t}</span><span class="update-notice-sub">${s}</span></span>${bar}</button></div>`)
+        .join("");
+    </script>
+  </body>
+</html>

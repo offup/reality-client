@@ -1,0 +1,398 @@
+/* Same frame as settings: between the top edge and the dock. Hero left, list right. */
+.instances {
+  position: absolute;
+  left: 80px;
+  right: 80px;
+  top: 64px;
+  bottom: 140px;
+  display: flex;
+  gap: 16px;
+  animation: settings-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.instances button {
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.instances button:focus,
+.instances input:focus {
+  outline: none;
+}
+
+/* ---------- hero */
+.inst-hero {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inst-cover {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid #2a2a2a;
+  background: #050505;
+}
+
+.instance-cover-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  animation: inst-cover-in 420ms ease-out;
+}
+
+@keyframes inst-cover-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Dark fade from the bottom so the name stays readable */
+.inst-cover-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(5, 5, 5, 0.92) 0%, rgba(5, 5, 5, 0.55) 34%, transparent 62%);
+}
+
+.inst-cover-text {
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.inst-chip {
+  padding: 4px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.45);
+  font-family: var(--font-minecraft);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #ddd;
+}
+
+.inst-name {
+  margin: 0;
+  max-width: 100%;
+  font-family: var(--font-minecraft);
+  font-size: 40px;
+  font-weight: normal;
+  line-height: 1.1;
+  color: #fff;
+  text-shadow: 3px 3px 0 #2a2a2a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: text;
+}
+
+.inst-name-input {
+  width: 100%;
+  padding: 0 0 6px;
+  border: 0;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+  background: none;
+  color: #fff;
+  font-family: var(--font-minecraft);
+  font-size: 40px;
+  line-height: 1.1;
+  text-shadow: 3px 3px 0 #2a2a2a;
+  user-select: text;
+}
+
+.inst-name-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.inst-name-input:focus {
+  border-bottom-color: #fff;
+}
+
+.inst-played,
+.inst-muted {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0;
+  color: #999;
+}
+
+.inst-cover-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.5);
+  color: #ddd;
+}
+
+.inst-cover-close:hover {
+  color: #fff;
+  border-color: #fff;
+}
+
+/* Play bar under the cover, same language as the dock's Launch */
+.inst-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.inst-play {
+  flex: 1;
+  height: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1px solid #555;
+  background: #1a1a1a;
+  color: #fff;
+  transition: background 120ms;
+}
+
+.inst-play:hover {
+  background: #262626;
+}
+
+.inst-play:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.inst-play:disabled:hover {
+  background: #1a1a1a;
+}
+
+.inst-play-title {
+  font-family: var(--font-smallcaps);
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.inst-play-sub {
+  font-family: var(--font-minecraft);
+  font-size: 11px;
+  line-height: 1;
+  color: #9a9a9a;
+}
+
+.inst-tool {
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #2a2a2a;
+  background: #0c0c0c;
+  color: #888;
+  transition: color 120ms, border-color 120ms;
+}
+
+.inst-tool:hover {
+  color: #fff;
+  border-color: #555;
+}
+
+.inst-tool:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.inst-delete:hover,
+.inst-delete.is-armed {
+  color: #e24b4a;
+}
+
+.inst-delete.is-armed {
+  width: auto;
+  padding: 0 16px;
+  border-color: #e24b4a;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+.inst-error {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0;
+  color: #f0a0a0;
+}
+
+/* Version tiles when creating */
+.inst-versions {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.inst-version {
+  height: 34px;
+  border: 1px solid #2a2a2a;
+  background: #0c0c0c;
+  color: #999;
+  font-family: var(--font-minecraft) !important;
+  font-size: 11px;
+  transition: color 120ms, border-color 120ms, background 120ms;
+}
+
+.inst-version:hover {
+  color: #fff;
+  border-color: #555;
+}
+
+.inst-version.is-active {
+  border-color: #fff;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+/* ---------- list */
+.inst-side {
+  width: 300px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  background: #0c0c0c;
+  border: 1px solid #2a2a2a;
+}
+
+.inst-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #888;
+}
+
+.inst-count {
+  min-width: 22px;
+  padding: 2px 6px;
+  border: 1px solid #333;
+  font-family: var(--font-minecraft);
+  font-size: 10px;
+  text-align: center;
+  color: #bbb;
+}
+
+.inst-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px;
+}
+
+.inst-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px !important;
+  border: 1px solid transparent;
+  background: none;
+  color: #bbb;
+  text-align: left;
+  transition: background 120ms, border-color 120ms;
+}
+
+.inst-row:hover {
+  background: #141414;
+}
+
+.inst-row.is-active {
+  border-color: #3a3a3a;
+  background: #181818;
+  color: #fff;
+}
+
+/* White marker on the left edge of the selected row, like the dock underline turned upright */
+.inst-row.is-active::before {
+  content: "";
+  position: absolute;
+  left: -9px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
+}
+
+.instance-icon-art {
+  flex: none;
+  image-rendering: pixelated;
+  outline: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.inst-row-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.inst-row-name {
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inst-row-version {
+  font-family: var(--font-minecraft);
+  font-size: 10px;
+  color: #777;
+}
+
+.inst-new {
+  margin: 8px !important;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px dashed #444;
+  background: none;
+  color: #aaa;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 120ms, border-color 120ms, background 120ms;
+}
+
+.inst-new:hover,
+.inst-new.is-active {
+  color: #fff;
+  border-color: #888;
+  background: #141414;
+}

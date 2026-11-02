@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dock-Animationen 5</title>
+<style>
+  @property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  :root { --acc: #4ade80; --acc-dim: rgba(74, 222, 128, 0.35); --spring: cubic-bezier(.34,1.45,.64,1); --soft: cubic-bezier(.22,1,.36,1); }
+  html, body { margin: 0; background: #000; color: #fff; font-family: "SmallCaps", monospace; letter-spacing: 0.03em; }
+  body { padding: 32px 24px 48px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 24px; letter-spacing: 0.1em; }
+  .row { display: flex; align-items: center; gap: 28px; padding: 20px 0; border-top: 1px solid #141414; }
+  .lab { width: 210px; font-size: 15px; }
+  .lab small { display: block; color: #777; font-size: 13px; margin-top: 2px; }
+  .d { position: relative; display: flex; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; }
+  .b { position: relative; z-index: 1; width: 52px; height: 52px; border: 1px solid transparent; background: none; color: #6a6a6a;
+       display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; font: inherit; box-sizing: border-box;
+       transition: color 200ms, background 240ms, transform 300ms var(--spring), border-color 240ms, box-shadow 240ms, filter 240ms; }
+  .b svg { width: 22px; height: 22px; flex: none; }
+  .b .ic { display: flex; position: relative; z-index: 2; transition: transform 300ms var(--spring), filter 240ms; }
+  .b:hover { color: #b0b0b0; }
+  .b.on { color: #fff; }
+  .clip { overflow: hidden; }
+
+  /* 76 Aurora */
+  @keyframes aurora { to { transform: rotate(360deg); } }
+  .v76 .au { position: absolute; inset: -16px; background: conic-gradient(from 0deg, #4ade80, #22d3ee, #a78bfa, #4ade80); filter: blur(14px); opacity: 0; transition: opacity 300ms; }
+  .v76.on .au { opacity: .5; animation: aurora 6s linear infinite; }
+  .v76 .cv { position: absolute; inset: 3px; background: #0c0c0c; z-index: 1; }
+
+  /* 77 Lichtkante läuft */
+  .v77 .sb { position: absolute; inset: -1px; padding: 1px; background: conic-gradient(from var(--a), transparent 0 70%, #fff 82%, transparent 94%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity 250ms; }
+  @keyframes turn { to { --a: 360deg; } }
+  .v77.on .sb { opacity: 1; animation: turn 2.4s linear infinite; }
+  .v77.on { background: #121212; }
+
+  /* 78 Frost */
+  .v78 .bl { position: absolute; inset: 8px; background: radial-gradient(circle at 30% 30%, #4ade80, #22d3ee 60%, transparent 75%); filter: blur(8px); opacity: 0; transition: opacity 300ms; }
+  .v78 .fr { position: absolute; inset: 0; background: rgba(255,255,255,.06); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.14); opacity: 0; transition: opacity 300ms; z-index: 1; }
+  .v78.on .bl, .v78.on .fr { opacity: 1; }
+
+  /* 79 Spiegelung */
+  .v79 { flex-direction: column; gap: 0; }
+  .v79 .rf { display: flex; transform: scaleY(-1) translateY(2px); opacity: 0; -webkit-mask: linear-gradient(#000, transparent 70%); transition: opacity 300ms; height: 0; }
+  .v79.on .ic { transform: translateY(-6px); }
+  .v79.on .rf { opacity: .35; transform: scaleY(-1) translateY(8px); }
+
+  /* 80 Stapel */
+  .v80 .s1, .v80 .s2 { position: absolute; inset: 0; border: 1px solid #262626; background: #121212; opacity: 0; transition: transform 300ms var(--soft), opacity 200ms; z-index: 0; }
+  .v80 .s1 { transition-delay: 40ms; } .v80 .s2 { transition-delay: 0ms; }
+  .v80.on .s1 { opacity: 1; transform: translate(3px, 3px); }
+  .v80.on .s2 { opacity: 1; transform: translate(6px, 6px); }
+  .v80.on { background: #1a1a1a; border-color: #2c2c2c; }
+
+  /* 81 Schmelzen */
+  .d81 .sl { position: absolute; top: 10px; left: 0; width: 52px; height: 52px; background: #1e1e1e; transition: transform 380ms var(--soft); }
+  @keyframes melt { 0% { transform: translateX(var(--from)) scale(1,1); } 40% { transform: translateX(calc((var(--from) + var(--to)) / 2)) scale(1.35,.72); } 100% { transform: translateX(var(--to)) scale(1,1); } }
+  .d81 .sl.mv { animation: melt 420ms var(--soft) forwards; }
+
+  /* 83 Flug */
+  @keyframes fly { 0% { transform: translate(0,0) scale(1); opacity: .9; } 50% { transform: translate(calc(var(--dx) / 2), -26px) scale(.8); } 100% { transform: translate(var(--dx), 0) scale(.3); opacity: 0; } }
+  .d83 .gh { position: absolute; top: 25px; width: 22px; height: 22px; color: var(--acc); pointer-events: none; animation: fly 450ms var(--soft) forwards; }
+  .v83.on { background: #141414; }
+
+  /* 84 Sterne */
+  @keyframes drift { from { transform: translateY(0); } to { transform: translateY(-40px); } }
+  .v84 .st { position: absolute; inset: 0; opacity: 0; transition: opacity 300ms; }
+  .v84 .st i { position: absolute; width: 2px; height: 2px; background: #fff; border-radius: 50%; animation: drift linear infinite; }
+  .v84.on .st { opacity: .7; }
+  .v84.on { background: #0a0f0c; border-color: #1f2a23; }
+
+  /* 85 Strahl */
+  .v85 .bm { position: absolute; top: -11px; left: 50%; width: 1px; height: 0; background: linear-gradient(var(--acc), transparent); transition: height 300ms var(--soft); }
+  .v85.on .bm { height: 26px; }
+  .v85.on .ic { filter: drop-shadow(0 -4px 6px var(--acc-dim)); }
+
+  /* 86 Linse */
+  .v86.on { background: #141414; box-shadow: inset 0 0 18px rgba(0,0,0,.9), inset 0 0 0 1px #222; }
+  .v86.on .ic { transform: scale(1.14); }
+
+  /* 87 Neonröhre */
+  @keyframes flicker { 0%,100% { opacity: 1; } 10% { opacity: .3; } 20% { opacity: 1; } 35% { opacity: .5; } 45% { opacity: 1; } }
+  .v87.on { color: var(--acc); }
+  .v87.on .ic { filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 6px var(--acc)) drop-shadow(0 0 14px var(--acc-dim)); animation: flicker 700ms steps(1) 1; }
+
+  /* 88 Umgebungslicht */
+  .v88 .am { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--acc); filter: blur(9px); opacity: 0; transform: scale(1.4); transition: opacity 300ms, transform 300ms var(--soft); }
+  .v88 .am svg { width: 34px; height: 34px; }
+  .v88.on .am { opacity: .8; transform: scale(1.8); }
+
+  /* 89 Metall */
+  .v89 .mt { position: absolute; inset: -1px; padding: 1px; background: conic-gradient(from 200deg, #cfcfcf, #4a4a4a 25%, #e8e8e8 50%, #3a3a3a 75%, #cfcfcf); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity 250ms; }
+  .v89.on .mt { opacity: 1; }
+  .v89.on { background: linear-gradient(#1c1c1c, #0e0e0e); }
+
+  /* 90 Tinte */
+  .v90 .ink { position: absolute; inset: 0; background: radial-gradient(circle, rgba(74,222,128,.32), transparent 68%); transform: scale(0); transition: transform 450ms var(--soft); }
+  .v90.on .ink { transform: scale(1.3); }
+  .v90.on { color: #e9ffe9; }
+
+  /* 91 Vorhang */
+  @keyframes curtain { 0% { transform: translateY(-100%); } 45% { transform: translateY(0); } 55% { transform: translateY(0); } 100% { transform: translateY(100%); } }
+  .v91 .ct { position: absolute; inset: 0; background: var(--acc); transform: translateY(-100%); pointer-events: none; z-index: 3; }
+  .v91.on .ct { animation: curtain 520ms var(--soft) forwards; }
+  .v91.on { background: #161616; transition-delay: 200ms; }
+
+  /* 92 Welle */
+  .v92 .wv { position: absolute; bottom: 5px; left: 50%; width: 26px; height: 6px; margin-left: -13px; opacity: 0; transition: opacity 200ms; }
+  .v92 .wv path { fill: none; stroke: var(--acc); stroke-width: 1.5; stroke-linecap: round; }
+  @keyframes wave { to { transform: translateX(-8px); } }
+  .v92.on .wv { opacity: 1; } .v92.on .wv path { animation: wave 700ms linear infinite; }
+
+  /* 93 Atmender Rand */
+  @keyframes bborder { 0%,100% { border-color: rgba(255,255,255,.12); } 50% { border-color: rgba(255,255,255,.45); } }
+  .v93.on { animation: bborder 2.4s ease-in-out infinite; background: #121212; }
+
+  /* 94 Langer Schatten */
+  .v94.on { background: linear-gradient(#1f1f1f, #0d0d0d); border-color: #262626; }
+  .v94.on .ic { filter: drop-shadow(0 7px 3px rgba(0,0,0,.95)); transform: translateY(-2px); }
+
+  /* 95 Eigene Farbe */
+  .v95.on { color: var(--hue); background: color-mix(in srgb, var(--hue) 12%, transparent); border-color: color-mix(in srgb, var(--hue) 35%, transparent); }
+</style>
+</head>
+<body>
+<h1>Dock-Auswahl · Ideen 76 bis 95 · schön</h1>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.33 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/><path d="m8 5.2 8 4.5"/><path d="m6.6 11.3 2.4 1.35"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="i-hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+</svg>
+<div id="list"></div>
+<script>
+  const icons = [["i-home","#4ade80"],["i-box","#fb923c"],["i-bell","#facc15"],["i-hex","#60a5fa"]];
+  const ideas = [
+    [76,"Aurora","farbiges Licht wandert hinter dem Rand"],
+    [77,"Lichtkante","heller Punkt läuft am Rand entlang"],
+    [78,"Frost","Milchglas über einem farbigen Schein"],
+    [79,"Spiegelung","Icon spiegelt sich unten, verblasst"],
+    [80,"Stapel","zwei Karten schieben sich dahinter"],
+    [81,"Schmelzen","Block zieht sich beim Gleiten lang"],
+    [83,"Flug","Icon fliegt im Bogen zum neuen Button"],
+    [84,"Sterne","winzige Punkte treiben nach oben"],
+    [85,"Strahl","Licht fällt von der Dock-Kante aufs Icon"],
+    [86,"Linse","Icon wird groß, Rand wird dunkel"],
+    [87,"Neonröhre","grün, flackert kurz beim Anschalten"],
+    [88,"Umgebungslicht","großes weiches Grün hinter dem Icon"],
+    [89,"Metall","gebürsteter Silberrand"],
+    [90,"Tinte","grüner Schein läuft aus der Mitte"],
+    [91,"Vorhang","grüner Vorhang fällt und hebt sich"],
+    [92,"Welle","Unterstrich als laufende Welle"],
+    [93,"Atmender Rand","Rand wird langsam hell und dunkel"],
+    [94,"Langer Schatten","Icon wirft Schatten wie unter Licht"],
+    [95,"Eigene Farbe","jeder Tab hat seine Farbe"],
+  ];
+  const svg = (id) => `<svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  const extra = (v, id) => ({
+    76: '<span class="au"></span><span class="cv"></span>', 77: '<span class="sb"></span>',
+    78: '<span class="bl"></span><span class="fr"></span>', 79: `<span class="rf">${svg(id)}</span>`,
+    80: '<span class="s1"></span><span class="s2"></span>',
+    84: '<span class="st">' + [...Array(5)].map((_, k) => `<i style="left:${8 + k * 9}px;top:${20 + (k * 13) % 30}px;animation-duration:${2.5 + k * .6}s;animation-delay:-${k}s"></i>`).join("") + '</span>',
+    85: '<span class="bm"></span>', 88: `<span class="am">${svg(id)}</span>`, 89: '<span class="mt"></span>',
+    90: '<span class="ink"></span>', 91: '<span class="ct"></span>',
+    92: '<svg class="wv" viewBox="0 0 26 6"><path d="M-8 3q2-2.5 4 0t4 0t4 0t4 0t4 0t4 0t4 0t4 0t4 0"/></svg>',
+  })[v] || "";
+  const list = document.getElementById("list");
+  for (const [v, name, sub] of ideas) {
+    const row = document.createElement("div"); row.className = "row";
+    row.innerHTML = `<div class="lab">${v} · ${name}<small>${sub}</small></div>`;
+    const d = document.createElement("div"); d.className = "d d" + v;
+    if (v === 81) d.innerHTML = '<span class="sl"></span>';
+    const btns = icons.map(([id, hue]) => {
+      const b = document.createElement("button"); b.className = "b v" + v + ([76,77,78,84,86,88,89,90,91].includes(v) ? " clip" : "");
+      b.style.setProperty("--hue", hue);
+      b.innerHTML = `<span class="ic">${svg(id)}</span>` + extra(v, id);
+      d.appendChild(b); return b;
+    });
+    let cur = -1;
+    const sel = (i) => {
+      btns.forEach((b, j) => b.classList.toggle("on", j === i));
+      if (v === 81) { const sl = d.querySelector(".sl"); if (cur === -1) sl.style.transform = `translateX(${btns[i].offsetLeft}px)`; else { sl.style.setProperty("--from", btns[cur].offsetLeft + "px"); sl.style.setProperty("--to", btns[i].offsetLeft + "px"); sl.classList.remove("mv"); void sl.offsetWidth; sl.classList.add("mv"); } }
+      if (v === 83 && cur !== -1) { const g = document.createElement("span"); g.className = "gh"; g.innerHTML = svg(icons[cur][0]); g.style.left = (btns[cur].offsetLeft + 15) + "px"; g.style.setProperty("--dx", (btns[i].offsetLeft - btns[cur].offsetLeft) + "px"); d.appendChild(g); setTimeout(() => g.remove(), 500); }
+      if ((v === 87 || v === 91) && cur !== -1) { const s = btns[i].querySelector(v === 87 ? ".ic" : ".ct"); s.style.animation = "none"; void s.offsetWidth; s.style.animation = ""; }
+      cur = i;
+    };
+    btns.forEach((b, i) => b.addEventListener("click", () => sel(i)));
+    row.appendChild(d); list.appendChild(row);
+    requestAnimationFrame(() => sel(0));
+  }
+</script>
+</body>
+</html>

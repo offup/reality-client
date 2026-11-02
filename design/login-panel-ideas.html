@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Login-Panel · Ideen</title>
+<style>
+  @property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; --acc: #89cff0; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 32px 24px 64px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 28px; letter-spacing: .1em; }
+  .card { margin-bottom: 30px; }
+  .card .lab { font-size: 16px; margin: 10px 0 0; }
+  .card .lab small { display: block; color: #777; font-size: 13px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; max-width: 896px; }
+  .frame { width: 896px; height: 224px; overflow: hidden; border: 1px solid #2a2a2a; }
+  .win { position: relative; width: 1280px; height: 320px; background: #000; transform: scale(.7); transform-origin: 0 0; overflow: hidden; }
+  .win::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(#161616 1px, transparent 1px), linear-gradient(90deg, #161616 1px, transparent 1px); background-size: 40px 40px; -webkit-mask-image: radial-gradient(ellipse 60% 120% at 50% 100%, #000 10%, transparent 100%); }
+
+  /* Dock, identisch zur App */
+  .dock { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); display: flex; align-items: stretch; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; }
+  .dock .it { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #777; position: relative; }
+  .dock .it.on { color: #fff; } .dock svg { width: 22px; height: 22px; }
+  .dock .ul { position: absolute; left: 0; bottom: 7px; width: 22px; height: 2px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,.35); }
+  .dock .lg { display: flex; margin: 0 12px; border: 1px solid #555; background: #1a1a1a; position: relative; }
+  .dock .lm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 200px; padding: 0 32px 0 20px; height: 52px; box-sizing: border-box; }
+  .dock .lt { font-size: 22px; line-height: 1; letter-spacing: .05em; } .dock .ls { font-family: var(--mc); font-size: 11px; line-height: 1; color: #9a9a9a; }
+  .dock .la { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #bbb; border-left: 1px solid #555; box-sizing: border-box; } .dock .la svg { width: 20px; height: 20px; }
+  .dock .add { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; padding-left: 4px; box-sizing: border-box; color: #fff; }
+  .dock .add .bx { width: 34px; height: 34px; border: 1px dashed #9a9a9a; background: #262626; display: flex; align-items: center; justify-content: center; } .dock .add .bx svg { width: 18px; height: 18px; }
+
+  /* Panel-Grundform: wie das Dock, gleiche Breite, 12px darüber */
+  .pop { position: absolute; left: -1px; right: -1px; bottom: calc(100% + 12px); padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; display: flex; gap: 8px; align-items: stretch; box-sizing: border-box; }
+  .btn { display: flex; align-items: center; justify-content: center; gap: 10px; height: 40px; padding: 0 16px; border: 1px solid #555; background: #1a1a1a; color: #fff; font-family: var(--sc); font-size: 15px; letter-spacing: .06em; white-space: nowrap; box-sizing: border-box; flex: 1; }
+  .btn.ghost { border-color: #2e2e2e; background: none; color: #bbb; }
+  .btn.ms { background: #fff; color: #111; border-color: #fff; font-family: var(--ui); font-size: 14px; font-weight: 600; letter-spacing: 0; }
+  .btn.big { height: 52px; flex-direction: column; gap: 3px; }
+  .btn.big .t { font-size: 22px; line-height: 1; letter-spacing: .05em; } .btn.big .s { font-family: var(--mc); font-size: 11px; line-height: 1; color: #9a9a9a; }
+  .logo { width: 14px; height: 14px; flex: none; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; }
+  .logo b { display: block; } .logo b:nth-child(1) { background: #f25022; } .logo b:nth-child(2) { background: #7fba00; } .logo b:nth-child(3) { background: #00a4ef; } .logo b:nth-child(4) { background: #ffb900; }
+  .logo.big { width: 20px; height: 20px; gap: 2px; }
+  .ico { width: 16px; height: 16px; flex: none; color: #999; }
+  .txt { font-family: var(--ui); font-size: 13px; color: #9a9a9a; letter-spacing: 0; line-height: 1.4; }
+  .ttl { font-size: 15px; letter-spacing: .06em; color: #fff; }
+  .col { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .row { display: flex; gap: 8px; align-items: stretch; }
+  .sep { width: 1px; background: #2a2a2a; align-self: stretch; }
+  .hsep { height: 1px; background: #1e1e1e; }
+  .spin { width: 14px; height: 14px; border: 2px solid #333; border-top-color: #fff; border-radius: 50%; animation: sp 900ms linear infinite; flex: none; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  .face { position: relative; width: 28px; height: 28px; flex: none; image-rendering: pixelated; background: url(skin.png) -28px -28px / 224px 224px; }
+  .face::after { content: ""; position: absolute; inset: 0; background: url(skin.png) -140px -28px / 224px 224px; image-rendering: pixelated; }
+  .sil { width: 28px; height: 28px; background: #1e1e1e; border: 1px dashed #444; box-sizing: border-box; flex: none; }
+  .key { font-family: var(--ui); font-size: 11px; color: #777; border: 1px solid #333; padding: 2px 6px; letter-spacing: 0; }
+  .tile { flex: 1; height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid #2e2e2e; background: #141414; font-size: 12px; letter-spacing: .06em; color: #ccc; }
+  .tile .ico { width: 20px; height: 20px; color: #ddd; }
+  .code { font-family: var(--mc); font-size: 20px; letter-spacing: .12em; display: flex; align-items: center; justify-content: center; flex: 1; border: 1px solid #3a3a3a; background: #111; }
+
+  /* Varianten */
+  .v7::after { content: ""; position: absolute; left: 263px; bottom: -7px; width: 12px; height: 12px; background: #0c0c0c; border-right: 1px solid #2a2a2a; border-bottom: 1px solid #2a2a2a; transform: rotate(45deg); }
+  .v8 { left: 236px; right: auto; width: 300px; }
+  .v8::after { content: ""; position: absolute; left: 27px; bottom: -7px; width: 12px; height: 12px; background: #0c0c0c; border-right: 1px solid #2a2a2a; border-bottom: 1px solid #2a2a2a; transform: rotate(45deg); }
+  .v9 .seg { display: flex; flex: 1; border: 1px solid #555; background: #1a1a1a; }
+  .v9 .seg > * { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 18px; height: 40px; font-size: 15px; letter-spacing: .06em; }
+  .v9 .seg > * + * { border-left: 1px solid #555; }
+  .v9 .seg .dim { color: #999; }
+  .v16 .btn { border-color: #4ade80; color: #4ade80; }
+  .v17 .btn { position: relative; border: 0; background: #141414; }
+  .v17 .btn::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 36px; height: 2px; margin-left: -18px; background: var(--acc); box-shadow: 0 0 8px rgba(137,207,240,.4); }
+  .v22 { background: rgba(12,12,12,.6); backdrop-filter: blur(8px); border-color: rgba(255,255,255,.14); }
+  .v23 .x { position: absolute; right: 12px; top: 10px; color: #777; width: 14px; height: 14px; }
+  .v25 { border-color: transparent; }
+  .v25::before { content: ""; position: absolute; inset: -1px; padding: 1px; background: conic-gradient(from var(--a), transparent 0 72%, #fff 84%, transparent 94%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: turn 2.6s linear infinite; pointer-events: none; }
+  .v25::after { content: ""; position: absolute; inset: 0; border: 1px solid #2a2a2a; pointer-events: none; }
+  @keyframes turn { to { --a: 360deg; } }
+  .v21 { left: 50%; right: auto; width: 340px; transform: translateX(-50%); }
+  .v19 { flex-direction: column; align-items: center; gap: 10px; padding: 18px 10px 10px; }
+  .v19 .logo.big { width: 28px; height: 28px; gap: 3px; }
+</style>
+</head>
+<body>
+<h1>Login-Panel · 20 Varianten · unterer Fensterausschnitt, 70 %</h1>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.33 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/><path d="m8 5.2 8 4.5"/><path d="m6.6 11.3 2.4 1.35"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="i-hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-import" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><path d="M8 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-4"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+</svg>
+<div id="grid"></div>
+<script>
+  const sv = (id, cls = "") => `<svg class="${cls}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  const logo = (big) => `<span class="logo${big ? " big" : ""}"><b></b><b></b><b></b><b></b></span>`;
+  const dock = (panel, cls = "") => `<div class="dock">
+    <div class="it on">${sv("i-home")}<span class="ul" style="transform:translateX(15px)"></span></div><div class="it">${sv("i-box")}</div>
+    <div class="lg"><div class="add"><span class="bx">${sv("i-plus")}</span></div><div class="lm"><span class="lt">Launch</span><span class="ls">1.21.4</span></div><div class="la">${sv("i-chev")}</div></div>
+    <div class="it">${sv("i-bell")}</div><div class="it">${sv("i-hex")}</div>
+    <div class="pop ${cls}">${panel}</div></div>`;
+  const ideas = [
+    ["1 · Jetzt", "Zum Vergleich: ein Knopf, Logo plus Login.", `<div class="btn">${logo()}Login</div>`],
+    ["2 · Zwei Knöpfe", "Microsoft links, Offline rechts, gleich breit.", `<div class="btn">${logo()}Microsoft</div><div class="btn ghost">${sv("i-user","ico")}Offline</div>`],
+    ["3 · Offiziell", "Weißer Microsoft-Knopf wie auf microsoft.com, daneben Offline leise.", `<div class="btn ms">${logo(true)}Mit Microsoft anmelden</div><div class="btn ghost" style="flex:0 0 160px">Offline</div>`],
+    ["4 · Mit Erklärung", "Links Titel und ein Satz, rechts der Knopf.", `<div class="col" style="justify-content:center;padding:0 8px"><span class="ttl">Account hinzufügen</span><span class="txt">Zum Spielen auf Servern brauchst du ein Microsoft-Konto.</span></div><div class="btn" style="flex:0 0 220px">${logo()}Login</div>`],
+    ["5 · Knopf plus Link", "Ein Knopf, darunter ein kleiner Text-Link für Offline.", `<div class="col"><div class="btn">${logo()}Mit Microsoft anmelden</div><span class="txt" style="text-align:center">oder <span style="color:#fff">offline mit Spielernamen</span></span></div>`],
+    ["6 · Kacheln", "Drei Kacheln mit Icon wie die Dock-Buttons: Microsoft, Offline, Import.", `<div class="tile">${logo(true)}MICROSOFT</div><div class="tile">${sv("i-user","ico")}OFFLINE</div><div class="tile">${sv("i-import","ico")}IMPORT</div>`],
+    ["7 · Mit Zeiger", "Wie jetzt, aber mit kleiner Spitze, die aufs Plus zeigt.", `<div class="btn">${logo()}Login</div>`, "v7"],
+    ["8 · Nur über dem Plus", "Schmales Panel direkt über dem Plus statt über dem ganzen Dock.", `<div class="btn">${logo()}Login</div>`, "v8"],
+    ["9 · Segmente", "Eine Leiste wie die Launch-Gruppe: Logo, Login, Offline als Segmente.", `<div class="seg"><span>${logo()}</span><span style="flex:1">Login</span><span class="dim">Offline</span></div>`, "v9"],
+    ["10 · Im Launch-Stil", "Derselbe Knopf wie Launch: groß, mit Untertitel.", `<div class="btn big"><span class="t">Login</span><span class="s">mit Microsoft</span></div>`],
+    ["11 · Kein Account", "Links die leere Kopf-Silhouette mit Text, rechts der Knopf.", `<div style="display:flex;align-items:center;gap:12px;padding:0 10px;flex:1"><span class="sil"></span><div class="col" style="gap:2px"><span class="ttl">Kein Account</span><span class="txt">Füge einen hinzu, um zu spielen</span></div></div><div class="btn" style="flex:0 0 200px">${logo()}Login</div>`],
+    ["12 · Während des Logins", "So sieht das Panel aus, wenn der Browser offen ist.", `<div style="display:flex;align-items:center;gap:12px;flex:1;padding:0 10px"><span class="spin"></span><span class="txt" style="color:#ddd">Browser geöffnet, warte auf Microsoft …</span></div><div class="btn ghost" style="flex:0 0 140px">Abbrechen</div>`],
+    ["13 · Gerätecode", "Code direkt im Panel, Kopieren und Browser öffnen daneben.", `<div class="code">AB7K-QX9F</div><div class="btn ghost" style="flex:0 0 130px">${sv("i-copy","ico")}Kopieren</div><div class="btn" style="flex:0 0 170px">${sv("i-ext","ico")}Browser</div>`],
+    ["14 · Account-Liste", "Mit mehreren Accounts: Zeilen zum Wechseln, unten Hinzufügen.", `<div class="col"><div class="row"><div class="btn ghost" style="justify-content:flex-start;border-color:#444;background:#161616"><span class="face"></span>lettner<span class="txt" style="margin-left:auto;color:#4ade80">aktiv</span></div><div class="btn ghost" style="justify-content:flex-start"><span class="face" style="filter:hue-rotate(150deg)"></span>lettner_alt</div></div><div class="btn ghost">${sv("i-plus","ico")}Account hinzufügen</div></div>`],
+    ["15 · Nur Text", "Kein Knopf, nur eine Zeile mit Pfeil.", `<div style="display:flex;align-items:center;justify-content:center;gap:12px;flex:1;height:40px;font-size:15px;letter-spacing:.06em">${logo()}Mit Microsoft anmelden ${sv("i-arrow","ico")}</div>`],
+    ["16 · Grüner Akzent", "Knopf mit grünem Rand und grüner Schrift.", `<div class="btn">${logo()}Login</div>`, "v16"],
+    ["17 · Babyblauer Strich", "Knopf ohne Rand, darunter der Strich wie unter den Dock-Icons.", `<div class="btn">${logo()}Login</div>`, "v17"],
+    ["18 · Tastenkürzel", "Rechts ein Hinweis, dass Enter reicht.", `<div class="btn">${logo()}Login<span class="key" style="margin-left:auto">Enter</span></div>`],
+    ["19 · Hochkant", "Höheres Panel: großes Logo oben, Knopf darunter.", `${logo(true)}<span class="ttl">Mit Microsoft anmelden</span><div class="btn" style="align-self:stretch">Login</div>`, "v19"],
+    ["20 · Zwei Spalten", "Microsoft und Offline nebeneinander, jeweils mit Erklärung und eigenem Knopf.", `<div class="col" style="padding:4px 8px"><span class="ttl">Microsoft</span><span class="txt">Für alle Server, mit deinem Skin und Cape.</span><div class="btn">${logo()}Login</div></div><div class="sep"></div><div class="col" style="padding:4px 8px"><span class="ttl">Offline</span><span class="txt">Nur Singleplayer und offline Server.</span><div class="btn ghost">Name eingeben</div></div>`],
+  ];
+  const grid = document.getElementById("grid");
+  for (const [t, s, panel, cls] of ideas) {
+    const c = document.createElement("div"); c.className = "card";
+    c.innerHTML = `<div class="frame"><div class="win">${dock(panel, cls || "")}</div></div><div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  }
+</script>
+</body>
+</html>

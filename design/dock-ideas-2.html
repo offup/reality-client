@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dock-Animationen 2</title>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  :root { --acc: #4ade80; --acc-dim: rgba(74, 222, 128, 0.35); --acc-bg: rgba(74, 222, 128, 0.12); }
+  html, body { margin: 0; background: #000; color: #fff; font-family: "SmallCaps", monospace; letter-spacing: 0.03em; }
+  body { padding: 32px 24px 48px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 24px; letter-spacing: 0.1em; }
+  .row { display: flex; align-items: center; gap: 28px; padding: 14px 0; border-top: 1px solid #141414; }
+  .lab { width: 210px; font-size: 15px; }
+  .lab small { display: block; color: #777; font-size: 13px; margin-top: 2px; }
+  .d { position: relative; display: flex; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; }
+  .b { position: relative; z-index: 1; width: 52px; height: 52px; border: 1px solid transparent; background: none; color: #666;
+       display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; font: inherit; box-sizing: border-box;
+       transition: color 200ms, background 250ms, transform 250ms, border-color 250ms, box-shadow 250ms, width 250ms, opacity 250ms; }
+  .b svg { width: 22px; height: 22px; flex: none; }
+  .b .ic { display: flex; transition: transform 250ms, filter 250ms; }
+  .b .lb { display: none; font-size: 13px; color: #fff; white-space: nowrap; }
+  .b:hover { color: #aaa; }
+  .b.on { color: #fff; }
+
+  /* 11 Puls */
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+  .v11.on .ic { animation: pulse 1.6s ease-in-out infinite; }
+
+  /* 12 Doppelstrich */
+  .v12 .t, .v12 .u { position: absolute; left: 50%; width: 18px; height: 2px; background: var(--acc); transform: translateX(-50%) scaleX(0); transition: transform 300ms cubic-bezier(.22,1,.36,1); }
+  .v12 .t { top: 5px; } .v12 .u { bottom: 5px; }
+  .v12.on .t, .v12.on .u { transform: translateX(-50%) scaleX(1); }
+
+  /* 13 Eckklammern */
+  .v13 .c { position: absolute; width: 8px; height: 8px; border: 2px solid var(--acc); opacity: 0; transition: opacity 200ms, transform 300ms cubic-bezier(.22,1,.36,1); }
+  .v13 .c1 { top: 4px; left: 4px; border-right: 0; border-bottom: 0; transform: translate(-4px,-4px); }
+  .v13 .c2 { top: 4px; right: 4px; border-left: 0; border-bottom: 0; transform: translate(4px,-4px); }
+  .v13 .c3 { bottom: 4px; left: 4px; border-right: 0; border-top: 0; transform: translate(-4px,4px); }
+  .v13 .c4 { bottom: 4px; right: 4px; border-left: 0; border-top: 0; transform: translate(4px,4px); }
+  .v13.on .c { opacity: 1; transform: none; }
+
+  /* 14 Wischen */
+  .v14 .w { position: absolute; inset: 0; background: #1c1c1c; transform: scaleX(0); transform-origin: left; transition: transform 300ms cubic-bezier(.22,1,.36,1); z-index: -1; }
+  .v14.on .w { transform: scaleX(1); }
+
+  /* 15 Rahmen zeichnen */
+  .v15 .sv { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+  .v15 .sv rect { fill: none; stroke: var(--acc); stroke-width: 1.5; stroke-dasharray: 200; stroke-dashoffset: 200; transition: stroke-dashoffset 500ms ease-out; }
+  .v15.on .sv rect { stroke-dashoffset: 0; }
+
+  /* 16 Icon füllt sich */
+  .v16.on svg { fill: rgba(255,255,255,0.18); }
+  .v16 svg { transition: fill 300ms; fill: transparent; }
+
+  /* 17 Licht von unten */
+  .v17.on { box-shadow: 0 10px 22px -8px var(--acc); border-color: #1e2a22; }
+
+  /* 18 Rotation */
+  @keyframes spin1 { to { transform: rotate(360deg); } }
+  .v18.on .ic { animation: spin1 500ms cubic-bezier(.22,1,.36,1); }
+
+  /* 19 Wackeln */
+  @keyframes wiggle { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-10deg); } 40% { transform: rotate(8deg); } 60% { transform: rotate(-5deg); } 80% { transform: rotate(3deg); } }
+  .v19.on .ic { animation: wiggle 500ms ease-out; }
+
+  /* 20 Label darunter */
+  .v20 { flex-direction: column; gap: 3px; }
+  .v20 .lb { display: block; font-size: 10px; color: var(--acc); opacity: 0; transform: translateY(4px); transition: opacity 200ms, transform 250ms; height: 0; }
+  .v20.on .ic { transform: translateY(-4px); }
+  .v20.on .lb { opacity: 1; transform: translateY(-4px); }
+
+  /* 21 Grüne Ecke */
+  .v21 .tri { position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 10px 10px 0; border-color: transparent var(--acc) transparent transparent; transform: scale(0); transform-origin: top right; transition: transform 250ms cubic-bezier(.34,1.56,.64,1); }
+  .v21.on .tri { transform: scale(1); }
+
+  /* 22 Punkt */
+  .v22 .dot { position: absolute; bottom: 5px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px; background: var(--acc); transform: scale(0); transition: transform 300ms cubic-bezier(.34,1.8,.64,1); }
+  .v22.on .dot { transform: scale(1); }
+
+  /* 23 Verbindung nach unten */
+  .v23 .ln { position: absolute; bottom: -11px; left: 50%; width: 2px; height: 0; margin-left: -1px; background: var(--acc); transition: height 250ms ease-out; }
+  .v23.on .ln { height: 12px; }
+  .v23.on { color: var(--acc); }
+
+  /* 24 Glas */
+  .v24.on { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); box-shadow: inset 0 1px 0 rgba(255,255,255,0.18); }
+
+  /* 25 Kleines Weiß */
+  .v25 .sq { position: absolute; inset: 7px; background: #fff; transform: scale(0.6); opacity: 0; transition: transform 250ms cubic-bezier(.34,1.56,.64,1), opacity 150ms; z-index: -1; }
+  .v25.on .sq { transform: scale(1); opacity: 1; }
+  .v25.on { color: #000; }
+
+  /* 26 Andere schrumpfen */
+  .d26 .b:not(.on) { transform: scale(0.85); opacity: 0.55; }
+  .d26 .b.on { transform: scale(1.05); }
+
+  /* 27 Breiter mit Label */
+  .v27 { gap: 8px; }
+  .v27 .lb { display: block; max-width: 0; overflow: hidden; opacity: 0; transition: max-width 300ms cubic-bezier(.22,1,.36,1), opacity 200ms; }
+  .v27.on { width: auto; padding: 0 16px; background: #161616; border-color: #262626; }
+  .v27.on .lb { max-width: 120px; opacity: 1; }
+
+  /* 28 Nur Farbe */
+  .v28.on { color: var(--acc); }
+
+  /* 29 Akzent-Fläche */
+  .v29.on { color: var(--acc); background: var(--acc-bg); border-color: rgba(74,222,128,0.25); }
+
+  /* 30 Blitz */
+  @keyframes flash { 0% { opacity: .7; } 100% { opacity: 0; } }
+  .v30 .fl { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+  .v30.on .fl { animation: flash 350ms ease-out; }
+  .v30.on { border-color: #333; }
+
+  /* 31 Zeilen-Scan */
+  @keyframes scan { 0% { top: 0; opacity: 1; } 100% { top: 100%; opacity: 0; } }
+  .v31 .sc { position: absolute; left: 0; right: 0; height: 2px; background: var(--acc); box-shadow: 0 0 8px var(--acc); opacity: 0; pointer-events: none; }
+  .v31.on .sc { animation: scan 450ms ease-in; }
+  .v31.on { border-bottom-color: var(--acc); }
+
+  /* 32 Grüner Versatz */
+  .v32.on .ic { filter: drop-shadow(2px 2px 0 var(--acc)); transform: translate(-1px,-1px); }
+
+  /* 33 Rahmen-Pop */
+  .v33 .fr { position: absolute; inset: 0; border: 1px solid #fff; opacity: 0; transform: scale(1.35); transition: transform 300ms cubic-bezier(.22,1,.36,1), opacity 200ms; pointer-events: none; }
+  .v33.on .fr { opacity: 1; transform: scale(1); }
+
+  /* 34 Ring */
+  .v34 .rg { position: absolute; inset: 6px; width: 40px; height: 40px; z-index: -1; }
+  .v34 .rg circle { fill: none; stroke: var(--acc); stroke-width: 1.5; stroke-dasharray: 120; stroke-dashoffset: 120; transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset 500ms ease-out; }
+  .v34.on .rg circle { stroke-dashoffset: 0; }
+
+  /* 35 Hotbar */
+  .v35 .hb { position: absolute; inset: -4px; border: 3px solid #e0e0e0; outline: 2px solid #000; opacity: 0; transform: scale(1.15); transition: transform 180ms steps(3), opacity 120ms; pointer-events: none; }
+  .v35.on .hb { opacity: 1; transform: scale(1); }
+</style>
+</head>
+<body>
+<h1>Dock-Auswahl · Ideen 11 bis 35</h1>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.33 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/><path d="m8 5.2 8 4.5"/><path d="m6.6 11.3 2.4 1.35"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="i-hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+</svg>
+<div id="list"></div>
+<script>
+  const icons = [["i-home","Home"],["i-box","Mods"],["i-bell","Meldungen"],["i-hex","Einstellungen"]];
+  const ideas = [
+    [11,"Puls","Icon atmet leicht, dauerhaft"],
+    [12,"Doppelstrich","grüne Linien oben und unten"],
+    [13,"Eckklammern","vier Ecken rasten ein wie ein Sucher"],
+    [14,"Wischen","dunkle Fläche wischt von links rein"],
+    [15,"Rahmen zeichnen","grüne Linie zeichnet den Rand"],
+    [16,"Icon füllt sich","Innenfläche wird leicht weiß"],
+    [17,"Licht von unten","grüner Schein unter dem Button"],
+    [18,"Drehung","Icon dreht sich einmal"],
+    [19,"Wackeln","Icon schüttelt sich kurz"],
+    [20,"Label","Icon rückt hoch, Name erscheint"],
+    [21,"Grüne Ecke","kleines Dreieck oben rechts"],
+    [22,"Punkt","grüner Punkt darunter, wie macOS"],
+    [23,"Verbindung","Strich wächst zur Dock-Kante"],
+    [24,"Glas","leichte Glasfläche mit Oberkante"],
+    [25,"Kleines Weiß","weißes Quadrat, kleiner als Button"],
+    [26,"Andere schrumpfen","Rest wird klein und dunkel"],
+    [27,"Breiter","Button klappt auf, Name daneben"],
+    [28,"Nur Farbe","Icon wird grün, sonst nichts"],
+    [29,"Akzent-Fläche","grün getönte Fläche plus Icon"],
+    [30,"Blitz","kurzer weißer Blitz, dann Rahmen"],
+    [31,"Zeilen-Scan","Linie läuft von oben nach unten"],
+    [32,"Grüner Versatz","grüner Schatten hinter dem Icon"],
+    [33,"Rahmen-Pop","Rahmen zoomt von außen rein"],
+    [34,"Ring","grüner Kreis zeichnet sich ums Icon"],
+    [35,"Hotbar","dicker Rahmen wie die Minecraft-Hotbar"],
+  ];
+  const extra = {
+    12: '<span class="t"></span><span class="u"></span>',
+    13: '<span class="c c1"></span><span class="c c2"></span><span class="c c3"></span><span class="c c4"></span>',
+    14: '<span class="w"></span>',
+    15: '<svg class="sv" viewBox="0 0 52 52" preserveAspectRatio="none"><rect x="1" y="1" width="50" height="50"/></svg>',
+    21: '<span class="tri"></span>',
+    22: '<span class="dot"></span>',
+    23: '<span class="ln"></span>',
+    25: '<span class="sq"></span>',
+    30: '<span class="fl"></span>',
+    31: '<span class="sc"></span>',
+    33: '<span class="fr"></span>',
+    34: '<svg class="rg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19"/></svg>',
+    35: '<span class="hb"></span>',
+  };
+  const list = document.getElementById("list");
+  for (const [v, name, sub] of ideas) {
+    const row = document.createElement("div"); row.className = "row";
+    row.innerHTML = `<div class="lab">${v} · ${name}<small>${sub}</small></div>`;
+    const d = document.createElement("div"); d.className = "d d" + v;
+    const btns = icons.map(([id, label]) => {
+      const b = document.createElement("button"); b.className = "b v" + v;
+      b.innerHTML = `<span class="ic"><svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg></span><span class="lb">${label}</span>` + (extra[v] || "");
+      d.appendChild(b); return b;
+    });
+    let cur = -1;
+    const sel = (i) => {
+      btns.forEach((b, j) => b.classList.toggle("on", j === i));
+      if (cur !== -1) { const a = btns[i].querySelector(".ic, .fl, .sc"); btns[i].querySelectorAll(".ic, .fl, .sc").forEach(s => { s.style.animation = "none"; void s.offsetWidth; s.style.animation = ""; }); }
+      cur = i;
+    };
+    btns.forEach((b, i) => b.addEventListener("click", () => sel(i)));
+    row.appendChild(d); list.appendChild(row);
+    sel(0);
+  }
+</script>
+</body>
+</html>

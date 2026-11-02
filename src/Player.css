@@ -1,0 +1,11 @@
+/* Mittig im Bereich über dem Dock (Dock braucht unten 32px + 74px), kein Rahmen, kein Hintergrund */
+.player {
+  position: absolute;
+  left: 50%;
+  top: calc((100% - 106px) / 2);
+  transform: translate(-50%, -50%);
+  height: 400px;
+  width: auto;
+  user-select: none;
+  pointer-events: none;
+}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>App in the browser</title>
+    <style>
+      html, body { margin: 0; }
+      #root { width: 1280px; height: 800px; }
+    </style>
+  </head>
+  <body>
+    <!-- Dev-only helper: the whole app with the Tauri bridge stubbed, for checking UI in a normal browser.
+         ?view=settings|instances opens that page, ?panel=accounts|instances opens the dock panel. -->
+    <div id="root"></div>
+    <script>
+      const replies = {
+        list_versions: ["26.3", "26.2", "26.1.2", "26.1.1", "26.1"],
+        "plugin:event|listen": 1,
+        "plugin:updater|check": null,
+        "plugin:window|is_maximized": false,
+      };
+      window.__TAURI_INTERNALS__ = {
+        metadata: { currentWindow: { label: "main" }, currentWebview: { label: "main", windowLabel: "main" } },
+        transformCallback: () => Math.floor(Math.random() * 1e9),
+        unregisterCallback: () => {},
+        invoke: async (cmd) => (cmd in replies ? replies[cmd] : null),
+        convertFileSrc: (p) => p,
+      };
+      window.__TAURI_EVENT_PLUGIN_INTERNALS__ = { unregisterListener: () => {} };
+      const now = Date.now();
+      localStorage.setItem(
+        "reality.instances",
+        JSON.stringify({
+          instances: [
+            { id: "k1x9-survival", name: "Survival", version: "26.3", created: now, lastPlayed: now - 7200e3 },
+            { id: "m3p2-pvp", name: "PvP", version: "26.2", created: now },
+          ],
+          activeId: "k1x9-survival",
+        }),
+      );
+    </script>
+    <script type="module">
+      import "/src/main.tsx";
+      const q = new URLSearchParams(location.search);
+      const click = (sel) => document.querySelector(sel)?.click();
+      setTimeout(() => {
+        const view = q.get("view");
+        if (view) click(`.dock-item[aria-label="${view[0].toUpperCase() + view.slice(1)}"]`);
+        setTimeout(() => {
+          const panel = q.get("panel");
+          if (panel === "accounts") click(".dock-add-account");
+          if (panel === "instances") click(".dock-launch-arrow");
+        }, 400);
+      }, 600);
+    </script>
+  </body>
+</html>

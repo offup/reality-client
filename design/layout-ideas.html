@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Layouts · 12 concepts</title>
+<script src="https://unpkg.com/skinview3d@3.1.0/bundles/skinview3d.bundle.js"></script>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 28px 24px 60px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 24px; letter-spacing: .1em; }
+  #grid { display: grid; grid-template-columns: repeat(2, 640px); gap: 30px 24px; }
+  .lab { font-size: 15px; margin: 10px 0 0; }
+  .lab small { display: block; color: #777; font-size: 12px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; max-width: 620px; }
+  .frame { width: 640px; height: 400px; overflow: hidden; border: 1px solid #2a2a2a; }
+  .win { position: relative; width: 1280px; height: 800px; background: #0a0a0a; transform: scale(.5); transform-origin: 0 0; overflow: hidden; }
+  .bg-grid::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(#161616 1px, transparent 1px), linear-gradient(90deg, #161616 1px, transparent 1px); background-size: 40px 40px; -webkit-mask-image: radial-gradient(ellipse 60% 70% at 50% 45%, #000 20%, transparent 100%); }
+  .bg-ascii { background: #0a0a0a url(/previews/ascii.webp) center bottom / 100% 55% no-repeat; }
+  .bg-glow { background: radial-gradient(ellipse 70% 60% at 50% 100%, #16222e, #0a0a0a 75%); }
+  .abs { position: absolute; }
+  img.skin { position: absolute; width: 340px; height: 450px; }
+  .name { position: absolute; font-family: var(--mc); font-size: 24px; text-shadow: 2px 2px 0 #3f3f3f; white-space: nowrap; }
+  .box { background: #0c0c0c; border: 1px solid #2a2a2a; box-sizing: border-box; }
+  .ico { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #777; position: relative; flex: none; }
+  .ico.on { color: #fff; } .ico svg { width: 22px; height: 22px; }
+  .ul { position: absolute; left: 15px; bottom: 7px; width: 22px; height: 2px; background: #fff; }
+  .ul-v { position: absolute; left: 6px; top: 15px; width: 2px; height: 22px; background: #fff; }
+  .launch { display: flex; border: 1px solid #555; background: #1a1a1a; }
+  .launch .lm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0 32px; box-sizing: border-box; }
+  .launch .lt { font-size: 22px; line-height: 1; letter-spacing: .05em; } .launch .ls { font-family: var(--mc); font-size: 11px; color: #9a9a9a; }
+  .launch .la { width: 52px; display: flex; align-items: center; justify-content: center; color: #bbb; border-left: 1px solid #555; } .launch .la svg { width: 20px; height: 20px; }
+  .launch .tile { width: 52px; display: flex; align-items: center; justify-content: center; padding-left: 4px; }
+  .launch.big .lt { font-size: 34px; } .launch.big .ls { font-size: 13px; } .launch.big .lm { padding: 0 56px; }
+  .face { width: 32px; height: 32px; image-rendering: pixelated; background: url(skin.png) -32px -32px / 256px 256px; position: relative; flex: none; }
+  .face::after { content: ""; position: absolute; inset: 0; background: url(skin.png) -160px -32px / 256px 256px; image-rendering: pixelated; }
+  .seg { display: flex; } .seg .s { width: 44px; height: 42px; display: flex; align-items: center; justify-content: center; color: #aaa; } .seg .s svg { width: 18px; height: 18px; } .seg .s + .s { border-left: 1px solid #2a2a2a; }
+  .logo { display: flex; align-items: center; gap: 12px; } .logo img { width: 34px; height: 34px; mix-blend-mode: lighten; } .logo span { font-size: 17px; letter-spacing: .08em; } .logo small { display: block; font-family: var(--mc); font-size: 10px; color: #666; margin-top: 3px; }
+  .t { font-size: 15px; letter-spacing: .08em; color: #888; } .t.on { color: #fff; }
+  .card { background: #0c0c0c; border: 1px solid #2a2a2a; padding: 14px 16px; box-sizing: border-box; }
+  .card b { display: block; font-weight: normal; font-size: 15px; letter-spacing: .06em; margin-bottom: 6px; } .card span { font-family: var(--ui); font-size: 13px; color: #888; letter-spacing: 0; line-height: 1.4; }
+  .news { height: 90px; background: linear-gradient(135deg, #1b2a3a, #0f1620); border: 1px solid #2a2a2a; position: relative; }
+  .news span { position: absolute; left: 12px; bottom: 10px; font-size: 13px; letter-spacing: .06em; }
+  .mcb { height: 44px; box-sizing: border-box; background: #6f6f6f; border: 2px solid #000; box-shadow: inset 2px 2px 0 #a8a8a8, inset -2px -2px 0 #3e3e3e; display: flex; align-items: center; justify-content: center; font-family: var(--mc); font-size: 17px; text-shadow: 2px 2px 0 #3f3f3f; }
+  .mcb.hv { background: #7e8fbf; box-shadow: inset 2px 2px 0 #b9c4e6, inset -2px -2px 0 #4a5683; }
+  .slot { width: 60px; height: 60px; box-sizing: border-box; border: 2px solid #3a3a3a; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; color: #bbb; } .slot svg { width: 24px; height: 24px; }
+  .slot.on { border: 3px solid #e6e6e6; outline: 2px solid #000; color: #fff; }
+  .big-title { font-family: var(--mc); font-size: 64px; letter-spacing: .04em; text-shadow: 4px 4px 0 #2a2a2a; }
+  .muted { font-family: var(--ui); font-size: 14px; color: #777; letter-spacing: 0; }
+  .vsel { display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 14px; border: 1px solid #2a2a2a; background: #0c0c0c; font-family: var(--mc); font-size: 13px; color: #bbb; box-sizing: border-box; } .vsel svg { width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+<h1>Launcher layouts · 12 concepts · full window at 50 %</h1>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.33 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/><path d="m8 5.2 8 4.5"/><path d="m6.6 11.3 2.4 1.35"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="min" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></symbol>
+</svg>
+<div id="grid"></div>
+<canvas id="src" style="display:none"></canvas>
+<script>
+  const sv = (id) => `<svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  const skin = (x, y, w = 340, h = 450) => `<img class="skin" data-skin alt="" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">`;
+  const name = (x, y, size = 24, center = true) => `<div class="name" style="left:${x}px;top:${y}px;font-size:${size}px;${center ? "transform:translateX(-50%)" : ""}">offup</div>`;
+  const duo = (x, y) => `<div class="abs box seg" style="right:${x}px;top:${y}px"><span class="s">${sv("min")}</span><span class="s">${sv("x")}</span></div>`;
+  const logo = (x, y) => `<div class="abs logo" style="left:${x}px;top:${y}px"><img src="logo.png" alt=""><div><span>REALITY</span><small>v0.1.0</small></div></div>`;
+  const launch = (big = false, face = true, w = 200) => `<div class="launch${big ? " big" : ""}">${face ? `<span class="tile"><span class="face"></span></span>` : ""}<span class="lm" style="min-width:${w}px;height:${big ? 72 : 52}px"><span class="lt">Launch</span><span class="ls">1.21.4</span></span><span class="la">${sv("chev")}</span></div>`;
+  const navIcons = (vertical) => ["home", "box", "bell", "hex"].map((i, k) => `<span class="ico${k === 0 ? " on" : ""}">${sv(i)}${k === 0 ? `<span class="${vertical ? "ul-v" : "ul"}"></span>` : ""}</span>`).join("");
+  const dock = `<div class="abs box" style="left:50%;bottom:32px;transform:translateX(-50%);display:flex;gap:8px;padding:10px"><span class="ico on">${sv("home")}<span class="ul"></span></span><span class="ico">${sv("box")}</span><span style="margin:0 12px">${launch()}</span><span class="ico">${sv("bell")}</span><span class="ico">${sv("hex")}</span></div>`;
+
+  const ideas = [
+    ["1 · Today, tidied", "The current layout as reference, with logo + version top left and the minimize/close duo top right. Everything else as is.",
+      "bg-grid", logo(28, 26) + duo(24, 24) + name(640, 150) + skin(470, 175) + dock],
+    ["2 · Top bar", "One thin bar across the top: logo left, navigation as words in the middle, account face and window controls right. The bottom is free for a big Launch under the player.",
+      "bg-grid", `<div class="abs box" style="left:0;right:0;top:0;height:64px;border-width:0 0 1px;display:flex;align-items:center;padding:0 0 0 24px;gap:36px">${logo(0, 0).replace('class="abs logo" style="left:0px;top:0px"', 'class="logo"')}<span style="flex:1"></span><span class="t on">Home</span><span class="t">Mods</span><span class="t">News</span><span class="t">Settings</span><span style="flex:1"></span><span class="face"></span><span class="seg" style="border-left:1px solid #2a2a2a;height:64px"><span class="s" style="height:64px">${sv("min")}</span><span class="s" style="height:64px">${sv("x")}</span></span></div>` + name(640, 130) + skin(470, 150, 340, 440) + `<div class="abs" style="left:50%;bottom:48px;transform:translateX(-50%)">${launch(true, false, 260)}</div>`],
+    ["3 · Side rail", "The dock turns vertical on the left edge. Launch moves to the bottom right, big. Player stays centered, more air around it.",
+      "bg-grid", `<div class="abs box" style="left:24px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;padding:10px">${navIcons(true)}</div>` + logo(28, 26) + duo(24, 24) + name(640, 150) + skin(470, 175) + `<div class="abs" style="right:32px;bottom:32px">${launch(true)}</div>`],
+    ["4 · Split screen", "Player on the left half, a clean column on the right: name big, version select, Launch, and a news card. Like a game's character screen.",
+      "bg-glow", logo(28, 26) + duo(24, 24) + skin(150, 190, 360, 480) + `<div class="abs" style="left:700px;top:200px;width:460px;display:flex;flex-direction:column;gap:18px"><div class="name" style="position:static;font-size:46px">offup</div><span class="muted">Signed in · Microsoft</span><div class="vsel">1.21.4 · Fabric${sv("chev")}</div>${launch(true, false, 300).replace('class="launch big"', 'class="launch big" style="align-self:stretch"')}<div class="news"><span>HEAVEN COLLECTION</span></div></div>` + `<div class="abs box" style="left:28px;bottom:28px;display:flex;gap:8px;padding:8px">${navIcons(false)}</div>`],
+    ["5 · Main menu", "Like Minecraft's own title screen: big title on top, a vertical stack of stone buttons in the middle, player to the side. Instantly familiar.",
+      "bg-ascii", `<div class="abs big-title" style="left:50%;top:90px;transform:translateX(-50%)">REALITY</div><div class="abs muted" style="left:50%;top:180px;transform:translateX(-50%)">Minecraft 1.21.4 · signed in as offup</div><div class="abs" style="left:50%;top:280px;transform:translateX(-50%);width:400px;display:flex;flex-direction:column;gap:10px"><div class="mcb hv">Launch</div><div class="mcb">Mods</div><div style="display:flex;gap:10px"><div class="mcb" style="flex:1">Settings</div><div class="mcb" style="flex:1">Quit</div></div></div>` + skin(890, 260, 300, 400)],
+    ["6 · Hotbar", "The dock becomes a Minecraft hotbar: square slots, the selected one with the white frame, Launch as a wide slot in the middle.",
+      "bg-grid", logo(28, 26) + duo(24, 24) + name(640, 150) + skin(470, 175) + `<div class="abs" style="left:50%;bottom:30px;transform:translateX(-50%);display:flex;gap:4px;align-items:center"><span class="slot on">${sv("home")}</span><span class="slot">${sv("box")}</span><span class="slot" style="width:220px;flex-direction:column;gap:2px"><span style="font-family:var(--mc);font-size:20px;color:#fff;text-shadow:2px 2px 0 #3f3f3f">Launch</span><span style="font-family:var(--mc);font-size:10px;color:#aaa">1.21.4</span></span><span class="slot">${sv("bell")}</span><span class="slot">${sv("hex")}</span></div>`],
+    ["7 · Cinematic", "Player large and off-center to the right, the name huge on the left with Launch right under it. Navigation as small words top left. Feels like a game trailer.",
+      "bg-glow", `<div class="abs" style="left:56px;top:40px;display:flex;gap:28px"><span class="t on">Home</span><span class="t">Mods</span><span class="t">News</span><span class="t">Settings</span></div>` + duo(24, 24) + skin(700, 140, 460, 610) + `<div class="abs" style="left:56px;top:300px;display:flex;flex-direction:column;gap:22px;align-items:flex-start"><span class="muted">Welcome back</span><div class="name" style="position:static;font-size:72px">offup</div>${launch(true, false, 240)}</div>`],
+    ["8 · Corners", "Every corner has one job: logo top left, window top right, account bottom left, Launch bottom right. The center belongs to the player alone.",
+      "bg-grid", logo(28, 26) + duo(24, 24) + name(640, 150) + skin(470, 175) + `<div class="abs box" style="left:28px;bottom:28px;display:flex;align-items:center;gap:12px;padding:10px 16px 10px 10px"><span class="face"></span><span class="t on">offup</span></div><div class="abs box" style="left:50%;bottom:28px;transform:translateX(-50%);display:flex;gap:8px;padding:8px">${navIcons(false)}</div><div class="abs" style="right:28px;bottom:28px">${launch(false, false, 180)}</div>`],
+    ["9 · Launch under the player", "Dock stays for navigation only; Launch sits directly under the player as the obvious next step.",
+      "bg-grid", logo(28, 26) + duo(24, 24) + name(640, 110) + skin(470, 130, 340, 430) + `<div class="abs" style="left:50%;top:575px;transform:translateX(-50%)">${launch(false, true, 220)}</div><div class="abs box" style="left:50%;bottom:28px;transform:translateX(-50%);display:flex;gap:8px;padding:8px">${navIcons(false)}</div>`],
+    ["10 · Sidebar + feed", "The classic launcher shape (NoRisk, Modrinth) for comparison: icon sidebar left, player center, news feed right.",
+      "bg-grid", `<div class="abs box" style="left:0;top:0;bottom:0;width:84px;border-width:0 1px 0 0;display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:24px"><img src="logo.png" style="width:34px;height:34px;mix-blend-mode:lighten;margin-bottom:20px">${navIcons(true)}</div>` + duo(24, 24) + name(560, 150) + skin(390, 175) + `<div class="abs" style="left:420px;bottom:40px">${launch()}</div><div class="abs" style="right:24px;top:96px;width:300px;display:flex;flex-direction:column;gap:12px"><span class="t" style="color:#bbb">NEWS</span><div class="news"><span>HEAVEN COLLECTION</span></div><div class="news" style="background:linear-gradient(135deg,#2a1a2a,#140f16)"><span>NEW YEAR COSMETICS</span></div><div class="news" style="background:linear-gradient(135deg,#1a2a1a,#0f160f)"><span>1.21.4 SUPPORT</span></div></div>`],
+    ["11 · Only Launch", "Radically reduced: player and one Launch button. Everything else lives in a menu behind the logo top left (and Esc).",
+      "bg-ascii", logo(28, 26) + duo(24, 24) + name(640, 150) + skin(470, 175) + `<div class="abs" style="left:50%;bottom:44px;transform:translateX(-50%)">${launch(true, true, 260)}</div>`],
+    ["12 · Floating cards", "Small cards float around the player: last played server, friends online, news. The dock stays below. More information, still calm.",
+      "bg-grid", logo(28, 26) + duo(24, 24) + name(640, 150) + skin(470, 175) + `<div class="abs card" style="left:120px;top:250px;width:250px"><b>LAST PLAYED</b><span>hugosmp.net · 2 hours ago</span></div><div class="abs card" style="right:120px;top:220px;width:250px"><b>FRIENDS · 3 ONLINE</b><span>lettner_alt, nox, kiwi</span></div><div class="abs card" style="right:150px;top:400px;width:220px"><b>NEW</b><span>Heaven collection is out</span></div>` + dock],
+  ];
+  const grid = document.getElementById("grid");
+  // ?row=N shows only one row (two concepts); used for checking screenshots
+  const row = Number(new URLSearchParams(location.search).get("row") || 0);
+  const shown = row ? ideas.slice((row - 1) * 2, row * 2) : ideas;
+  for (const [t, s, bg, html] of shown) {
+    const c = document.createElement("div");
+    c.innerHTML = `<div class="frame"><div class="win ${bg}">${html}</div></div><div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  }
+  (async () => {
+    const canvas = document.getElementById("src");
+    const viewer = new skinview3d.SkinViewer({ canvas, width: 680, height: 900, preserveDrawingBuffer: true });
+    await viewer.loadSkin("skin.png");
+    viewer.zoom = 0.78;
+    viewer.playerWrapper.rotation.y = -0.55;
+    viewer.render();
+    const url = canvas.toDataURL();
+    for (const img of document.querySelectorAll("img[data-skin]")) img.src = url;
+  })();
+</script>
+</body>
+</html>

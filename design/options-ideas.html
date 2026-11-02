@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Background options · 10 ideas</title>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 28px 24px 48px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 6px; letter-spacing: .1em; }
+  .note { font-family: var(--ui); font-size: 13px; color: #666; margin: 0 0 24px; letter-spacing: 0; }
+  .idea { margin-bottom: 30px; }
+  .lab { font-size: 15px; margin: 10px 0 0; }
+  .lab small { display: block; color: #777; font-size: 12px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; max-width: 1000px; }
+
+  /* real-size crop: bottom of the cards + the options area */
+  .p { position: relative; width: 1280px; background: #0a0a0a; border: 1px solid #222; padding: 0 110px 26px; box-sizing: border-box; overflow: hidden; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: -60px; }
+  .card { border: 1px solid #2a2a2a; background: #0c0c0c; }
+  .card.sel { border-color: #fff; box-shadow: inset 0 0 0 1px #fff; }
+  .card .pv { height: 110px; background: #0a0a0a center / cover; }
+  .card .nm { padding: 14px; font-size: 15px; letter-spacing: .08em; }
+  .gap { height: 22px; }
+
+  .ui { font-family: var(--ui); letter-spacing: 0; }
+  .lbl { font-family: var(--ui); font-size: 13px; color: #999; letter-spacing: 0; }
+  .cap { font-size: 12px; letter-spacing: .12em; color: #777; }
+  .val { font-family: var(--ui); font-size: 13px; color: #ddd; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+  .row { display: flex; align-items: center; }
+  .box { background: #0c0c0c; border: 1px solid #2a2a2a; box-sizing: border-box; }
+  .sw { width: 28px; height: 28px; box-sizing: border-box; border: 1px solid #333; flex: none; }
+  .sw.sel { outline: 2px solid #fff; outline-offset: 2px; }
+  .sw.plus { border: 1px dashed #555; display: flex; align-items: center; justify-content: center; color: #aaa; font-family: var(--ui); font-size: 16px; }
+  .sws { display: flex; gap: 10px; }
+  .slider { position: relative; height: 2px; background: #333; flex: none; }
+  .slider i { position: absolute; left: 0; top: 0; bottom: 0; background: #fff; }
+  .slider b { position: absolute; top: -6px; width: 14px; height: 14px; background: #fff; margin-left: -7px; }
+  .tg { width: 44px; height: 24px; border: 1px solid #444; background: #141414; position: relative; box-sizing: border-box; flex: none; }
+  .tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #666; }
+  .tg.on { border-color: #fff; background: #1a1a1a; } .tg.on::after { left: 23px; background: #fff; }
+  .seg { display: flex; border: 1px solid #2a2a2a; } .seg span { padding: 8px 14px; font-size: 13px; letter-spacing: .08em; color: #777; } .seg span + span { border-left: 1px solid #2a2a2a; } .seg span.on { background: #1a1a1a; color: #fff; }
+  .hue { position: relative; height: 14px; background: linear-gradient(90deg, #ff3b3b, #ffb23b, #e8ff3b, #3bff6a, #3bf5ff, #3b6aff, #b03bff, #ff3bb0, #ff3b3b); }
+  .hue b, .lum b { position: absolute; top: -4px; bottom: -4px; width: 6px; margin-left: -3px; background: #fff; box-shadow: 0 0 0 1px #000; }
+  .lum { position: relative; height: 14px; }
+  .mcs { position: relative; height: 40px; box-sizing: border-box; background: #000; border: 2px solid #a0a0a0; display: flex; align-items: center; justify-content: center; font-family: var(--mc); font-size: 14px; text-shadow: 2px 2px 0 #3f3f3f; }
+  .mcs::before { content: ""; position: absolute; top: -2px; bottom: -2px; left: var(--k); width: 14px; background: #6f6f6f; border: 2px solid #000; box-shadow: inset 2px 2px 0 #a8a8a8, inset -2px -2px 0 #3e3e3e; }
+  .mcs span { position: relative; }
+  .pop { position: absolute; padding: 14px; background: #0f0f0f; border: 1px solid #2e2e2e; }
+</style>
+</head>
+<body>
+<h1>Background options · 10 ideas · real size</h1>
+<p class="note">Example state: ASCII is selected, strength 100 %, the light blue color. The bottom of the cards is shown above for context.</p>
+<div id="list"></div>
+<script>
+  const COLORS = ["#16222e", "#1f1633", "#0f2a1f", "#2a1818", "#2a2410", "#89cff0"];
+  const SEL = 5;
+  const sws = (size = 28, gap = 10, plus = true) => `<div class="sws" style="gap:${gap}px">${COLORS.map((c, i) => `<span class="sw${i === SEL ? " sel" : ""}" style="width:${size}px;height:${size}px;background:${c}"></span>`).join("")}${plus ? `<span class="sw plus" style="width:${size}px;height:${size}px">+</span>` : ""}</div>`;
+  const slider = (w = 200, pct = 43) => `<span class="slider" style="width:${w}px"><i style="width:${pct}%"></i><b style="left:${pct}%"></b></span>`;
+  const cards = `<div class="cards"><div class="card"><div class="pv" style="background-image:url(/previews/lightning.webp)"></div><div class="nm">LIGHTNING</div></div><div class="card sel"><div class="pv" style="background-image:url(/previews/ascii.webp)"></div><div class="nm">ASCII</div></div><div class="card"><div class="pv" style="background-image:url(/previews/ghostfibers.webp)"></div><div class="nm">GHOST FIBERS</div></div></div><div class="gap"></div>`;
+
+  const ideas = [
+    ["1 · One box, three columns", "All options in one panel in dock style. Small caps title above each control, thin dividers between. Calm and clearly grouped.",
+      `<div class="box row" style="padding:18px 0">
+        <div style="flex:1;padding:0 26px"><div class="cap">STRENGTH</div><div class="row" style="gap:14px;margin-top:14px">${slider(220)}<span class="val">100%</span></div></div>
+        <div style="width:1px;align-self:stretch;background:#222"></div>
+        <div style="flex:1.4;padding:0 26px"><div class="cap">COLOR</div><div style="margin-top:12px">${sws()}</div></div>
+      </div>`],
+    ["2 · Only what matters", "Options appear only when the selected background uses them: ASCII shows Strength and Color, Grid would show Moving grid instead. No greyed-out controls ever.",
+      `<div class="row" style="justify-content:center;gap:48px;padding:6px 0">
+        <div class="row" style="gap:14px"><span class="cap">STRENGTH</span>${slider(220)}<span class="val">100%</span></div>
+        <span style="width:1px;height:28px;background:#2a2a2a"></span>
+        <div class="row" style="gap:14px"><span class="cap">COLOR</span>${sws()}</div>
+      </div>`],
+    ["3 · Dock-style toolbar", "A centered bar exactly like the dock: same box, padding and borders. Strength and color sit inside it like dock items.",
+      `<div class="row" style="justify-content:center"><div class="box row" style="padding:10px 18px;gap:22px">
+        <span class="cap" style="color:#bbb">STRENGTH</span>${slider(180)}<span class="val" style="min-width:38px">100%</span>
+        <span style="width:1px;height:34px;background:#2a2a2a"></span>
+        ${sws(26, 8)}
+      </div></div>`],
+    ["4 · Settings list", "Classic rows: label and short help on the left, control on the right, one row per option inside a box. Most readable, scales to more options later.",
+      `<div class="box">
+        <div class="row" style="justify-content:space-between;padding:16px 22px"><div><div style="font-size:14px;letter-spacing:.08em">STRENGTH</div><div class="lbl" style="font-size:12px;color:#666;margin-top:3px">How bright the background is</div></div><div class="row" style="gap:14px">${slider(240)}<span class="val">100%</span></div></div>
+        <div class="row" style="justify-content:space-between;padding:16px 22px;border-top:1px solid #1c1c1c"><div><div style="font-size:14px;letter-spacing:.08em">COLOR</div><div class="lbl" style="font-size:12px;color:#666;margin-top:3px">Tint of the effect</div></div>${sws()}</div>
+      </div>`],
+    ["5 · Color as a spectrum", "No presets: one rainbow strip for the hue and one strip from grey to full color. Any color in two drags, grey included. Strength on its own line below.",
+      `<div class="box" style="padding:18px 22px;display:grid;grid-template-columns:110px 1fr 60px;gap:16px 18px;align-items:center">
+        <span class="cap">COLOR</span><div class="hue"><b style="left:54%"></b></div><span class="sw" style="width:26px;height:26px;background:#89cff0"></span>
+        <span class="cap">SATURATION</span><div class="lum" style="background:linear-gradient(90deg,#888,#3bc8ff)"><b style="left:62%"></b></div><span class="val">62%</span>
+        <span class="cap">STRENGTH</span><div class="lum" style="background:linear-gradient(90deg,#111,#fff)"><b style="left:43%"></b></div><span class="val">100%</span>
+      </div>`],
+    ["6 · Chips with popovers", "Two compact chips. Clicking COLOR opens a small palette above it, STRENGTH opens a slider. Tidy at rest, details only when needed. Shown with the color chip open.",
+      `<div style="position:relative;height:170px"><div class="row" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);gap:10px">
+        <div class="box row" style="height:40px;padding:0 14px;gap:12px"><span class="cap" style="color:#bbb">STRENGTH</span><span class="val">100%</span></div>
+        <div class="box row" style="height:40px;padding:0 10px 0 14px;gap:12px;border-color:#fff"><span class="cap" style="color:#fff">COLOR</span><span class="sw" style="width:20px;height:20px;background:#89cff0"></span></div>
+      </div><div class="pop" style="left:50%;bottom:52px;transform:translateX(-10%)">${sws(28, 8)}</div></div>`],
+    ["7 · Under the selected card", "The options attach directly below the chosen card, like a drawer pulled out of it. Clear which background they belong to.",
+      `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px"><div></div><div class="box" style="border-color:#fff;border-top:0;margin-top:-23px;padding:16px 16px 18px;box-shadow:inset 1px 0 0 #fff,inset -1px 0 0 #fff,inset 0 -1px 0 #fff">
+        <div class="row" style="gap:12px"><span class="cap" style="width:76px">STRENGTH</span>${slider(150)}<span class="val">100%</span></div>
+        <div class="row" style="gap:12px;margin-top:16px"><span class="cap" style="width:76px">COLOR</span>${sws(20, 6)}</div>
+      </div><div></div></div>`],
+    ["8 · Minecraft slider + buttons", "In the game's own style: a stone slider for strength and the colors as small stone buttons.",
+      `<div class="row" style="justify-content:center;gap:24px">
+        <div class="mcs" style="--k:43%;width:300px"><span>Strength: 100%</span></div>
+        <div class="row" style="gap:6px">${COLORS.map((c, i) => `<span style="width:36px;height:36px;box-sizing:border-box;border:2px solid ${i === SEL ? "#fff" : "#000"};background:${c};box-shadow:inset 2px 2px 0 rgba(255,255,255,.25),inset -2px -2px 0 rgba(0,0,0,.35)"></span>`).join("")}<span style="width:36px;height:36px;box-sizing:border-box;border:2px solid #000;background:#6f6f6f;box-shadow:inset 2px 2px 0 #a8a8a8,inset -2px -2px 0 #3e3e3e;display:flex;align-items:center;justify-content:center;font-family:var(--mc);text-shadow:2px 2px 0 #3f3f3f">+</span></div>
+      </div>`],
+    ["9 · Big swatches row", "Color is the star: large swatches across the full width with names, strength as a thin line underneath them.",
+      `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px">${["Night", "Violet", "Forest", "Ember", "Gold", "Sky"].map((n, i) => `<div style="height:56px;background:${COLORS[i]};border:1px solid ${i === SEL ? "#fff" : "#2a2a2a"};${i === SEL ? "box-shadow:inset 0 0 0 1px #fff;" : ""}position:relative"><span style="position:absolute;left:10px;bottom:8px;font-size:12px;letter-spacing:.1em;color:${i === SEL ? "#000" : "#ccc"}">${n.toUpperCase()}</span></div>`).join("")}<div style="height:56px;border:1px dashed #555;display:flex;align-items:center;justify-content:center;font-size:12px;letter-spacing:.1em;color:#aaa">+ CUSTOM</div></div>
+      <div class="row" style="gap:16px;margin-top:20px"><span class="cap">STRENGTH</span>${slider(820)}<span class="val">100%</span></div>`],
+    ["10 · Steps instead of slider", "Strength as four steps (Soft, Normal, Strong, Max) in a segmented control, colors to the right. No fiddly dragging.",
+      `<div class="row" style="justify-content:space-between">
+        <div class="row" style="gap:14px"><span class="cap">STRENGTH</span><div class="seg"><span>SOFT</span><span class="on">NORMAL</span><span>STRONG</span><span>MAX</span></div></div>
+        <div class="row" style="gap:14px"><span class="cap">COLOR</span>${sws()}</div>
+      </div>`],
+  ];
+
+  const q = new URLSearchParams(location.search);
+  const from = +(q.get("from") || 1), to = +(q.get("to") || ideas.length);
+  const list = document.getElementById("list");
+  ideas.forEach(([t, s, html], i) => {
+    if (i + 1 < from || i + 1 > to) return;
+    const d = document.createElement("div");
+    d.className = "idea";
+    d.innerHTML = `<div class="p">${cards}${html}</div><div class="lab">${t}<small>${s}</small></div>`;
+    list.appendChild(d);
+  });
+</script>
+</body>
+</html>

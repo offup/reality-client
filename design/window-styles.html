@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Window controls · 20 styles</title>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; --red: #e24b4a; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 28px 24px 48px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 6px; letter-spacing: .1em; }
+  .note { font-family: var(--ui); font-size: 13px; color: #666; margin: 0 0 24px; letter-spacing: 0; }
+  #grid { display: grid; grid-template-columns: repeat(2, 640px); gap: 28px 24px; }
+  .wide { grid-column: span 2; }
+  .lab { font-size: 15px; margin: 8px 0 0; }
+  .lab small { display: block; color: #777; font-size: 12px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; }
+  .pair { display: flex; gap: 8px; }
+
+  /* One panel = a real 1:1 crop of the window */
+  .p { position: relative; width: 316px; height: 190px; overflow: hidden; background: #0a0a0a; border: 1px solid #222; }
+  .p.full { width: 1286px; }
+  .p::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(#141414 1px, transparent 1px), linear-gradient(90deg, #141414 1px, transparent 1px); background-size: 40px 40px; background-position: right top; }
+  .p .tag { position: absolute; left: 10px; bottom: 8px; font-family: var(--ui); font-size: 11px; color: #555; letter-spacing: 0; }
+  .p.left .tag { left: auto; right: 10px; }
+  .p svg { width: 18px; height: 18px; flex: none; }
+  .cur { position: absolute; width: 14px; height: 20px; pointer-events: none; z-index: 5; }
+
+  /* shared bits */
+  .tr { position: absolute; top: 24px; right: 24px; display: flex; align-items: center; }
+  .b { display: flex; align-items: center; justify-content: center; color: #9a9a9a; box-sizing: border-box; }
+  .hv { color: #fff; }
+  .logo { width: 22px; height: 22px; mix-blend-mode: lighten; }
+  .face { width: 22px; height: 22px; image-rendering: pixelated; background: url(skin.png) -22px -22px / 176px 176px; position: relative; flex: none; }
+  .face::after { content: ""; position: absolute; inset: 0; background: url(skin.png) -110px -22px / 176px 176px; image-rendering: pixelated; }
+
+  /* 1 separate tiles */
+  .s1 { gap: 6px; } .s1 .b { width: 38px; height: 38px; border: 1px solid #2a2a2a; background: #0c0c0c; }
+  .s1 .b.hv { background: #161616; border-color: #444; } .s1 .b.x.hv { background: var(--red); border-color: var(--red); }
+
+  /* 2 edge strip */
+  .s2 { position: absolute; top: 0; right: 0; display: flex; border-left: 1px solid #2a2a2a; border-bottom: 1px solid #2a2a2a; background: #0c0c0c; }
+  .s2 .b { width: 46px; height: 34px; } .s2 .b + .b { border-left: 1px solid #1c1c1c; }
+  .s2 .b.hv { background: #1a1a1a; } .s2 .b.x.hv { background: var(--red); }
+
+  /* 3 vertical segmented */
+  .s3 { flex-direction: column; border: 1px solid #2a2a2a; background: #0c0c0c; }
+  .s3 .b { width: 40px; height: 38px; } .s3 .b + .b { border-top: 1px solid #2a2a2a; }
+  .s3 .b.hv { background: #1a1a1a; } .s3 .b.x.hv { background: var(--red); }
+
+  /* 4 ghost + tooltip */
+  .s4 { gap: 6px; } .s4 .b { width: 36px; height: 36px; color: #6a6a6a; position: relative; }
+  .s4 .b.hv { color: #fff; background: #141414; } .s4 .b.x.hv { color: #ff6b6a; }
+  .tip { position: absolute; top: calc(100% + 8px); right: 0; padding: 5px 9px; background: #0f0f0f; border: 1px solid #2e2e2e; font-family: var(--ui); font-size: 12px; color: #ddd; letter-spacing: 0; white-space: nowrap; }
+
+  /* 5 dock rail with underline */
+  .s5 { gap: 2px; padding: 5px; border: 1px solid #2a2a2a; background: #0c0c0c; }
+  .s5 .b { width: 38px; height: 34px; position: relative; color: #777; }
+  .s5 .b.hv { color: #fff; } .s5 .b.hv::after { content: ""; position: absolute; left: 11px; right: 11px; bottom: 3px; height: 2px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,.35); }
+  .s5 .b.x.hv { color: #ff6b6a; } .s5 .b.x.hv::after { background: var(--red); box-shadow: 0 0 8px rgba(226,75,74,.5); }
+
+  /* 6 pixel traffic lights */
+  .s6 { top: 28px; right: 28px; gap: 9px; } .s6 .b { width: 14px; height: 14px; background: #2e2e2e; }
+  .s6 .b svg { width: 10px; height: 10px; opacity: 0; }
+  .s6.on .b svg { opacity: 1; color: rgba(0,0,0,.65); }
+  .s6.on .m1 { background: #f5c542; } .s6.on .m2 { background: #4ade80; } .s6.on .x { background: var(--red); }
+  .s6.on .b.hv { box-shadow: 0 0 0 2px #0a0a0a, 0 0 0 3px #fff; }
+
+  /* 7 text buttons */
+  .s7 { gap: 18px; font-family: var(--sc); font-size: 14px; letter-spacing: .1em; color: #6f6f6f; }
+  .s7 span { position: relative; padding: 6px 0; } .s7 .hv { color: #fff; }
+  .s7 .x.hv { color: #ff6b6a; } .s7 .hv::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: currentColor; }
+
+  /* 8 brackets */
+  .s8 { gap: 10px; font-family: var(--mc); font-size: 20px; color: #555; }
+  .s8 .g { display: flex; align-items: center; gap: 2px; } .s8 .g .b { color: #9a9a9a; }
+  .s8 .g.hv { color: #fff; } .s8 .g.hv .b { color: #fff; } .s8 .g.x.hv, .s8 .g.x.hv .b { color: #ff6b6a; }
+  .s8 svg { width: 14px !important; height: 14px !important; }
+
+  /* 9 split close */
+  .s9 { gap: 8px; }
+  .s9 .seg { display: flex; border: 1px solid #2a2a2a; background: #0c0c0c; } .s9 .seg .b { width: 40px; height: 38px; } .s9 .seg .b + .b { border-left: 1px solid #2a2a2a; }
+  .s9 .seg .b.hv { background: #1a1a1a; }
+  .s9 .cl { width: 40px; height: 40px; border: 1px solid #4a2222; background: #140c0c; color: #e88; }
+  .s9 .cl.hv { background: var(--red); border-color: var(--red); color: #fff; }
+
+  /* 10 corner notch */
+  .s10 { position: absolute; top: 0; right: 0; width: 176px; height: 46px; background: #2a2a2a; clip-path: polygon(0 0, 100% 0, 100% 100%, 26px 100%); }
+  .s10 .in { position: absolute; inset: 0 0 1px 1px; background: #0c0c0c; clip-path: polygon(0 0, 100% 0, 100% 100%, 26px 100%); display: flex; justify-content: flex-end; align-items: center; padding-right: 8px; gap: 4px; }
+  .s10 .b { width: 38px; height: 32px; } .s10 .b.hv { background: #1a1a1a; } .s10 .b.x.hv { background: var(--red); }
+
+  /* 11 minecraft stone */
+  .s11 { gap: 6px; }
+  .s11 .b { width: 34px; height: 34px; background: #6f6f6f; border: 2px solid #000; box-shadow: inset 2px 2px 0 #a8a8a8, inset -2px -2px 0 #3e3e3e; color: #fff; filter: drop-shadow(2px 2px 0 #3f3f3f); }
+  .s11 .b svg { stroke-width: 2.6; filter: drop-shadow(2px 2px 0 #3f3f3f); }
+  .s11 .b.hv { background: #7e8fbf; box-shadow: inset 2px 2px 0 #b9c4e6, inset -2px -2px 0 #4a5683; }
+  .s11 .b.x.hv { background: #b04040; box-shadow: inset 2px 2px 0 #e08080, inset -2px -2px 0 #6a2020; }
+
+  /* 12 hover reveal */
+  .s12 { gap: 6px; } .s12 .grip { display: flex; gap: 4px; padding: 10px 6px; } .s12 .grip i { width: 4px; height: 4px; background: #444; }
+  .s12 .b { width: 36px; height: 36px; border: 1px solid #2a2a2a; background: #0c0c0c; }
+  .s12 .b.x.hv { background: var(--red); border-color: var(--red); }
+  .zone { position: absolute; top: 0; right: 0; width: 180px; height: 84px; border-left: 1px dashed #262626; border-bottom: 1px dashed #262626; }
+  .zone small { position: absolute; left: 8px; bottom: 6px; font-family: var(--ui); font-size: 10px; color: #444; letter-spacing: 0; }
+
+  /* 13 title bar */
+  .s13 { position: absolute; top: 0; left: 0; right: 0; height: 40px; display: flex; align-items: center; border-bottom: 1px solid #1c1c1c; background: rgba(10,10,10,.6); }
+  .s13 .brand { display: flex; align-items: center; gap: 10px; padding-left: 16px; font-family: var(--sc); font-size: 14px; letter-spacing: .12em; color: #ddd; }
+  .s13 .brand .ver { font-family: var(--mc); font-size: 10px; color: #666; letter-spacing: .03em; }
+  .s13 .ctl { margin-left: auto; display: flex; height: 100%; } .s13 .b { width: 48px; height: 100%; }
+  .s13 .b.hv { background: #1a1a1a; } .s13 .b.x.hv { background: var(--red); }
+
+  /* 14 in the dock */
+  .dock { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); display: flex; align-items: stretch; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; }
+  .dock .di { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #777; position: relative; }
+  .dock .di svg { width: 22px; height: 22px; } .dock .di.act { color: #fff; } .dock .di.act::after { content: ""; position: absolute; left: 15px; right: 15px; bottom: 7px; height: 2px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,.35); }
+  .dock .launch { display: flex; margin: 0 12px; border: 1px solid #555; background: #1a1a1a; }
+  .dock .launch .acc { width: 52px; display: flex; align-items: center; justify-content: center; padding-left: 4px; }
+  .dock .launch .acc .face { width: 32px; height: 32px; background-size: 256px 256px; background-position: -32px -32px; } .dock .launch .acc .face::after { background-size: 256px 256px; background-position: -160px -32px; }
+  .dock .launch .main { min-width: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0 32px 0 20px; }
+  .dock .launch .t { font-family: var(--sc); font-size: 22px; letter-spacing: .05em; line-height: 1; } .dock .launch .v { font-family: var(--mc); font-size: 11px; color: #9a9a9a; line-height: 1; }
+  .dock .launch .arr { width: 52px; display: flex; align-items: center; justify-content: center; border-left: 1px solid #555; color: #bbb; }
+  .dock .sep { width: 1px; background: #2a2a2a; margin: 6px 4px; }
+  .dock .wc { display: flex; flex-direction: column; gap: 4px; } .dock .wc .b { width: 30px; height: 24px; color: #666; } .dock .wc svg { width: 15px; height: 15px; }
+  .dock .wc .b.x.hv { background: var(--red); color: #fff; }
+
+  /* 15 mac side */
+  .tl { position: absolute; top: 24px; left: 24px; display: flex; align-items: center; gap: 16px; }
+  .s15 { display: flex; gap: 8px; } .s15 .b { width: 13px; height: 13px; background: #2e2e2e; } .s15 .b svg { width: 9px; height: 9px; opacity: 0; }
+  .s15.on .b svg { opacity: 1; color: rgba(0,0,0,.65); } .s15.on .x { background: var(--red); } .s15.on .m1 { background: #f5c542; } .s15.on .m2 { background: #4ade80; }
+  .brand15 { display: flex; align-items: center; gap: 9px; font-family: var(--sc); font-size: 14px; letter-spacing: .12em; color: #ccc; }
+
+  /* 16 logo chip + controls */
+  .s16 { gap: 8px; }
+  .s16 .chip { height: 38px; display: flex; align-items: center; gap: 9px; padding: 0 12px 0 9px; border: 1px solid #2a2a2a; background: #0c0c0c; font-family: var(--sc); font-size: 13px; letter-spacing: .12em; color: #ccc; }
+  .s16 .seg { display: flex; border: 1px solid #2a2a2a; background: #0c0c0c; } .s16 .seg .b { width: 38px; height: 38px; } .s16 .seg .b + .b { border-left: 1px solid #2a2a2a; }
+  .s16 .b.hv { background: #1a1a1a; } .s16 .b.x.hv { background: var(--red); }
+
+  /* 17 hanging tab */
+  .s17 { position: absolute; top: 0; right: 24px; display: flex; padding: 0 4px 4px; border: 1px solid #2a2a2a; border-top: 0; background: #0c0c0c; }
+  .s17 .b { width: 38px; height: 34px; } .s17 .b.hv { background: #1a1a1a; } .s17 .b.x.hv { background: var(--red); }
+
+  /* 18 labeled quit */
+  .s18 { gap: 6px; } .s18 .b { width: 38px; height: 38px; border: 1px solid #2a2a2a; background: #0c0c0c; }
+  .s18 .q { height: 38px; display: flex; align-items: center; gap: 8px; padding: 0 14px 0 11px; border: 1px solid #2a2a2a; background: #0c0c0c; color: #bbb; font-family: var(--sc); font-size: 14px; letter-spacing: .1em; }
+  .s18 .q svg { width: 16px; height: 16px; } .s18 .q.hv { background: var(--red); border-color: var(--red); color: #fff; }
+
+  /* 19 LED top line */
+  .s19 { gap: 6px; } .s19 .b { width: 38px; height: 38px; border: 1px solid #2a2a2a; border-top: 2px solid #303030; background: #0c0c0c; }
+  .s19 .b.hv { border-top-color: #fff; color: #fff; background: #121212; box-shadow: 0 -4px 10px -4px rgba(255,255,255,.4); }
+  .s19 .b.x.hv { border-top-color: var(--red); color: #ff6b6a; box-shadow: 0 -4px 12px -4px rgba(226,75,74,.7); }
+
+  /* 20 edge rail vertical */
+  .s20 { position: absolute; top: 0; right: 0; display: flex; flex-direction: column; border-left: 1px solid #2a2a2a; border-bottom: 1px solid #2a2a2a; background: #0c0c0c; }
+  .s20 .b { width: 40px; height: 38px; } .s20 .b + .b { border-top: 1px solid #1c1c1c; }
+  .s20 .b.hv { background: #1a1a1a; } .s20 .b.x.hv { background: var(--red); }
+</style>
+</head>
+<body>
+<h1>Window controls · 20 styles · real size</h1>
+<p class="note">Minimize, maximize and close only. Left: idle. Right: hovering close (the cursor shows where).</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="min" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="max" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="power" viewBox="0 0 24 24"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></symbol>
+  <symbol id="home" viewBox="0 0 24 24"><path d="M3.5 10 12 3.5 20.5 10 17.5 20h-11z"/><path d="M9 13.5c1.6 1.6 4.4 1.6 6 0"/></symbol>
+  <symbol id="box" viewBox="0 0 24 24"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5"/><path d="M12 12v9"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5h4"/></symbol>
+  <symbol id="hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="M8.5 12h7"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+</svg>
+<div id="grid"></div>
+<script>
+  const sv = (id, sw = 1.75) => `<svg fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  // Arrow cursor, tip at (x, y) inside the panel
+  const cur = (x, y) => `<svg class="cur" style="left:${x}px;top:${y}px" viewBox="0 0 14 20"><path d="M1 1v15l4-4 3 7 2.5-1-3-7h5.5z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
+  const pair = (a, b, cls = "") => `<div class="pair"><div class="p ${cls}">${a}<span class="tag">idle</span></div><div class="p ${cls}">${b}<span class="tag">hover close</span></div></div>`;
+  const full = (a) => `<div class="pair"><div class="p full">${a}<span class="tag">hover close</span></div></div>`;
+  const trio = (h, b = (c, i) => `<span class="b ${c}">${sv(i)}</span>`) => b("m1", "min") + b("m2", "max") + b("x" + (h ? " hv" : ""), "x");
+  const L = "https://dummy"; // unused
+
+  const ideas = [
+    ["1 · Separate tiles", "Three small boxes with a gap, same border as the dock. Close fills red on hover.",
+      pair(`<div class="tr s1">${trio(false)}</div>`, `<div class="tr s1">${trio(true)}</div>${cur(282, 42)}`)],
+    ["2 · Edge strip", "Glued into the corner, no margin. Borders only left and bottom, like part of the window frame.",
+      pair(`<div class="s2">${trio(false)}</div>`, `<div class="s2">${trio(true)}</div>${cur(296, 18)}`)],
+    ["3 · Vertical stack", "One segmented box standing upright on the right. Unusual, takes almost no width.",
+      pair(`<div class="tr s3">${trio(false)}</div>`, `<div class="tr s3">${trio(true)}</div>${cur(276, 106)}`)],
+    ["4 · Ghost icons", "No boxes at all, just grey icons. Hover shows a soft square and a small label below.",
+      pair(`<div class="tr s4">${trio(false)}</div>`, `<div class="tr s4"><span class="b m1">${sv("min")}</span><span class="b m2">${sv("max")}</span><span class="b x hv">${sv("x")}<span class="tip">Close</span></span></div>${cur(278, 40)}`)],
+    ["5 · Mini dock", "A tiny copy of the dock: one box, and the white underline glides under the hovered button. Red under close.",
+      pair(`<div class="tr s5">${trio(false)}</div>`, `<div class="tr s5">${trio(true)}</div>${cur(280, 40)}`)],
+    ["6 · Pixel lights", "Three small grey squares. Hovering the group colors them like traffic lights, with symbols.",
+      pair(`<div class="tr s6">${trio(false)}</div>`, `<div class="tr s6 on">${trio(true)}</div>${cur(282, 36)}`)],
+    ["7 · Words", "HIDE · FULL · QUIT in the SmallCaps font, like LAUNCH. Hover underlines the word.",
+      pair(`<div class="tr s7"><span>HIDE</span><span>FULL</span><span class="x">QUIT</span></div>`, `<div class="tr s7"><span>HIDE</span><span>FULL</span><span class="x hv">QUIT</span></div>${cur(272, 38)}`)],
+    ["8 · Brackets", "Icons in square brackets with the Minecraft font, like an old game menu.",
+      pair(`<div class="tr s8">${["min", "max", "x"].map((i) => `<span class="g">[<span class="b">${sv(i, 2.4)}</span>]</span>`).join("")}</div>`,
+           `<div class="tr s8">${["min", "max"].map((i) => `<span class="g">[<span class="b">${sv(i, 2.4)}</span>]</span>`).join("")}<span class="g x hv">[<span class="b">${sv("x", 2.4)}</span>]</span></div>${cur(276, 38)}`)],
+    ["9 · Close apart", "Minimize and maximize together, close on its own with a dark red tint so you never hit it by accident.",
+      pair(`<div class="tr s9"><div class="seg">${trio(false).split('<span class="b x')[0]}</div><span class="b cl">${sv("x")}</span></div>`,
+           `<div class="tr s9"><div class="seg">${trio(false).split('<span class="b x')[0]}</div><span class="b cl hv">${sv("x")}</span></div>${cur(280, 42)}`)],
+    ["10 · Corner notch", "A slanted piece cut into the corner, flush with the edges. Sharp, techy.",
+      pair(`<div class="s10"><div class="in">${trio(false)}</div></div>`, `<div class="s10"><div class="in">${trio(true)}</div></div>${cur(284, 20)}`)],
+    ["11 · Minecraft stone", "Three tiny stone buttons as in the game. Blue on hover, close turns redstone red.",
+      pair(`<div class="tr s11">${trio(false, (c, i) => `<span class="b ${c}">${sv(i, 2.6)}</span>`)}</div>`,
+           `<div class="tr s11">${trio(true, (c, i) => `<span class="b ${c}">${sv(i, 2.6)}</span>`)}</div>${cur(280, 40)}`)],
+    ["12 · Appear on hover", "Idle only three small dots. Moving the mouse into the corner area slides the buttons in.",
+      `<div class="pair"><div class="p"><div class="zone"><small>hover area</small></div><div class="tr s12"><span class="grip"><i></i><i></i><i></i></span></div><span class="tag">idle</span></div><div class="p"><div class="zone"><small>hover area</small></div><div class="tr s12">${trio(true)}</div>${cur(280, 40)}<span class="tag">mouse in the corner</span></div></div>`],
+    ["13 · Thin title bar", "A slim bar across the full top: logo and name left, controls right. Most classic, very clear. Shown full width.",
+      `<div class="wide">${full(`<div class="s13"><span class="brand"><img class="logo" src="logo.png" alt="">REALITY <span class="ver">v0.1.0</span></span><span class="ctl">${trio(true)}</span></div>${cur(1262, 18)}`)}`],
+    ["14 · Inside the dock", "Nothing in the top corner. Minimize and close sit small at the right end of the dock. Shown full width.",
+      `<div class="wide">${`<div class="pair"><div class="p full" style="height:150px"><div class="dock"><span class="di act">${sv("home")}</span><span class="di">${sv("box")}</span><span class="launch"><span class="acc"><span class="face"></span></span><span class="main"><span class="t">LAUNCH</span><span class="v">1.21.4</span></span><span class="arr">${sv("chev")}</span></span><span class="di">${sv("bell")}</span><span class="di">${sv("hex")}</span><span class="sep"></span><span class="wc"><span class="b">${sv("min")}</span><span class="b x hv">${sv("x")}</span></span></div>${cur(968, 92)}<span class="tag">hover close</span></div></div>`}`],
+    ["15 · Left side, Mac style", "Pixel lights top left next to the logo; the right corner stays completely empty.",
+      pair(`<div class="tl"><span class="s15"><span class="b x">${sv("x", 3)}</span><span class="b m1">${sv("min", 3)}</span><span class="b m2">${sv("max", 3)}</span></span><span class="brand15"><img class="logo" src="logo.png" alt="">REALITY</span></div>`,
+           `<div class="tl"><span class="s15 on"><span class="b x">${sv("x", 3)}</span><span class="b m1">${sv("min", 3)}</span><span class="b m2">${sv("max", 3)}</span></span><span class="brand15"><img class="logo" src="logo.png" alt="">REALITY</span></div>${cur(30, 32)}`, "left")],
+    ["16 · Brand + controls", "A small REALITY chip with the logo, then the controls. The corner becomes the app's signature.",
+      pair(`<div class="tr s16"><span class="chip"><img class="logo" src="logo.png" alt="">REALITY</span><span class="seg">${trio(false)}</span></div>`,
+           `<div class="tr s16"><span class="chip"><img class="logo" src="logo.png" alt="">REALITY</span><span class="seg">${trio(true)}</span></div>${cur(280, 42)}`)],
+    ["17 · Hanging tab", "Controls in a tab hanging down from the top edge, no top border. Like a drawer pulled out.",
+      pair(`<div class="s17">${trio(false)}</div>`, `<div class="s17">${trio(true)}</div>${cur(266, 18)}`)],
+    ["18 · Labeled quit", "Minimize and maximize as icons, quit as a real button with power icon and word.",
+      pair(`<div class="tr s18"><span class="b">${sv("min")}</span><span class="b">${sv("max")}</span><span class="q">${sv("power")}QUIT</span></div>`,
+           `<div class="tr s18"><span class="b">${sv("min")}</span><span class="b">${sv("max")}</span><span class="q hv">${sv("power")}QUIT</span></div>${cur(266, 42)}`)],
+    ["19 · LED line", "Each box has a thin line on top that lights up on hover: white, red for close. Glows slightly.",
+      pair(`<div class="tr s19">${trio(false)}</div>`, `<div class="tr s19">${trio(true)}</div>${cur(282, 42)}`)],
+    ["20 · Edge rail", "Upright strip glued to the right edge. Same as 3 but part of the frame, no floating.",
+      pair(`<div class="s20">${trio(false)}</div>`, `<div class="s20">${trio(true)}</div>${cur(296, 96)}`)],
+  ];
+
+  // ?from=1&to=4 shows only some ideas (for screenshots)
+  const q = new URLSearchParams(location.search);
+  const from = +(q.get("from") || 1), to = +(q.get("to") || ideas.length);
+  const grid = document.getElementById("grid");
+  ideas.forEach(([t, s, html], i) => {
+    if (i + 1 < from || i + 1 > to) return;
+    const c = document.createElement("div");
+    if (html.startsWith('<div class="wide">')) {
+      c.className = "wide";
+      html = html.slice('<div class="wide">'.length);
+    }
+    c.innerHTML = `${html}<div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  });
+</script>
+</body>
+</html>

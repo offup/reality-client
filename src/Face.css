@@ -1,0 +1,15 @@
+.face {
+  position: relative;
+  display: block;
+  flex: none;
+  image-rendering: pixelated;
+  background-repeat: no-repeat;
+}
+
+.face-hat {
+  position: absolute;
+  inset: 0;
+  display: block;
+  image-rendering: pixelated;
+  background-repeat: no-repeat;
+}

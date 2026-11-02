@@ -1,0 +1,65 @@
+/* Etwas unter der Mitte des Bereichs über dem Dock (Dock braucht unten 32px + 74px) */
+.skin-view {
+  position: absolute;
+  left: 50%;
+  top: calc((100% - 106px) / 2 + 56px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Only the canvas takes the mouse: dragging turns the skin left/right */
+.skin-view canvas {
+  display: block;
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  transition: opacity 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease;
+}
+
+/* Skin swap: sink a little, fade and blur out; the new skin comes back the same way */
+.skin-view.is-swapping canvas {
+  opacity: 0;
+  transform: translateY(10px) scale(0.96);
+  filter: blur(2px);
+}
+
+.skin-view .skin-name {
+  transition: opacity 180ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.skin-view.is-swapping .skin-name {
+  opacity: 0;
+  transform: translate(-50%, 6px);
+}
+
+.skin-view canvas.is-dragging {
+  cursor: grabbing;
+}
+
+/* Name über dem Kopf wie das Namensschild in Minecraft, nur ohne die dunkle Box:
+   Pixelschrift, weiß, harter Schatten nach rechts unten */
+.skin-name {
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  transform: translateX(-50%);
+  font-family: var(--font-minecraft);
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-shadow: 2px 2px 0 #3f3f3f;
+  white-space: nowrap;
+  animation: skin-name-in 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes skin-name-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

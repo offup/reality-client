@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Settings · ideas</title>
+<script src="https://unpkg.com/skinview3d@3.1.0/bundles/skinview3d.bundle.js"></script>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; --acc: #89cff0; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 32px 24px 64px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 28px; letter-spacing: .1em; }
+  .card { margin-bottom: 40px; }
+  .card .lab { font-size: 16px; margin: 12px 0 0; }
+  .card .lab small { display: block; color: #777; font-size: 13px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; max-width: 896px; }
+  .frame { width: 896px; height: 560px; overflow: hidden; border: 1px solid #2a2a2a; }
+  .win { position: relative; width: 1280px; height: 800px; background: #0a0a0a; transform: scale(.7); transform-origin: 0 0; overflow: hidden; }
+  img.skin { position: absolute; left: 50%; top: 150px; transform: translateX(-50%); width: 320px; height: 420px; }
+  img.skin.dim { opacity: .18; filter: blur(2px); }
+  .pname { position: absolute; left: 50%; top: 118px; transform: translateX(-50%); font-family: var(--mc); font-size: 24px; color: #fff; text-shadow: 2px 2px 0 #3f3f3f; }
+
+  /* Dock, identical to the app, Settings active */
+  .dock { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); display: flex; align-items: stretch; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; z-index: 5; }
+  .dock .it { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #777; position: relative; }
+  .dock .it.on { color: #fff; } .dock svg { width: 22px; height: 22px; }
+  .dock .ul { position: absolute; left: 0; bottom: 7px; width: 22px; height: 2px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,.35); }
+  .dock .lg { display: flex; margin: 0 12px; border: 1px solid #555; background: #1a1a1a; }
+  .dock .lm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 200px; padding: 0 32px 0 20px; height: 52px; box-sizing: border-box; }
+  .dock .lt { font-size: 22px; line-height: 1; letter-spacing: .05em; } .dock .ls { font-family: var(--mc); font-size: 11px; line-height: 1; color: #9a9a9a; }
+  .dock .la { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #bbb; border-left: 1px solid #555; box-sizing: border-box; } .dock .la svg { width: 20px; height: 20px; }
+  .dock .tile { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; padding-left: 4px; box-sizing: border-box; }
+  .face { position: relative; width: 32px; height: 32px; flex: none; image-rendering: pixelated; background: url(skin.png) -32px -32px / 256px 256px; }
+  .face::after { content: ""; position: absolute; inset: 0; background: url(skin.png) -160px -32px / 256px 256px; image-rendering: pixelated; }
+
+  /* Panels in dock style */
+  .panel { position: absolute; background: #0c0c0c; border: 1px solid #2a2a2a; box-sizing: border-box; }
+  .side { left: 80px; top: 72px; width: 260px; height: 580px; padding: 10px; display: flex; flex-direction: column; gap: 4px; }
+  .side .h { font-size: 13px; color: #666; letter-spacing: .1em; padding: 8px 12px 10px; }
+  .side .n { display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; color: #999; font-size: 15px; letter-spacing: .06em; }
+  .side .n svg { width: 18px; height: 18px; } .side .n.on { color: #fff; background: #1a1a1a; border: 1px solid #333; }
+  .side .sp { flex: 1; }
+  .main { left: 352px; top: 72px; width: 848px; height: 580px; padding: 28px 32px; display: flex; flex-direction: column; gap: 22px; overflow: hidden; }
+  .ttl { font-size: 24px; letter-spacing: .06em; line-height: 1; }
+  .sub { font-family: var(--ui); font-size: 13px; color: #888; letter-spacing: 0; margin-top: 6px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid #1a1a1a; }
+  .row:first-of-type { border-top: 0; }
+  .row .l { display: flex; flex-direction: column; gap: 3px; } .row .l b { font-weight: normal; font-size: 15px; letter-spacing: .06em; } .row .l small { font-family: var(--ui); font-size: 12px; color: #777; letter-spacing: 0; }
+  .tg { width: 42px; height: 22px; border: 1px solid #444; background: #141414; position: relative; flex: none; }
+  .tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; background: #666; }
+  .tg.on { border-color: var(--acc); } .tg.on::after { left: 23px; background: var(--acc); }
+  .sel { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 12px; border: 1px solid #444; background: #141414; font-family: var(--ui); font-size: 13px; letter-spacing: 0; color: #ddd; min-width: 160px; justify-content: space-between; }
+  .sel svg { width: 14px; height: 14px; color: #777; }
+  .sl { width: 260px; height: 2px; background: #2a2a2a; position: relative; } .sl i { position: absolute; left: 0; top: 0; height: 100%; width: 55%; background: var(--acc); } .sl b { position: absolute; top: -6px; left: 55%; width: 14px; height: 14px; background: #fff; margin-left: -7px; }
+  .slv { font-family: var(--mc); font-size: 12px; color: #bbb; width: 60px; text-align: right; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 36px; padding: 0 16px; border: 1px solid #555; background: #1a1a1a; color: #fff; font-size: 14px; letter-spacing: .06em; white-space: nowrap; }
+  .btn.ghost { border-color: #2e2e2e; background: none; color: #bbb; } .btn svg { width: 16px; height: 16px; }
+  .tabs { position: absolute; left: 50%; top: 72px; transform: translateX(-50%); display: flex; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; }
+  .tabs .t { height: 40px; padding: 0 18px; display: flex; align-items: center; gap: 10px; color: #888; font-size: 14px; letter-spacing: .06em; } .tabs .t svg { width: 16px; height: 16px; } .tabs .t.on { color: #fff; background: #1a1a1a; border: 1px solid #333; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .tile2 { position: relative; height: 110px; border: 1px solid #2e2e2e; background: #111; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px 12px; box-sizing: border-box; font-size: 13px; letter-spacing: .06em; overflow: hidden; }
+  .tile2.on { border-color: var(--acc); } .tile2.on::after { content: "✓"; position: absolute; top: 8px; right: 10px; width: 20px; height: 20px; background: var(--acc); color: #000; font-family: var(--ui); font-size: 12px; display: flex; align-items: center; justify-content: center; }
+  .tile2 .pv { position: absolute; inset: 0; }
+  .pv.solid { background: #0a0a0a; } .pv.gridbg { background: #0a0a0a; background-image: linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px); background-size: 16px 16px; }
+  .pv.grad { background: radial-gradient(ellipse at 50% 100%, #1a2a3a, #0a0a0a 70%); } .pv.img { background: linear-gradient(160deg, #203040, #0a0a0a 60%, #1a1a0a); }
+  .pv.stars { background: #0a0a0a; background-image: radial-gradient(#fff 0.6px, transparent 0.8px), radial-gradient(#fff 0.5px, transparent 0.7px); background-size: 37px 29px, 53px 41px; opacity: .8; }
+  .pv.skin { background: radial-gradient(ellipse at 50% 60%, #2b4a5e, #0a0a0a 65%); }
+  .tile2 span { position: relative; text-shadow: 1px 1px 0 #000; }
+  .sw { display: flex; gap: 10px; } .sw i { width: 28px; height: 28px; border: 1px solid #333; box-sizing: border-box; } .sw i.on { outline: 2px solid #fff; outline-offset: 2px; }
+  .skins { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+  .skins .s { height: 120px; border: 1px solid #2e2e2e; background: #111; display: flex; align-items: center; justify-content: center; position: relative; }
+  .skins .s img { height: 100px; } .skins .s.on { border-color: var(--acc); } .skins .s.add { border-style: dashed; color: #666; font-size: 12px; letter-spacing: .06em; flex-direction: column; gap: 8px; } .skins .s.add svg { width: 20px; height: 20px; }
+  .capes { display: flex; gap: 10px; } .capes .c { width: 64px; height: 100px; border: 1px solid #2e2e2e; background: #111; image-rendering: pixelated; position: relative; }
+  .capes .c.on { border-color: var(--acc); } .capes .c.none { display: flex; align-items: center; justify-content: center; color: #666; font-size: 12px; }
+  .capes .c i { position: absolute; left: 12px; top: 10px; width: 40px; height: 64px; }
+  .sheet { right: 0; top: 0; bottom: 0; width: 460px; border-left: 1px solid #2a2a2a; border-top: 0; border-right: 0; border-bottom: 0; padding: 36px 28px; display: flex; flex-direction: column; gap: 18px; box-shadow: -30px 0 60px rgba(0,0,0,.6); }
+  .hub { position: absolute; left: 50%; top: 110px; transform: translateX(-50%); width: 900px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .hub .h { height: 150px; background: #0c0c0c; border: 1px solid #2a2a2a; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
+  .hub .h .ic { color: #ddd; } .hub .h .ic svg { width: 26px; height: 26px; } .hub .h b { font-weight: normal; font-size: 17px; letter-spacing: .06em; } .hub .h small { font-family: var(--ui); font-size: 12px; color: #777; letter-spacing: 0; margin-top: 4px; }
+  .prev { display: flex; gap: 24px; align-items: flex-start; }
+  .prev .box { width: 220px; height: 300px; border: 1px solid #2a2a2a; background: #0a0a0a; display: flex; align-items: center; justify-content: center; position: relative; } .prev .box img { height: 280px; }
+  .prev .box .nm { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); font-family: var(--mc); font-size: 14px; text-shadow: 2px 2px 0 #3f3f3f; }
+  .mini { display: flex; gap: 8px; }
+</style>
+</head>
+<body>
+<h1>Settings · how it could look · 8 mock-ups, real window size at 70 %</h1>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.33 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/><path d="m8 5.2 8 4.5"/><path d="m6.6 11.3 2.4 1.35"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="i-hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+  <symbol id="i-palette" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6h1.9c3 0 5.5-2.5 5.5-5.5C22 6 17.5 2 12 2z"/></symbol>
+  <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-disc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></symbol>
+</svg>
+<div id="grid"></div>
+<canvas id="src" style="display:none"></canvas>
+<script>
+  const sv = (id) => `<svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  const skin = (cls = "") => `<img class="skin ${cls}" data-skin alt="">`;
+  const dock = `<div class="dock">
+    <div class="it">${sv("i-home")}</div><div class="it">${sv("i-box")}</div>
+    <div class="lg"><div class="tile"><span class="face"></span></div><div class="lm"><span class="lt">Launch</span><span class="ls">1.21.4</span></div><div class="la">${sv("i-chev")}</div></div>
+    <div class="it">${sv("i-bell")}</div><div class="it on">${sv("i-hex")}<span class="ul" style="transform:translateX(15px)"></span></div></div>`;
+  const nav = (on) => `<div class="panel side"><div class="h">SETTINGS</div>
+    ${[["i-user","Account"],["i-shirt","Skin & cape"],["i-image","Background"],["i-palette","Appearance"],["i-rocket","Launch"],["i-cpu","Java & memory"],["i-folder","Folders"],["i-info","About"]].map(([i,l]) => `<div class="n${l===on?" on":""}">${sv(i)}${l}</div>`).join("")}
+    <div class="sp"></div><div class="n" style="color:#666;font-family:var(--ui);font-size:12px;letter-spacing:0">Reality Client v0.1.0</div></div>`;
+  const toggle = (on) => `<span class="tg${on?" on":""}"></span>`;
+  const row = (b, s, ctrl) => `<div class="row"><div class="l"><b>${b}</b><small>${s}</small></div>${ctrl}</div>`;
+  const sel = (v) => `<span class="sel">${v}${sv("i-chev")}</span>`;
+  const slider = (v) => `<div style="display:flex;align-items:center;gap:14px"><div class="sl"><i></i><b></b></div><span class="slv">${v}</span></div>`;
+  const cape = (c, on) => `<span class="c${on?" on":""}"><i style="background:${c}"></i></span>`;
+  const ideas = [
+    ["1 · Sidebar + page · Account", "Settings replace the player: categories on the left, content on the right, both in dock style. Dock stays. Home brings the player back.",
+      skin("dim") + nav("Account") + `<div class="panel main"><div><div class="ttl">Account</div><div class="sub">Signed in via Microsoft</div></div>
+        ${row("Roblox_Lover_67", "069a79f4 · Java Edition · last login today", `<span class="btn ghost">Remove</span>`)}
+        ${row("Show name above player", "The Minecraft-style name tag on the home screen", toggle(true))}
+        ${row("Keep me signed in", "Reuse the session until it expires", toggle(true))}
+        ${row("Discord Rich Presence", "Show \"Playing with Reality\" on Discord", toggle(false))}</div>` + dock],
+    ["2 · Skin & cape", "Live preview left, your skin library right, upload or pick from history. Capes as a row: the ones you own plus none.",
+      nav("Skin & cape") + `<div class="panel main"><div class="prev"><div class="box"><span class="nm">Roblox_Lover_67</span>${skin("")}</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:18px"><div><div class="ttl">Skin</div><div class="sub">Classic model · changes apply to your Minecraft account</div></div>
+        <div class="skins"><div class="s on">${skin("")}</div><div class="s">${skin("")}</div><div class="s">${skin("")}</div><div class="s">${skin("")}</div><div class="s add">${sv("i-upload")}UPLOAD</div><div class="s add">${sv("i-folder")}BROWSE</div></div>
+        <div class="mini"><span class="btn">Apply skin</span><span class="btn ghost">Slim model</span><span class="btn ghost">Save to library</span></div>
+        <div><div class="ttl" style="font-size:18px">Cape</div></div>
+        <div class="capes"><span class="c none on">none</span>${cape("#1b2a4a",false)}${cape("#3a1b1b",false)}${cape("#1b3a2a",false)}${cape("#4a3a1b",false)}</div></div></div></div>` + dock],
+    ["3 · Background", "Pick how the home screen looks behind the player: solid, grid, gradient, stars, your own image, or colors pulled from your skin. Plus an accent color.",
+      nav("Background") + `<div class="panel main"><div><div class="ttl">Background</div><div class="sub">Shown behind the player on the home screen</div></div>
+        <div class="grid">
+          <div class="tile2 on"><div class="pv solid"></div><span>SOLID</span></div><div class="tile2"><div class="pv gridbg"></div><span>GRID</span></div><div class="tile2"><div class="pv grad"></div><span>GRADIENT</span></div><div class="tile2"><div class="pv stars"></div><span>STARS</span></div>
+          <div class="tile2"><div class="pv img"></div><span>IMAGE …</span></div><div class="tile2"><div class="pv skin"></div><span>SKIN COLORS</span></div><div class="tile2"><div class="pv solid" style="background:#000"></div><span>PURE BLACK</span></div><div class="tile2" style="border-style:dashed;align-items:center;justify-content:center;color:#666"><span>+ CUSTOM</span></div>
+        </div>
+        ${row("Accent color", "Underline, checks and highlights", `<div class="sw"><i style="background:#89cff0" class="on"></i><i style="background:#4ade80"></i><i style="background:#f472b6"></i><i style="background:#facc15"></i><i style="background:#a78bfa"></i><i style="background:#fff"></i></div>`)}
+        ${row("Dim background while panels are open", "", toggle(true))}</div>` + dock],
+    ["4 · Appearance", "Everything about the look: dock size, animations, fonts, the player idle motion.",
+      nav("Appearance") + `<div class="panel main"><div><div class="ttl">Appearance</div><div class="sub">How the client looks and moves</div></div>
+        ${row("Dock size", "", slider("100 %"))}
+        ${row("Player idle animation", "Dangling arms and legs on the home screen", toggle(true))}
+        ${row("Player can be rotated", "Drag left/right, eases back", toggle(true))}
+        ${row("Panel animations", "Slide and fade for account panel and settings", toggle(true))}
+        ${row("Title font", "", sel("Minecraft Ten"))}
+        ${row("Reduce motion", "Follows the Windows setting", toggle(false))}</div>` + dock],
+    ["5 · Launch & Java", "Memory, resolution and Java. Sliders and selects in the same style as the rest.",
+      nav("Java & memory") + `<div class="panel main"><div><div class="ttl">Java & memory</div><div class="sub">Applies to every launch</div></div>
+        ${row("Memory", "4096 MB of 16384 MB", slider("4096 MB"))}
+        ${row("Java runtime", "Bundled Java 21 (recommended)", sel("Bundled · Java 21"))}
+        ${row("Resolution", "", `<div class="mini">${sel("1920")}${sel("1080")}</div>`)}
+        ${row("Fullscreen", "", toggle(false))}
+        ${row("Close client when the game starts", "", toggle(false))}
+        ${row("JVM arguments", "Advanced", `<span class="btn ghost">Edit …</span>`)}</div>` + dock],
+    ["6 · Tabs on top", "Alternative layout: a tab bar in dock style at the top, content centered, the player stays faintly visible behind.",
+      skin("dim") + `<div class="tabs">${[["i-user","Account"],["i-shirt","Skin & cape"],["i-image","Background"],["i-palette","Appearance"],["i-rocket","Launch"],["i-info","About"]].map(([i,l],k) => `<div class="t${k===2?" on":""}">${sv(i)}${l}</div>`).join("")}</div>
+        <div class="panel main" style="left:50%;transform:translateX(-50%);top:150px;height:500px;width:900px"><div><div class="ttl">Background</div><div class="sub">Shown behind the player on the home screen</div></div>
+        <div class="grid"><div class="tile2 on"><div class="pv solid"></div><span>SOLID</span></div><div class="tile2"><div class="pv gridbg"></div><span>GRID</span></div><div class="tile2"><div class="pv grad"></div><span>GRADIENT</span></div><div class="tile2"><div class="pv stars"></div><span>STARS</span></div></div>
+        ${row("Accent color", "", `<div class="sw"><i style="background:#89cff0" class="on"></i><i style="background:#4ade80"></i><i style="background:#f472b6"></i><i style="background:#facc15"></i></div>`)}</div>` + dock],
+    ["7 · Side sheet", "Alternative: settings slide in from the right, the player stays on screen and reacts live, e.g. when you change skin or background.",
+      `<div class="pname" style="left:35%">Roblox_Lover_67</div>` + skin("").replace("left: 50%","left:35%").replace('class="skin "', 'class="skin " style="left:35%"') + `<div class="panel sheet"><div><div class="ttl">Settings</div><div class="sub">Changes apply instantly</div></div>
+        <div class="side" style="position:static;width:auto;height:auto;padding:0;border:0;background:none">${[["i-user","Account"],["i-shirt","Skin & cape"],["i-image","Background"],["i-palette","Appearance"],["i-rocket","Launch"],["i-cpu","Java & memory"],["i-info","About"]].map(([i,l],k) => `<div class="n${k===1?" on":""}">${sv(i)}${l}</div>`).join("")}</div></div>` + dock],
+    ["8 · Hub with cards", "Alternative: first a hub with one card per area, each with a one-line summary. Click opens the page.",
+      `<div class="hub">${[["i-user","Account","Roblox_Lover_67 · 2 accounts"],["i-shirt","Skin & cape","Classic · no cape"],["i-image","Background","Solid #0A0A0A"],["i-palette","Appearance","Dock 100 % · animations on"],["i-rocket","Launch","1.21.4 · windowed 1920×1080"],["i-cpu","Java & memory","Bundled Java 21 · 4 GB"],["i-folder","Folders","Open .minecraft, mods, logs"],["i-sparkle","What's new","v0.1.0"],["i-info","About","Reality Client"]].map(([i,b,s]) => `<div class="h"><div class="ic">${sv(i)}</div><div><b>${b}</b><small>${s}</small></div></div>`).join("")}</div>` + dock],
+  ];
+  const grid = document.getElementById("grid");
+  for (const [t, s, html] of ideas) {
+    const c = document.createElement("div"); c.className = "card";
+    c.innerHTML = `<div class="frame"><div class="win">${html}</div></div><div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  }
+  (async () => {
+    const canvas = document.getElementById("src");
+    const viewer = new skinview3d.SkinViewer({ canvas, width: 640, height: 840, preserveDrawingBuffer: true });
+    await viewer.loadSkin("skin.png");
+    viewer.zoom = 0.85;
+    viewer.playerWrapper.rotation.y = -0.45;
+    viewer.render();
+    const url = canvas.toDataURL();
+    for (const img of document.querySelectorAll("img[data-skin]")) img.src = url;
+  })();
+</script>
+</body>
+</html>

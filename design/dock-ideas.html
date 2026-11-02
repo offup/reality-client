@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dock-Animationen</title>
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<style>
+  :root { --acc: #4ade80; --acc-dim: rgba(74, 222, 128, 0.35); }
+  html, body { margin: 0; background: #000; color: #fff; font-family: "Segoe UI", system-ui, sans-serif; }
+  body { padding: 32px 24px 48px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 24px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .row { display: flex; align-items: center; gap: 28px; padding: 14px 0; border-top: 1px solid #141414; }
+  .lab { width: 190px; font-size: 14px; }
+  .lab small { display: block; color: #777; font-size: 12px; margin-top: 2px; }
+  .d { position: relative; display: flex; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; }
+  .b { position: relative; z-index: 1; width: 52px; height: 52px; border: 1px solid transparent; background: none;
+       color: #666; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;
+       transition: color 200ms, background 250ms, transform 250ms, border-color 250ms, box-shadow 250ms; }
+  .b svg { width: 22px; height: 22px; }
+  .b:hover { color: #aaa; }
+  .b.on { color: #fff; }
+
+  /* 1 Neon */
+  .v1.on svg { filter: drop-shadow(0 0 6px rgba(255,255,255,0.9)); }
+  .v1 .u { position: absolute; bottom: 5px; left: 50%; width: 18px; height: 2px; transform: translateX(-50%) scaleX(0); background: var(--acc); box-shadow: 0 0 10px var(--acc); transition: transform 300ms cubic-bezier(.22,1,.36,1); }
+  .v1.on .u { transform: translateX(-50%) scaleX(1); }
+
+  /* 2 Unterstrich gleitet */
+  .d2 .bar { position: absolute; bottom: 8px; left: 0; width: 24px; height: 2px; background: var(--acc); box-shadow: 0 0 8px var(--acc-dim); transition: transform 320ms cubic-bezier(.34,1.4,.64,1); }
+
+  /* 3 Spotlight */
+  .d3 .spot { position: absolute; top: -10px; left: 0; width: 100px; height: 80px; margin-left: -24px; pointer-events: none;
+    background: radial-gradient(ellipse 50% 70% at 50% 0%, rgba(255,255,255,0.22), transparent 75%); transition: transform 340ms cubic-bezier(.22,1,.36,1); }
+
+  /* 4 Hologramm */
+  @keyframes holo { 0% { filter: drop-shadow(-3px 0 #22d3ee) drop-shadow(3px 0 #f472b6); transform: skewX(-8deg); opacity: .6; }
+    40% { filter: drop-shadow(2px 0 #22d3ee) drop-shadow(-2px 0 #f472b6); transform: skewX(4deg); opacity: 1; }
+    100% { filter: drop-shadow(0 0 8px rgba(255,255,255,.5)); transform: none; } }
+  .v4.on svg { animation: holo 380ms ease-out forwards; }
+
+  /* 5 Grasblock */
+  .v5 .g { position: absolute; top: 0; left: 0; height: 4px; width: 0; background: var(--acc); transition: width 300ms cubic-bezier(.22,1,.36,1); }
+  .v5.on { background: #151515; border-color: #222; }
+  .v5.on .g { width: 100%; }
+
+  /* 6 Sonar */
+  .ring { position: absolute; inset: 0; border: 1px solid var(--acc); pointer-events: none; animation: sonar 700ms ease-out forwards; }
+  @keyframes sonar { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(1.9); opacity: 0; } }
+  .v6.on { border-color: var(--acc); color: var(--acc); }
+
+  /* 7 Lift */
+  .v7.on { background: #1c1c1c; border-color: #2c2c2c; transform: translateY(-4px); box-shadow: 0 10px 18px rgba(0,0,0,.7), 0 1px 0 #333 inset; }
+
+  /* 8 Schimmer */
+  .v8 { overflow: hidden; }
+  .v8.on { border-color: #2a4a35; background: #0f1a13; }
+  .v8 .sh { position: absolute; inset: 0; pointer-events: none; }
+  .v8.on .sh::after { content: ""; position: absolute; inset: -20px; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.35) 50%, transparent 65%); animation: sweep 650ms ease-out forwards; }
+  @keyframes sweep { 0% { transform: translateX(-110%); } 100% { transform: translateX(110%); } }
+
+  /* 9 Editor-Block */
+  .d9 .blk { position: absolute; top: 10px; left: 0; width: 52px; height: 52px; background: #181818; border-left: 2px solid var(--acc); box-sizing: border-box; transition: transform 320ms cubic-bezier(.22,1,.36,1); }
+
+  /* 10 Zeichnen */
+  .v10.on svg * { stroke-dasharray: 90; animation: draw 650ms ease-out forwards; }
+  @keyframes draw { 0% { stroke-dashoffset: 90; stroke: var(--acc); } 70% { stroke: var(--acc); } 100% { stroke-dashoffset: 0; stroke: #fff; } }
+</style>
+</head>
+<body>
+<h1>Dock-Auswahl · 10 Ideen</h1>
+<div id="list"></div>
+<script>
+  const icons = ["user", "puzzle", "shirt", "settings"];
+  const ideas = [
+    [1, "Neon", "Icon leuchtet, grüner Strich darunter"],
+    [2, "Unterstrich", "grüne Linie gleitet mit Nachfedern"],
+    [3, "Spotlight", "Lichtkegel von oben wandert"],
+    [4, "Hologramm", "kurzer Farbversatz, dann Glow"],
+    [5, "Grasblock", "grüne Kante wächst oben drüber"],
+    [6, "Sonar", "Ringe laufen nach außen"],
+    [7, "Lift", "Button hebt sich mit Schatten"],
+    [8, "Schimmer", "Lichtstreifen fegt drüber"],
+    [9, "Editor", "Block mit Akzentkante gleitet"],
+    [10, "Zeichnen", "Icon zeichnet sich grün nach"],
+  ];
+  const list = document.getElementById("list");
+  for (const [v, name, sub] of ideas) {
+    const row = document.createElement("div"); row.className = "row";
+    row.innerHTML = `<div class="lab">${v} · ${name}<small>${sub}</small></div>`;
+    const d = document.createElement("div"); d.className = "d d" + v;
+    if (v === 2) d.innerHTML = '<span class="bar"></span>';
+    if (v === 3) d.innerHTML = '<span class="spot"></span>';
+    if (v === 9) d.innerHTML = '<span class="blk"></span>';
+    const btns = icons.map((ic) => {
+      const b = document.createElement("button"); b.className = "b v" + v;
+      b.innerHTML = `<i data-lucide="${ic}"></i>` + (v === 1 ? '<span class="u"></span>' : v === 5 ? '<span class="g"></span>' : v === 8 ? '<span class="sh"></span>' : "");
+      d.appendChild(b); return b;
+    });
+    let cur = -1;
+    const sel = (i) => {
+      btns.forEach((b, j) => b.classList.toggle("on", j === i));
+      if (v === 2) d.querySelector(".bar").style.transform = `translateX(${btns[i].offsetLeft + 14}px)`;
+      if (v === 3) d.querySelector(".spot").style.transform = `translateX(${btns[i].offsetLeft}px)`;
+      if (v === 9) d.querySelector(".blk").style.transform = `translateX(${btns[i].offsetLeft}px)`;
+      if (v === 6 && cur !== -1) for (let k = 0; k < 3; k++) {
+        const r = document.createElement("span"); r.className = "ring"; r.style.animationDelay = k * 120 + "ms";
+        btns[i].appendChild(r); setTimeout(() => r.remove(), 900);
+      }
+      if ((v === 4 || v === 8 || v === 10) && cur !== -1) { const s = btns[i].querySelector("svg, .sh"); if (s) { s.style.animation = "none"; void s.offsetWidth; s.style.animation = ""; } }
+      cur = i;
+    };
+    btns.forEach((b, i) => b.addEventListener("click", () => sel(i)));
+    row.appendChild(d); list.appendChild(row);
+    requestAnimationFrame(() => sel(0));
+  }
+  lucide.createIcons();
+</script>
+</body>
+</html>

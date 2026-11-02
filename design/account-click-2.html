@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Account · nach dem Klick · Teil 2</title>
+<script src="https://unpkg.com/skinview3d@3.1.0/bundles/skinview3d.bundle.js"></script>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 32px 24px 64px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 28px; letter-spacing: .1em; }
+  .card { margin-bottom: 40px; }
+  .card .lab { font-size: 16px; margin: 12px 0 0; }
+  .card .lab small { display: block; color: #777; font-size: 13px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; max-width: 896px; }
+  .frame { width: 896px; height: 560px; overflow: hidden; border: 1px solid #2a2a2a; }
+  .win { position: relative; width: 1280px; height: 800px; background: #000; transform: scale(.7); transform-origin: 0 0; overflow: hidden; }
+  .win::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(#161616 1px, transparent 1px), linear-gradient(90deg, #161616 1px, transparent 1px); background-size: 40px 40px; -webkit-mask-image: radial-gradient(ellipse 60% 70% at 50% 45%, #000 20%, transparent 100%); }
+  .logo { position: absolute; left: 36px; top: 36px; display: flex; align-items: center; gap: 14px; }
+  .logo img { width: 40px; height: 40px; }
+  .logo span { font-size: 18px; letter-spacing: .08em; } .logo small { display: block; font-family: var(--mc); font-size: 11px; color: #777; margin-top: 3px; }
+  img.skin { position: absolute; left: 50%; top: 150px; transform: translateX(-50%); width: 320px; height: 420px; }
+  img.skin.dim { filter: grayscale(1) brightness(.45); opacity: .5; }
+  img.skin.sil { filter: grayscale(1) brightness(.3); }
+  .pname { position: absolute; left: 50%; top: 118px; transform: translateX(-50%); font-family: var(--mc); font-size: 26px; letter-spacing: .04em; color: #fff; white-space: nowrap; }
+  .face { position: relative; width: 32px; height: 32px; flex: none; image-rendering: pixelated; background: url(skin.png) -32px -32px / 256px 256px; }
+  .face::after { content: ""; position: absolute; inset: 0; background: url(skin.png) -160px -32px / 256px 256px; image-rendering: pixelated; }
+  .face.lg { width: 64px; height: 64px; background-size: 512px 512px; background-position: -64px -64px; } .face.lg::after { background-size: 512px 512px; background-position: -320px -64px; }
+  .face.md { width: 44px; height: 44px; background-size: 352px 352px; background-position: -44px -44px; } .face.md::after { background-size: 352px 352px; background-position: -220px -44px; }
+
+  .dock { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); display: flex; align-items: stretch; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; z-index: 5; }
+  .dock .it { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #777; position: relative; }
+  .dock .it.on { color: #fff; } .dock svg { width: 22px; height: 22px; }
+  .dock .ul { position: absolute; left: 0; bottom: 7px; width: 22px; height: 2px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,.35); }
+  .dock .lg { display: flex; margin: 0 12px; border: 1px solid #555; background: #1a1a1a; position: relative; }
+  .dock .lm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 200px; padding: 0 32px 0 20px; height: 52px; box-sizing: border-box; position: relative; overflow: hidden; }
+  .dock .lt { font-size: 22px; line-height: 1; letter-spacing: .05em; position: relative; } .dock .ls { font-family: var(--mc); font-size: 11px; line-height: 1; color: #9a9a9a; position: relative; }
+  .dock .la { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #bbb; border-left: 1px solid #555; box-sizing: border-box; } .dock .la svg { width: 20px; height: 20px; }
+  .dock .add { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; padding-left: 4px; box-sizing: border-box; color: #6a6a6a; position: relative; }
+  .dock .add .bx { width: 34px; height: 34px; border: 1px dashed #555; background: #1a1a1a; display: flex; align-items: center; justify-content: center; } .dock .add .bx svg { width: 18px; height: 18px; }
+  .dock .add.on { color: #fff; } .dock .add.on .bx { border-color: #9a9a9a; background: #262626; }
+  .dock .tile { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .dock .tile .on-dot { position: absolute; right: 8px; bottom: 8px; width: 8px; height: 8px; background: #4ade80; border: 2px solid #1a1a1a; }
+
+  .ms { display: flex; align-items: center; justify-content: center; gap: 12px; height: 44px; padding: 0 16px; background: #fff; color: #111; font-family: var(--ui); font-size: 15px; font-weight: 600; letter-spacing: 0; white-space: nowrap; box-sizing: border-box; }
+  .ms i { width: 21px; height: 21px; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; flex: none; }
+  .ms i b { display: block; } .ms i b:nth-child(1) { background: #f25022; } .ms i b:nth-child(2) { background: #7fba00; } .ms i b:nth-child(3) { background: #00a4ef; } .ms i b:nth-child(4) { background: #ffb900; }
+  .ghost { display: flex; align-items: center; justify-content: center; gap: 10px; height: 44px; padding: 0 16px; border: 1px solid #2e2e2e; color: #bbb; font-family: var(--ui); font-size: 14px; letter-spacing: 0; white-space: nowrap; box-sizing: border-box; }
+  .ghost svg { width: 18px; height: 18px; color: #888; }
+  .copy { font-family: var(--ui); font-size: 14px; color: #9a9a9a; letter-spacing: 0; line-height: 1.5; }
+  .ttl { font-size: 24px; letter-spacing: .06em; line-height: 1; }
+  .x { position: absolute; right: 16px; top: 14px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #777; } .x svg { width: 16px; height: 16px; }
+  .dim { position: absolute; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(8px); }
+  .panel { position: absolute; background: #0f0f0f; border: 1px solid #2e2e2e; box-shadow: 0 30px 80px rgba(0,0,0,.8); box-sizing: border-box; }
+  .dlg { left: 50%; top: 50%; transform: translate(-50%,-50%); width: 460px; padding: 36px; display: flex; flex-direction: column; gap: 14px; }
+  .spin { width: 16px; height: 16px; border: 2px solid #333; border-top-color: #fff; border-radius: 50%; animation: sp 900ms linear infinite; flex: none; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  .row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 1px solid #222; font-size: 16px; }
+  .row .meta { margin-left: auto; font-family: var(--ui); font-size: 12px; color: #777; letter-spacing: 0; }
+  .row svg { width: 18px; height: 18px; color: #888; flex: none; }
+  .tag { font-family: var(--ui); font-size: 11px; letter-spacing: .04em; padding: 3px 7px; border: 1px solid #333; color: #999; }
+
+  /* 7 Browser-Overlay */
+  .web { left: 50%; top: 90px; transform: translateX(-50%); width: 720px; height: 560px; background: #fff; color: #1b1b1b; border: 0; box-shadow: 0 30px 80px rgba(0,0,0,.8); font-family: var(--ui); letter-spacing: 0; }
+  .web .bar { height: 40px; background: #1a1a1a; display: flex; align-items: center; gap: 12px; padding: 0 14px; color: #aaa; font-size: 13px; }
+  .web .bar .url { flex: 1; height: 24px; background: #0c0c0c; border: 1px solid #2e2e2e; display: flex; align-items: center; padding: 0 10px; color: #ccc; font-size: 12px; }
+  .web .bar svg { width: 14px; height: 14px; }
+  .web .pg { display: flex; align-items: center; justify-content: center; height: 520px; background: #f3f3f3; }
+  .web .cardw { width: 400px; background: #fff; padding: 36px; box-shadow: 0 2px 8px rgba(0,0,0,.15); display: flex; flex-direction: column; gap: 14px; box-sizing: border-box; }
+  .web .cardw .mslogo { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; color: #5e5e5e; }
+  .web .cardw h3 { margin: 6px 0; font-size: 22px; font-weight: 600; }
+  .web .cardw .inp { border-bottom: 1px solid #666; padding: 8px 0; color: #777; font-size: 15px; }
+  .web .cardw .btn { align-self: flex-end; background: #0067b8; color: #fff; padding: 8px 28px; font-size: 15px; margin-top: 10px; }
+  .web .cardw a { color: #0067b8; font-size: 13px; }
+
+  /* 8 QR */
+  .qrwrap { position: absolute; left: 50%; top: 150px; transform: translateX(-50%); display: flex; gap: 44px; align-items: center; }
+  .qr { width: 220px; height: 220px; background: #fff; padding: 14px; box-sizing: border-box; display: grid; grid-template-columns: repeat(25, 1fr); }
+  .qr i { background: #000; } .qr i.w { background: transparent; }
+  .qrwrap .txt { display: flex; flex-direction: column; gap: 14px; max-width: 320px; }
+  .qrwrap .or { display: flex; align-items: center; gap: 12px; color: #555; font-family: var(--ui); font-size: 12px; } .qrwrap .or::before, .qrwrap .or::after { content: ""; flex: 1; height: 1px; background: #2a2a2a; }
+
+  /* 9 Wizard */
+  .wiz { left: 50%; top: 50%; transform: translate(-50%,-50%); width: 560px; padding: 0; }
+  .wiz .steps { display: flex; border-bottom: 1px solid #2e2e2e; }
+  .wiz .st { flex: 1; padding: 16px 20px; font-family: var(--ui); font-size: 13px; color: #666; letter-spacing: 0; display: flex; align-items: center; gap: 10px; border-right: 1px solid #2e2e2e; }
+  .wiz .st:last-child { border-right: 0; } .wiz .st b { width: 22px; height: 22px; border: 1px solid #444; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 11px; }
+  .wiz .st.done { color: #aaa; } .wiz .st.done b { background: #fff; color: #000; border-color: #fff; }
+  .wiz .st.cur { color: #fff; background: #161616; } .wiz .st.cur b { border-color: #fff; }
+  .wiz .body { padding: 32px 36px; display: flex; flex-direction: column; gap: 14px; }
+
+  /* 10 Toast */
+  .toast { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: #0f0f0f; border: 1px solid #2e2e2e; box-shadow: 0 16px 40px rgba(0,0,0,.7); font-family: var(--ui); font-size: 14px; letter-spacing: 0; }
+  .toast .lnk { color: #777; margin-left: 10px; }
+
+  /* 11 Launch als Ladebalken */
+  .dock .lm .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 58%; background: #2c2c2c; }
+
+  /* 12 Silhouette füllt sich */
+  .fillwrap { position: absolute; left: 50%; top: 150px; transform: translateX(-50%); width: 320px; height: 420px; }
+  .fillwrap img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .fillwrap img.sil { filter: grayscale(1) brightness(.3); }
+  .fillwrap img.col { clip-path: inset(42% 0 0 0); }
+  .fillwrap .ln { position: absolute; left: 20%; right: 20%; top: 42%; height: 1px; background: #fff; box-shadow: 0 0 10px #fff; }
+  .fillwrap .pct { position: absolute; left: 50%; top: calc(42% - 30px); transform: translateX(-50%); font-family: var(--mc); font-size: 14px; color: #fff; }
+
+  /* 13 Account-Karten */
+  .cards { position: absolute; left: 50%; top: 200px; transform: translateX(-50%); display: flex; gap: 20px; }
+  .cardp { width: 180px; height: 230px; background: #0f0f0f; border: 1px solid #2a2a2a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; font-size: 16px; }
+  .cardp.cur { border-color: #666; } .cardp.new { border: 1px dashed #444; color: #888; } .cardp.new svg { width: 28px; height: 28px; }
+  .cardp .face.lg { image-rendering: pixelated; }
+
+  /* 14 Dropdown */
+  .dd { position: absolute; left: 50%; bottom: 102px; transform: translateX(calc(-50% - 175px)); width: 300px; background: #0f0f0f; border: 1px solid #2e2e2e; box-shadow: 0 16px 40px rgba(0,0,0,.7); padding: 6px; }
+  .dd .row { border: 0; padding: 11px 12px; font-family: var(--ui); font-size: 14px; letter-spacing: 0; color: #ddd; }
+  .dd .row:hover, .dd .row.hv { background: #1c1c1c; }
+  .dd .sep { height: 1px; background: #222; margin: 4px 0; }
+
+  /* 16 Offline-Eingabe */
+  .dock .lg .inp { display: flex; align-items: center; gap: 10px; padding: 0 12px; font-family: var(--ui); font-size: 15px; letter-spacing: 0; color: #fff; }
+  .dock .lg .inp .fld { width: 180px; height: 36px; border: 1px solid #444; background: #0c0c0c; display: flex; align-items: center; padding: 0 10px; box-sizing: border-box; }
+  .dock .lg .inp .fld i { width: 1px; height: 16px; background: #fff; margin-left: 2px; animation: bl 1s steps(1) infinite; } @keyframes bl { 50% { opacity: 0; } }
+  .dock .lg .inp .ok { width: 36px; height: 36px; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; } .dock .lg .inp .ok svg { width: 18px; height: 18px; }
+
+  /* 17 Willkommen */
+  .welcome { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; text-align: center; }
+  .welcome img { width: 96px; height: 96px; } .welcome .ttl { font-size: 34px; } .welcome .later { font-family: var(--ui); font-size: 13px; color: #666; letter-spacing: 0; }
+
+  /* 18 Spotlight */
+  .spot { position: absolute; left: 50%; bottom: 42px; transform: translateX(-183px); width: 52px; height: 52px; box-shadow: 0 0 0 9999px rgba(0,0,0,.78); z-index: 6; pointer-events: none; }
+  .tip { position: absolute; left: 50%; bottom: 116px; transform: translateX(-140px); z-index: 7; background: #fff; color: #000; font-family: var(--ui); font-size: 14px; letter-spacing: 0; padding: 10px 14px; white-space: nowrap; }
+  .tip::after { content: ""; position: absolute; left: 20px; bottom: -6px; width: 12px; height: 12px; background: #fff; transform: rotate(45deg); }
+
+  /* 19 Kontextmenü */
+  .ctx { position: absolute; left: 50%; bottom: 110px; transform: translateX(-183px); width: 240px; background: #0f0f0f; border: 1px solid #2e2e2e; box-shadow: 0 16px 40px rgba(0,0,0,.7); padding: 6px; z-index: 6; }
+  .ctx .row { border: 0; padding: 9px 10px; font-family: var(--ui); font-size: 13px; letter-spacing: 0; color: #ddd; gap: 10px; } .ctx .row svg { width: 16px; height: 16px; }
+  .ctx .sep { height: 1px; background: #222; margin: 4px 0; } .ctx .row .k { margin-left: auto; color: #555; font-size: 11px; }
+
+  /* 20 Bottom Sheet */
+  .bsheet { position: absolute; left: 0; right: 0; bottom: 0; height: 300px; background: #0c0c0c; border-top: 1px solid #2a2a2a; padding: 28px 0 0; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 4; }
+  .bsheet .grab { width: 40px; height: 3px; background: #333; margin-bottom: 8px; }
+  .bsheet .opts { display: flex; gap: 12px; }
+
+  /* 21 Fehler */
+  .err { border-top: 2px solid #e24b4a; }
+  .err .msg { display: flex; gap: 12px; padding: 12px 14px; background: rgba(226,75,74,.08); border: 1px solid rgba(226,75,74,.3); font-family: var(--ui); font-size: 13px; letter-spacing: 0; color: #f0a0a0; line-height: 1.45; }
+  .err .msg svg { width: 18px; height: 18px; flex: none; color: #e24b4a; }
+
+  /* 22 Erfolg */
+  .px { position: absolute; width: 6px; height: 6px; background: #fff; }
+  .toast.ok { bottom: 120px; }
+  .toast.ok .chk { width: 22px; height: 22px; background: #4ade80; color: #000; display: flex; align-items: center; justify-content: center; } .toast.ok .chk svg { width: 14px; height: 14px; }
+
+  /* 23 Pfeil-Dropdown zweispaltig */
+  .two { position: absolute; left: 50%; bottom: 102px; transform: translateX(calc(-50% + 20px)); display: flex; background: #0f0f0f; border: 1px solid #2e2e2e; box-shadow: 0 16px 40px rgba(0,0,0,.7); }
+  .two .col { width: 220px; padding: 10px; display: flex; flex-direction: column; gap: 4px; } .two .col + .col { border-left: 1px solid #222; }
+  .two .hd { font-size: 12px; color: #666; letter-spacing: .08em; padding: 4px 8px 8px; }
+  .two .row { border: 0; padding: 9px 10px; font-family: var(--ui); font-size: 14px; letter-spacing: 0; color: #ddd; } .two .row.hv { background: #1c1c1c; } .two .row .ver { font-family: var(--mc); font-size: 12px; }
+
+  /* 24 Profilkarte */
+  .prof { position: absolute; left: 50%; bottom: 110px; transform: translateX(calc(-50% - 110px)); width: 300px; background: #0f0f0f; border: 1px solid #2e2e2e; box-shadow: 0 16px 40px rgba(0,0,0,.7); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .prof .top { display: flex; align-items: center; gap: 14px; } .prof .top .nm { font-size: 18px; } .prof .top .id { font-family: var(--ui); font-size: 11px; color: #666; letter-spacing: 0; margin-top: 3px; }
+  .prof .acts { display: flex; gap: 8px; } .prof .acts .ghost { flex: 1; height: 36px; font-size: 13px; padding: 0 10px; }
+
+  /* 25 Zwei Spalten */
+  .twocol { left: 50%; top: 50%; transform: translate(-50%,-50%); width: 720px; height: 400px; padding: 0; display: flex; }
+  .twocol .art { width: 300px; background: #090909; border-right: 1px solid #2e2e2e; position: relative; overflow: hidden; }
+  .twocol .art img { position: absolute; left: 50%; top: 20px; transform: translateX(-50%); width: 280px; height: 370px; }
+  .twocol .art::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(#161616 1px, transparent 1px), linear-gradient(90deg, #161616 1px, transparent 1px); background-size: 30px 30px; -webkit-mask-image: radial-gradient(circle at 50% 50%, #000, transparent 75%); }
+  .twocol .side { flex: 1; padding: 36px; display: flex; flex-direction: column; gap: 14px; justify-content: center; }
+  .twocol .side ul { margin: 0 0 8px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-family: var(--ui); font-size: 13px; color: #9a9a9a; letter-spacing: 0; }
+  .twocol .side li::before { content: "✓  "; color: #4ade80; }
+
+  /* 26 Terminal */
+  .term { position: absolute; left: 50%; top: 200px; transform: translateX(-50%); width: 560px; background: #080808; border: 1px solid #222; padding: 20px 24px; font-family: Consolas, "Cascadia Mono", monospace; font-size: 14px; letter-spacing: 0; line-height: 1.8; color: #9a9a9a; box-sizing: border-box; }
+  .term .ok { color: #4ade80; } .term .wh { color: #fff; } .term .cur { display: inline-block; width: 8px; height: 15px; background: #fff; vertical-align: -2px; animation: bl 1s steps(1) infinite; }
+</style>
+</head>
+<body>
+<h1>Account · was nach dem Klick auf Plus passiert · Abläufe 7 bis 26</h1>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.33 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/><path d="m8 5.2 8 4.5"/><path d="m6.6 11.3 2.4 1.35"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="i-hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-import" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><path d="M8 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-4"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+  <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
+</svg>
+<div id="grid"></div>
+<canvas id="src" style="display:none"></canvas>
+<script>
+  const sv = (id) => `<svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  const logo = `<div class="logo"><img src="logo.png" alt=""><div><span>Reality Client</span><small>v0.1.0</small></div></div>`;
+  const ms = `<div class="ms"><i><b></b><b></b><b></b><b></b></i>Mit Microsoft anmelden</div>`;
+  const ghost = (t = "Offline mit Spielernamen", ic = "i-user") => `<div class="ghost">${sv(ic)}${t}</div>`;
+  const skin = (cls = "") => `<img class="skin ${cls}" data-skin alt="">`;
+  const pname = `<div class="pname">lettner</div>`;
+  const dock = (o = {}) => `<div class="dock">
+    <div class="it on">${sv("i-home")}<span class="ul" style="transform:translateX(15px)"></span></div><div class="it">${sv("i-box")}</div>
+    <div class="lg">${o.left !== undefined ? o.left : `<div class="add${o.active ? " on" : ""}"><span class="bx">${o.spin ? '<span class="spin"></span>' : sv("i-plus")}</span></div>`}${o.mid !== undefined ? o.mid : `<div class="lm">${o.fill ? '<span class="fill"></span>' : ""}<span class="lt">${o.title || "Launch"}</span><span class="ls">${o.sub || "1.21.4"}</span></div><div class="la">${sv("i-chev")}</div>`}</div>
+    <div class="it">${sv("i-bell")}</div><div class="it">${sv("i-hex")}</div></div>`;
+  const headTile = `<div class="tile"><span class="face"></span><span class="on-dot"></span></div>`;
+  const qr = () => { let h = ""; const f = (r, c) => (r < 7 && c < 7) || (r < 7 && c > 17) || (r > 17 && c < 7); const fin = (r, c) => { const rr = r % 18 < 7 ? r % 18 : r - 18, cc = c % 18 < 7 ? c % 18 : c - 18; const a = rr, b = cc; return a === 0 || a === 6 || b === 0 || b === 6 || (a >= 2 && a <= 4 && b >= 2 && b <= 4); }; let s = 7; for (let r = 0; r < 25; r++) for (let c = 0; c < 25; c++) { let on; if (f(r, c)) { const rr = r > 17 ? r - 18 : r, cc = c > 17 ? c - 18 : c; on = rr === 0 || rr === 6 || cc === 0 || cc === 6 || (rr >= 2 && rr <= 4 && cc >= 2 && cc <= 4); } else { s = (s * 1103515245 + 12345) & 0x7fffffff; on = (s >> 8) % 100 < 45; } h += `<i class="${on ? "" : "w"}"></i>`; } return h; };
+  const px = (() => { let h = ""; const pts = [[560,170],[700,190],[520,300],[760,320],[590,520],[690,540],[480,420],[800,440]]; for (const [x, y] of pts) h += `<span class="px" style="left:${x}px;top:${y}px;opacity:${.4 + Math.random() * .6}"></span>`; return h; })();
+  const ideas = [
+    ["7 · Browser im Fenster", "Die Microsoft-Seite öffnet sich als Overlay in der App statt im externen Browser. Oben eine kleine Adressleiste, damit man sieht, dass es echt ist.",
+      logo + skin("dim") + dock({ active: 1 }) + `<div class="panel web"><div class="bar">${sv("i-lock")}<div class="url">login.live.com/oauth20_authorize.srf</div>${sv("i-x")}</div><div class="pg"><div class="cardw"><div class="mslogo"><i class="ms" style="padding:0;height:auto;background:none"><i><b></b><b></b><b></b><b></b></i></i>Microsoft</div><h3>Anmelden</h3><div class="inp">E-Mail, Telefon oder Skype</div><a>Kein Konto? Erstellen Sie jetzt eins!</a><div class="btn">Weiter</div></div></div></div>`],
+    ["8 · QR-Code", "Mit dem Handy scannen, dort anmelden, fertig. Daneben der Code zum Abtippen für alle ohne Handy.",
+      logo + dock({ active: 1 }) + `<div class="qrwrap"><div class="qr">${qr()}</div><div class="txt"><div class="ttl">Mit dem Handy anmelden</div><div class="copy">Scanne den Code mit der Kamera. Du landest direkt bei Microsoft und bist in zehn Sekunden drin.</div><div class="or">oder</div><div class="copy">Code <b style="color:#fff;font-family:var(--mc)">AB7K-QX9F</b> auf microsoft.com/link eingeben</div></div></div>`],
+    ["9 · Assistent in Schritten", "Drei Schritte oben sichtbar: Anmelden, Xbox-Profil prüfen, Minecraft-Profil laden. Man sieht immer, wo man gerade steht und was noch kommt.",
+      logo + skin("dim") + dock({ active: 1 }) + `<div class="dim"></div><div class="panel wiz"><div class="steps"><div class="st done"><b>✓</b>Microsoft</div><div class="st cur"><b>2</b>Xbox-Profil</div><div class="st"><b>3</b>Minecraft</div></div><div class="body"><div class="ttl">Xbox-Profil wird geprüft</div><div class="copy">Wir prüfen, ob dein Konto ein Xbox-Profil hat. Das dauert nur einen Moment.</div><div style="display:flex;align-items:center;gap:12px;font-family:var(--ui);font-size:13px;color:#aaa;letter-spacing:0"><span class="spin"></span>Verbinde mit Xbox Live …</div></div></div>`],
+    ["10 · Nur ein Toast", "Klick öffnet den Browser, in der App erscheint nur eine schmale Meldung über dem Dock mit Spinner und Abbrechen. Nichts wird blockiert.",
+      logo + skin("dim") + dock({ spin: 1 }) + `<div class="toast"><span class="spin"></span>Browser geöffnet, warte auf Anmeldung …<span class="lnk">Abbrechen</span></div>`],
+    ["11 · Launch wird zur Ladeleiste", "Der Launch-Knopf selbst zeigt den Fortschritt: Im Plus dreht ein Spinner, hinter dem Text füllt sich die Fläche.",
+      logo + skin("dim") + dock({ spin: 1, fill: 1, title: "Anmelden", sub: "warte auf Microsoft" })],
+    ["12 · Spieler füllt sich", "Die graue Silhouette bekommt von unten her Farbe, während der Login läuft. Bei 100 % steht der Skin.",
+      logo + dock({ spin: 1 }) + `<div class="fillwrap"><img class="sil" data-skin alt=""><img class="col" data-skin alt=""><span class="ln"></span><span class="pct">58 %</span></div>`],
+    ["13 · Account-Karten", "Wie bei Streaming-Diensten: Wer spielt? Karten für jeden Account, eine gestrichelte für Neu. Klick auf eine Karte wählt und schließt.",
+      logo + dock({ active: 1 }) + `<div class="cards"><div class="cardp cur"><span class="face lg"></span>lettner</div><div class="cardp"><span class="face lg" style="filter:hue-rotate(150deg)"></span>lettner_alt</div><div class="cardp new">${sv("i-plus")}Neu</div></div>`],
+    ["14 · Dropdown mit drei Wegen", "Menü über dem Plus: Microsoft, Offline, und Import aus anderen Launchern. Mit Icons, Hover-Zeile hell.",
+      logo + skin() + dock({ active: 1 }) + `<div class="dd"><div class="row hv">${sv("i-lock")}Mit Microsoft anmelden</div><div class="row">${sv("i-user")}Offline mit Spielernamen</div><div class="sep"></div><div class="row">${sv("i-import")}Aus anderem Launcher importieren</div></div>`],
+    ["15 · Import-Assistent", "Die App findet Accounts, die in Modrinth, Prism oder dem offiziellen Launcher schon angemeldet sind, und bietet sie zum Übernehmen an.",
+      logo + skin("dim") + dock({ active: 1 }) + `<div class="dim"></div><div class="panel dlg" style="width:520px"><span class="x">${sv("i-x")}</span><div class="ttl">Gefundene Accounts</div><div class="copy">Diese Accounts sind auf deinem PC schon angemeldet. Übernehmen spart den Login.</div><div class="row"><span class="face"></span>lettner<span class="tag">Modrinth App</span><span class="meta">Übernehmen</span></div><div class="row"><span class="face" style="filter:hue-rotate(150deg)"></span>lettner_alt<span class="tag">Prism</span><span class="meta">Übernehmen</span></div><div class="copy" style="text-align:center;margin-top:6px">oder <span style="color:#fff">neu anmelden</span></div></div>`],
+    ["16 · Offline-Eingabe im Dock", "Für den Offline-Weg: Das Plus wird zum Eingabefeld direkt in der Launch-Gruppe, Haken bestätigt. Kein Dialog.",
+      logo + skin("dim") + dock({ active: 1, mid: `<div class="inp"><div class="fld">lett<i></i></div><div class="ok">${sv("i-check")}</div></div>` })],
+    ["17 · Willkommensbildschirm", "Beim allerersten Start: kein Dock, nur Logo, Begrüßung und der Login. Erst danach erscheint die normale Oberfläche.",
+      `<div class="welcome"><img src="logo.png" alt=""><div class="ttl">Willkommen bei Reality</div><div class="copy" style="max-width:380px">Melde dich an, damit dein Skin, deine Freunde und deine Server bereit sind.</div>${ms}<div class="later">Später, erstmal umschauen</div></div>`],
+    ["18 · Spotlight", "Wenn man ohne Account auf Launch klickt: Alles wird dunkel, nur das Plus bleibt hell, mit Hinweis. Lenkt den Blick, ohne zu schimpfen.",
+      logo + skin() + dock() + `<div class="spot"></div><div class="tip">Zuerst einen Account hinzufügen</div>`],
+    ["19 · Kontextmenü", "Kompaktes Menü wie bei Rechtsklick, direkt am Plus, mit Tastenkürzeln. Für Leute, die es schnell mögen.",
+      logo + skin() + dock({ active: 1 }) + `<div class="ctx"><div class="row">${sv("i-lock")}Microsoft<span class="k">Strg+L</span></div><div class="row">${sv("i-user")}Offline<span class="k">Strg+O</span></div><div class="sep"></div><div class="row">${sv("i-import")}Importieren</div></div>`],
+    ["20 · Panel von unten", "Ein Blatt schiebt sich hinter dem Dock hoch, mit den Optionen nebeneinander. Fühlt sich wie am Handy an, das Dock bleibt oben drauf.",
+      logo + skin("dim") + dock({ active: 1 }) + `<div class="bsheet"><span class="grab"></span><div class="ttl">Account hinzufügen</div><div class="copy">Wähle, wie du dich anmelden willst.</div><div class="opts">${ms}${ghost()}</div></div>`],
+    ["21 · Fehlerfall", "So sieht es aus, wenn der Login schiefgeht: rote Kante, klare Meldung, was zu tun ist, und Erneut versuchen. Kein Technik-Kauderwelsch.",
+      logo + skin("dim") + dock({ active: 1 }) + `<div class="dim"></div><div class="panel dlg err"><span class="x">${sv("i-x")}</span><div class="ttl">Anmeldung fehlgeschlagen</div><div class="msg">${sv("i-warn")}<span>Dieses Microsoft-Konto besitzt kein Minecraft: Java Edition. Melde dich mit dem Konto an, mit dem du das Spiel gekauft hast.</span></div>${ms.replace("Mit Microsoft anmelden", "Mit anderem Konto versuchen")}<div class="copy" style="text-align:center">Hilfe bei Login-Problemen</div></div>`],
+    ["22 · Erfolgsmoment", "Nach dem Login: Der Skin ploppt rein, der Name erscheint, ein paar Pixel fliegen, unten ein kurzer Gruß. Das Plus ist jetzt dein Kopf.",
+      logo + pname + skin() + px + dock({ left: headTile }) + `<div class="toast ok"><span class="chk">${sv("i-check")}</span>Willkommen zurück, lettner</div>`],
+    ["23 · Im Versions-Pfeil", "Der Pfeil neben Launch öffnet zwei Spalten: links Accounts, rechts Versionen. Ein Menü für beides, kein eigenes Plus nötig.",
+      logo + pname + skin() + dock({ left: headTile }) + `<div class="two"><div class="col"><div class="hd">ACCOUNT</div><div class="row hv"><span class="face"></span>lettner</div><div class="row"><span class="face" style="filter:hue-rotate(150deg)"></span>lettner_alt</div><div class="row" style="color:#888">${sv("i-plus")}Hinzufügen</div></div><div class="col"><div class="hd">VERSION</div><div class="row hv"><span class="ver">1.21.4</span>Neueste</div><div class="row"><span class="ver">1.20.1</span></div><div class="row"><span class="ver">1.8.9</span>PvP</div></div></div>`],
+    ["24 · Profilkarte am Kopf", "Nach dem Login: Hover oder Klick auf den Kopf zeigt eine kleine Karte mit Name, Kurz-ID, Skin ändern und Abmelden.",
+      logo + pname + skin() + dock({ left: headTile }) + `<div class="prof"><div class="top"><span class="face md"></span><div><div class="nm">lettner</div><div class="id">069a79f4 · Microsoft</div></div></div><div class="acts">${ghost("Skin ändern", "i-shirt")}${ghost("Abmelden", "i-out")}</div></div>`],
+    ["25 · Zwei Spalten mit Vorschau", "Links der Skin auf eigenem Raster, rechts was man vom Login hat und die Knöpfe. Wie eine kleine Verkaufsseite, aber in der App.",
+      logo + dock({ active: 1 }) + `<div class="dim"></div><div class="panel twocol"><div class="art"><img data-skin alt=""></div><div class="side"><div class="ttl">Dein Account</div><ul><li>Dein Skin und dein Cape</li><li>Auf allen Servern spielen</li><li>Freunde sehen, wer online ist</li></ul>${ms}${ghost()}</div></div>`],
+    ["26 · Terminal-Stil", "Für die Nerds: Der Login läuft als Log-Zeilen ab, jede Stufe wird abgehakt. Transparent, was gerade passiert.",
+      logo + dock({ spin: 1 }) + `<div class="term"><div><span class="ok">✓</span> Browser geöffnet</div><div><span class="ok">✓</span> Microsoft-Token erhalten</div><div><span class="ok">✓</span> Xbox Live angemeldet</div><div><span class="ok">✓</span> XSTS-Token geprüft</div><div><span class="wh">›</span> Minecraft-Profil wird geladen <span class="cur"></span></div><div style="color:#444">  Profil, Skin, Cape</div></div>`],
+  ];
+  const grid = document.getElementById("grid");
+  for (const [t, s, html] of ideas) {
+    const c = document.createElement("div"); c.className = "card";
+    c.innerHTML = `<div class="frame"><div class="win">${html}</div></div><div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  }
+  // Skin einmal in 3D rendern, dann als Bild in alle Fenster
+  (async () => {
+    const canvas = document.getElementById("src");
+    const viewer = new skinview3d.SkinViewer({ canvas, width: 640, height: 840, preserveDrawingBuffer: true });
+    await viewer.loadSkin("skin.png");
+    viewer.zoom = 0.85;
+    viewer.playerObject.rotation.y = -0.35;
+    viewer.playerObject.skin.leftArm.rotation.x = 0.25; viewer.playerObject.skin.rightArm.rotation.x = -0.25;
+    viewer.playerObject.skin.leftLeg.rotation.x = -0.2; viewer.playerObject.skin.rightLeg.rotation.x = 0.2;
+    viewer.render();
+    const url = canvas.toDataURL();
+    for (const img of document.querySelectorAll("img[data-skin]")) img.src = url;
+  })();
+</script>
+</body>
+</html>

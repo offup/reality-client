@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Account-Platzierung</title>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --acc: #89cff0; --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 32px 24px 48px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 24px; letter-spacing: .1em; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(640px, 1fr)); gap: 28px 24px; }
+  .card .lab { font-size: 15px; margin: 10px 0 2px; }
+  .card .lab small { display: block; color: #777; font-size: 13px; margin-top: 2px; }
+  .frame { width: 640px; height: 400px; overflow: hidden; border: 1px solid #2a2a2a; }
+  .win { position: relative; width: 1280px; height: 800px; background: #000; transform: scale(.5); transform-origin: 0 0; }
+
+  /* Spieler-Silhouette */
+  .skin { position: absolute; left: 50%; top: 220px; transform: translateX(-50%); width: 120px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .skin .h { width: 56px; height: 56px; background: #2a2a2a; }
+  .skin .b { width: 56px; height: 84px; background: #222; }
+  .skin .l { width: 56px; height: 84px; display: flex; gap: 4px; } .skin .l i { flex: 1; background: #1e1e1e; }
+  .skin.real .h { background: #a0785a; position: relative; }
+  .skin.real .h::before, .skin.real .h::after { content: ""; position: absolute; top: 28px; width: 8px; height: 8px; background: #fff; box-shadow: inset -4px 0 #3b6ea5; }
+  .skin.real .h::before { left: 12px; } .skin.real .h::after { right: 12px; }
+  .skin.real .b { background: #3fb1c9; } .skin.real .l i { background: #3f5a9a; }
+  .name { position: absolute; left: 50%; top: 170px; transform: translateX(-50%); font-family: var(--mc); font-size: 24px; letter-spacing: .03em; white-space: nowrap; }
+
+  /* Kopf-Avatar */
+  .head { width: 28px; height: 28px; background: #a0785a; position: relative; flex: none; }
+  .head::before, .head::after { content: ""; position: absolute; top: 14px; width: 4px; height: 4px; background: #fff; box-shadow: inset -2px 0 #3b6ea5; }
+  .head::before { left: 6px; } .head::after { right: 6px; }
+  .head.lg { width: 44px; height: 44px; } .head.lg::before, .head.lg::after { top: 22px; width: 6px; height: 6px; } .head.lg::before { left: 10px; } .head.lg::after { right: 10px; }
+  .head.sm { width: 20px; height: 20px; } .head.sm::before, .head.sm::after { top: 10px; width: 3px; height: 3px; } .head.sm::before { left: 4px; } .head.sm::after { right: 4px; }
+  .online { position: absolute; right: -3px; bottom: -3px; width: 10px; height: 10px; background: #4ade80; border: 2px solid #0c0c0c; }
+
+  /* Dock-Replik */
+  .dock { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); display: flex; align-items: stretch; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; }
+  .dock .it { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #777; border: 1px solid transparent; box-sizing: border-box; position: relative; }
+  .dock .it.on { color: #fff; }
+  .dock svg { width: 22px; height: 22px; }
+  .dock .ul { position: absolute; left: 0; bottom: 7px; width: 22px; height: 2px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,.35); }
+  .dock .lg { display: flex; margin: 0 12px; border: 1px solid #555; background: #1a1a1a; }
+  .dock .lm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 200px; padding: 0 32px; height: 52px; box-sizing: border-box; }
+  .dock .lt { font-size: 22px; line-height: 1; letter-spacing: .05em; }
+  .dock .ls { font-family: var(--mc); font-size: 11px; line-height: 1; color: #9a9a9a; }
+  .dock .la { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #bbb; border-left: 1px solid #555; box-sizing: border-box; }
+  .dock .la svg { width: 20px; height: 20px; }
+  .dock .add { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; padding-left: 4px; box-sizing: border-box; color: #6a6a6a; }
+  .dock .add .bx { width: 34px; height: 34px; border: 1px dashed #555; display: flex; align-items: center; justify-content: center; }
+  .dock .add .bx svg { width: 18px; height: 18px; }
+  .dock .tile { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; position: relative; }
+
+  /* Account-Elemente */
+  .pill { position: absolute; display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #0c0c0c; border: 1px solid #2a2a2a; font-size: 16px; }
+  .pill .chev { color: #777; width: 16px; height: 16px; }
+  .pill.tr { right: 32px; top: 32px; }
+  .pill.tc { left: 50%; top: 32px; transform: translateX(-50%); }
+  .pill.bl { left: 32px; bottom: 32px; }
+  .chip { position: absolute; left: 50%; bottom: 112px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px; background: #0c0c0c; border: 1px solid #2a2a2a; font-size: 14px; }
+  .under { position: absolute; left: 50%; top: 470px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; font-size: 16px; color: #ccc; }
+  .under .chev { width: 14px; height: 14px; color: #777; }
+  .circle { position: absolute; right: 32px; top: 32px; width: 44px; height: 44px; border: 1px solid #2a2a2a; background: #0c0c0c; display: flex; align-items: center; justify-content: center; }
+  .stack { position: absolute; right: 32px; top: 32px; display: flex; }
+  .stack .head { border: 2px solid #000; margin-left: -10px; }
+  .stack .head:first-child { margin-left: 0; }
+  .stack .more { width: 28px; height: 28px; margin-left: -10px; border: 2px solid #000; background: #1a1a1a; color: #999; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+  .skinwrap { position: absolute; left: 50%; top: 200px; transform: translateX(-50%); width: 200px; height: 290px; border: 1px dashed #444; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; box-sizing: border-box; }
+  .skinwrap .skin { position: static; transform: none; }
+  .skinwrap .plus { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border: 1px dashed #666; display: flex; align-items: center; justify-content: center; color: #aaa; }
+  .skinwrap .plus svg { width: 18px; height: 18px; }
+  .skinwrap .hint { position: absolute; left: 50%; bottom: -34px; transform: translateX(-50%); font-size: 14px; color: #777; white-space: nowrap; }
+  .minidock { position: absolute; right: 32px; bottom: 32px; display: flex; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; }
+  .minidock .tile { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .login { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .login .btn { display: flex; align-items: center; gap: 14px; padding: 18px 36px; border: 1px solid #555; background: #1a1a1a; font-size: 22px; letter-spacing: .05em; }
+  .login .btn .ms { width: 22px; height: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .login .btn .ms i { background: #f25022; } .login .btn .ms i:nth-child(2) { background: #7fba00; } .login .btn .ms i:nth-child(3) { background: #00a4ef; } .login .btn .ms i:nth-child(4) { background: #ffb900; }
+  .login .sub { font-size: 14px; color: #777; }
+  .logo { position: absolute; left: 32px; top: 32px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #fff; }
+  .logo svg { width: 30px; height: 30px; }
+</style>
+</head>
+<body>
+<h1>Account · 10 Platzierungen · echte Fenster, halb so groß</h1>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.33 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/><path d="m8 5.2 8 4.5"/><path d="m6.6 11.3 2.4 1.35"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="i-hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-clover" viewBox="0 0 24 24"><path d="M12 11c-1.5-3-5-3.5-5.5-1S9 13 12 11c-3-2-6.5-1.5-6.5 1S9 15.5 12 13c-3 2.5-2.5 6 0 6s3-3.5 0-6c3 2.5 6.5 1.5 6.5-1S15 9 12 11c3 2 6.5 1.5 5.5-1S13.5 8 12 11z"/></symbol>
+</svg>
+<div class="grid" id="grid"></div>
+<script>
+  const sv = (id) => `<svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  const chev = `<svg class="chev" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chev"/></svg>`;
+  const skin = (real) => `<div class="skin${real ? " real" : ""}"><div class="h"></div><div class="b"></div><div class="l"><i></i><i></i></div></div>`;
+  const dock = (o = {}) => `<div class="dock">
+    <div class="it on">${sv("i-home")}<span class="ul" style="transform:translateX(15px)"></span></div>
+    <div class="it">${sv("i-box")}</div>
+    ${o.tile || ""}
+    <div class="lg">${o.left !== undefined ? o.left : `<div class="add"><span class="bx">${sv("i-plus")}</span></div>`}<div class="lm"><span class="lt">${o.title || "Launch"}</span><span class="ls">${o.sub || "1.21.4"}</span></div><div class="la">${sv("i-chev")}</div></div>
+    <div class="it">${sv("i-bell")}</div>
+    <div class="it">${sv("i-hex")}</div>
+  </div>`;
+  const logo = `<div class="logo">${sv("i-clover")}</div>`;
+  const ideas = [
+    ["1 · Oben rechts Pill", "Kopf + Name in der Ecke, Pfeil öffnet Wechsler und Logout", logo + `<div class="pill tr"><span class="head"></span>lettner${chev}</div>` + `<div class="name">lettner</div>` + skin(true) + dock({ left: "" })],
+    ["5 · Chip über dem Dock", "kleiner Chip schwebt mittig über Launch", logo + `<div class="name">lettner</div>` + skin(true) + `<div class="chip"><span class="head"></span>lettner${chev}</div>` + dock({ left: "" })],
+    ["6 · Im Launch-Button", "Kopf links im Launch, dein Name statt Version, Version im Pfeil", logo + `<div class="name">lettner</div>` + skin(true) + dock({ left: `<div class="tile"><span class="head"></span></div>`, title: "Launch", sub: "als lettner · 1.21.4" })],
+    ["7 · Unter dem Skin", "Name + Kopf direkt unter dem Spieler, Klick öffnet Wechsler", logo + skin(true) + `<div class="under"><span class="head sm"></span>lettner${chev}</div>` + dock({ left: "" })],
+    ["8 · Der Skin ist der Account", "ohne Login graue Silhouette mit Plus, Klick auf den Spieler = Login", logo + `<div class="skinwrap">${skin(false)}<span class="plus">${sv("i-plus")}</span><span class="hint">Account hinzufügen</span></div>` + dock({ left: "" })],
+    ["16 · Nur ein Kreis", "oben rechts nur der Kopf, Name erscheint beim Hover", logo + `<div class="circle"><span class="head"></span></div>` + `<div class="name">lettner</div>` + skin(true) + dock({ left: "" })],
+    ["17 · Avatar-Stapel", "mehrere Accounts überlappend, Klick wechselt, Plus für neue", logo + `<div class="stack"><span class="head"></span><span class="head" style="filter:hue-rotate(120deg)"></span><span class="head" style="filter:hue-rotate(240deg)"></span><span class="more">+</span></div>` + `<div class="name">lettner</div>` + skin(true) + dock({ left: "" })],
+    ["18 · Kachel vor Launch", "die Plus-Box wird nach dem Login zum Kopf mit Online-Punkt", logo + `<div class="name">lettner</div>` + skin(true) + dock({ left: `<div class="tile"><span class="head"><span class="online"></span></span></div>` })],
+    ["19 · Erst-Start ohne Dock", "ohne Account nur der Login in der Mitte, Dock erscheint danach", logo + `<div class="login"><div class="btn"><span class="ms"><i></i><i></i><i></i><i></i></span>Mit Microsoft anmelden</div><div class="sub">Du brauchst einen Minecraft-Account, um zu spielen</div></div>`],
+    ["11 · Mini-Dock rechts unten", "zweites kleines Dock nur für Account und Status", logo + `<div class="name">lettner</div>` + skin(true) + dock({ left: "" }) + `<div class="minidock"><div class="tile"><span class="head"><span class="online"></span></span></div></div>`],
+  ];
+  const grid = document.getElementById("grid");
+  for (const [t, s, html] of ideas) {
+    const c = document.createElement("div"); c.className = "card";
+    c.innerHTML = `<div class="frame"><div class="win">${html}</div></div><div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  }
+</script>
+</body>
+</html>

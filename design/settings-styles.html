@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Settings · 10 designs</title>
+<script src="https://unpkg.com/skinview3d@3.1.0/bundles/skinview3d.bundle.js"></script>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 28px 24px 60px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 24px; letter-spacing: .1em; }
+  #grid { display: grid; grid-template-columns: repeat(2, 640px); gap: 30px 24px; }
+  .lab { font-size: 15px; margin: 10px 0 0; }
+  .lab small { display: block; color: #777; font-size: 12px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; max-width: 620px; }
+  .frame { width: 640px; height: 400px; overflow: hidden; border: 1px solid #2a2a2a; }
+  .win { position: relative; width: 1280px; height: 800px; background: #0a0a0a; transform: scale(.5); transform-origin: 0 0; overflow: hidden; }
+  .abs { position: absolute; }
+  .muted { font-family: var(--ui); font-size: 14px; color: #777; letter-spacing: 0; }
+  .box { background: #0c0c0c; border: 1px solid #2a2a2a; box-sizing: border-box; }
+
+  /* window backgrounds */
+  .bg-grid::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(#161616 1px, transparent 1px), linear-gradient(90deg, #161616 1px, transparent 1px); background-size: 40px 40px; -webkit-mask-image: radial-gradient(ellipse 60% 70% at 50% 45%, #000 20%, transparent 100%); }
+  .bg-ascii { background: #0a0a0a url(/previews/ascii.webp) center bottom / 100% 60% no-repeat; }
+  .dim::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.55); z-index: 1; }
+  .dim > * { z-index: 2; }
+
+  /* background previews */
+  .pv { position: relative; display: block; overflow: hidden; background: #0a0a0a center / cover no-repeat; }
+  .pv-grid { background-image: linear-gradient(#1c1c1c 1px, transparent 1px), linear-gradient(90deg, #1c1c1c 1px, transparent 1px); background-size: 16px 16px; }
+  .pv-gradient { background: radial-gradient(ellipse 90% 80% at 50% 110%, #3a2a66, #0a0a0a 70%); }
+  .pv-lightning { background-image: url(/previews/lightning.webp); }
+  .pv-ascii { background-image: url(/previews/ascii.webp); }
+  .pv-ferrofluid { background-image: url(/previews/ferrofluid.webp); filter: brightness(1.6); }
+  .pv-black { background: #050505; }
+
+  /* tiles */
+  .tile { position: relative; border: 1px solid #2a2a2a; box-sizing: border-box; }
+  .tile .pv { position: absolute; inset: 0; }
+  .tile .nm { position: absolute; left: 12px; bottom: 10px; font-size: 13px; letter-spacing: .08em; text-shadow: 0 1px 4px #000; }
+  .tile.sel { border: 2px solid #fff; }
+  .chk { position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; }
+  .chk svg { width: 13px; height: 13px; }
+
+  /* rows */
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0; border-top: 1px solid #1c1c1c; }
+  .row b { display: block; font-weight: normal; font-size: 14px; letter-spacing: .08em; } .row span.s { font-family: var(--ui); font-size: 12px; color: #666; letter-spacing: 0; }
+  .sw { width: 44px; height: 24px; border: 1px solid #333; background: #141414; position: relative; box-sizing: border-box; flex: none; }
+  .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #555; }
+  .sw.on { background: #fff; border-color: #fff; } .sw.on::after { left: 23px; background: #000; }
+  .dots { display: flex; gap: 8px; } .dot { width: 26px; height: 26px; box-sizing: border-box; border: 1px solid #333; flex: none; }
+  .dot.sel { outline: 2px solid #fff; outline-offset: 2px; } .dot.plus { border: 1px dashed #555; display: flex; align-items: center; justify-content: center; color: #888; font-family: var(--ui); font-size: 16px; }
+  .h2 { font-size: 24px; letter-spacing: .08em; } .sub { font-family: var(--ui); font-size: 13px; color: #777; letter-spacing: 0; margin-top: 4px; }
+
+  /* chrome */
+  .notch { position: absolute; top: 0; right: 0; width: 150px; height: 46px; background: #2a2a2a; clip-path: polygon(0 0, 100% 0, 100% 100%, 20px 100%); z-index: 5; }
+  .notch .in { position: absolute; inset: 0 0 1px 1px; background: #0c0c0c; clip-path: polygon(0 0, 100% 0, 100% 100%, 20px 100%); display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding-right: 8px; }
+  .notch .in span { width: 38px; height: 32px; display: flex; align-items: center; justify-content: center; color: #8a8a8a; } .notch svg { width: 17px; height: 17px; }
+  .ico { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #777; position: relative; flex: none; }
+  .ico.on { color: #fff; } .ico svg { width: 22px; height: 22px; }
+  .ul { position: absolute; left: 15px; bottom: 7px; width: 22px; height: 2px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,.35); }
+  .launch { display: flex; border: 1px solid #555; background: #1a1a1a; }
+  .launch .lm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0 32px 0 20px; min-width: 200px; height: 52px; box-sizing: border-box; }
+  .launch .lt { font-size: 22px; line-height: 1; letter-spacing: .05em; } .launch .ls { font-family: var(--mc); font-size: 11px; color: #9a9a9a; }
+  .launch .la { width: 52px; display: flex; align-items: center; justify-content: center; color: #bbb; border-left: 1px solid #555; } .launch .la svg { width: 20px; height: 20px; }
+  .launch .tl { width: 52px; display: flex; align-items: center; justify-content: center; padding-left: 4px; }
+  .face { width: 32px; height: 32px; image-rendering: pixelated; background: url(skin.png) -32px -32px / 256px 256px; position: relative; flex: none; }
+  .face::after { content: ""; position: absolute; inset: 0; background: url(skin.png) -160px -32px / 256px 256px; image-rendering: pixelated; }
+  img.skin { position: absolute; }
+  .name { position: absolute; font-family: var(--mc); font-size: 24px; text-shadow: 2px 2px 0 #3f3f3f; white-space: nowrap; transform: translateX(-50%); }
+
+  /* idea-specific */
+  .tabs { display: flex; gap: 28px; border-bottom: 1px solid #1c1c1c; padding: 0 0 0 4px; }
+  .tabs span { position: relative; padding: 0 0 14px; font-size: 15px; letter-spacing: .08em; color: #555; } .tabs span.on { color: #fff; }
+  .tabs span.on::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,.35); }
+  .lrow { display: flex; align-items: center; gap: 14px; height: 52px; padding: 0 12px; border: 1px solid transparent; }
+  .lrow .pv { width: 64px; height: 36px; border: 1px solid #2a2a2a; flex: none; }
+  .lrow b { font-weight: normal; font-size: 14px; letter-spacing: .08em; color: #aaa; } .lrow i { margin-left: auto; font-style: normal; font-family: var(--ui); font-size: 11px; color: #555; letter-spacing: 0; }
+  .lrow.sel { border-color: #555; background: #161616; } .lrow.sel b { color: #fff; }
+  .radio { width: 14px; height: 14px; border: 1px solid #444; flex: none; box-sizing: border-box; } .lrow.sel .radio { border: 4px solid #fff; background: #000; }
+  .mcb { height: 44px; box-sizing: border-box; background: #6f6f6f; border: 2px solid #000; box-shadow: inset 2px 2px 0 #a8a8a8, inset -2px -2px 0 #3e3e3e; display: flex; align-items: center; justify-content: center; font-family: var(--mc); font-size: 16px; text-shadow: 2px 2px 0 #3f3f3f; }
+  .mcb.hv { background: #7e8fbf; box-shadow: inset 2px 2px 0 #b9c4e6, inset -2px -2px 0 #4a5683; }
+  .mcslide { position: relative; height: 44px; box-sizing: border-box; background: #000; border: 2px solid #a0a0a0; display: flex; align-items: center; justify-content: center; font-family: var(--mc); font-size: 16px; text-shadow: 2px 2px 0 #3f3f3f; }
+  .mcslide::before { content: ""; position: absolute; top: -2px; bottom: -2px; left: var(--k); width: 14px; background: #6f6f6f; border: 2px solid #000; box-shadow: inset 2px 2px 0 #a8a8a8, inset -2px -2px 0 #3e3e3e; }
+  .mcslide span { position: relative; }
+  .badge { position: absolute; top: 10px; left: 10px; padding: 3px 7px; background: rgba(0,0,0,.65); border: 1px solid #333; font-family: var(--ui); font-size: 10px; letter-spacing: .04em; color: #bbb; }
+  .arrow { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; border: 1px solid #2a2a2a; background: #0c0c0c; color: #bbb; } .arrow svg { width: 22px; height: 22px; }
+  .glass .tile:not(.sel) { border-color: rgba(255,255,255,.12); }
+  .dots.sm { display: grid; grid-template-columns: repeat(4, 22px); gap: 6px; } .dots.sm .dot { width: 22px; height: 22px; }
+  .glass { background: rgba(12,12,12,.55); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.08); }
+</style>
+</head>
+<body>
+<h1>Settings · 10 designs · full window at 50 %</h1>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.33 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/><path d="m8 5.2 8 4.5"/><path d="m6.6 11.3 2.4 1.35"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+  <symbol id="right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="min" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="sq" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+</svg>
+<div id="grid"></div>
+<canvas id="src" style="display:none"></canvas>
+<script>
+  const sv = (id, sw = 1.75) => `<svg fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  const BGS = [["grid", "Grid"], ["gradient", "Gradient"], ["lightning", "Lightning"], ["ascii", "ASCII"], ["ferrofluid", "Ferrofluid"], ["black", "Pure black"]];
+  const SEL = "ascii";
+  const COLORS = ["#16222e", "#1f1633", "#0f2a1f", "#2a1818", "#2a2410", "#89cff0"];
+
+  const notch = `<div class="notch"><div class="in"><span>${sv("min")}</span><span>${sv("sq")}</span><span>${sv("x")}</span></div></div>`;
+  const dock = `<div class="abs box" style="left:50%;bottom:32px;transform:translateX(-50%);display:flex;gap:8px;padding:10px;z-index:4"><span class="ico">${sv("home")}</span><span class="ico">${sv("box")}</span><span style="margin:0 12px" class="launch"><span class="tl"><span class="face"></span></span><span class="lm"><span class="lt">LAUNCH</span><span class="ls">1.21.4</span></span><span class="la">${sv("chev")}</span></span><span class="ico">${sv("bell")}</span><span class="ico on">${sv("hex")}<span class="ul"></span></span></div>`;
+  const skin = (x, y, w = 340, h = 450) => `<img class="skin" data-skin alt="" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">`;
+  const name = (x, y, size = 24) => `<div class="name" style="left:${x}px;top:${y}px;font-size:${size}px">offup</div>`;
+  const tiles = (cols, h, gap = 12, extra = "") => `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:${gap}px;${extra}">${BGS.map(([id, nm]) => `<div class="tile${id === SEL ? " sel" : ""}" style="height:${h}px"><span class="pv pv-${id}"></span><span class="nm">${nm.toUpperCase()}</span>${id === SEL ? `<span class="chk">${sv("check", 3)}</span>` : ""}</div>`).join("")}</div>`;
+  const dots = (sel = 1) => `<div class="dots">${COLORS.map((c, i) => `<span class="dot${i === sel ? " sel" : ""}" style="background:${c}"></span>`).join("")}<span class="dot plus">+</span></div>`;
+  const rows = `<div class="row" style="opacity:.4"><div><b>MOVING GRID</b><span class="s">The grid lines drift slowly</span></div><span class="sw"></span></div><div class="row"><div><b>COLOR</b><span class="s">Used by Gradient, Lightning, ASCII and Ferrofluid</span></div>${dots()}</div>`;
+  const head = (t = "BACKGROUND", s = "Shown behind the player on the home screen") => `<div class="h2">${t}</div><div class="sub">${s}</div>`;
+
+  const ideas = [
+    ["1 · One centered panel", "No sidebar while there is only one category. One calm panel in the middle, bigger tiles, the options below.",
+      "bg-grid", notch + `<div class="abs box" style="left:190px;right:190px;top:70px;bottom:140px;padding:36px 40px">${head()}${tiles(3, 140, 14, "margin:26px 0 18px")}${rows}</div>` + dock],
+    ["2 · Right drawer", "Settings slide in from the right. The player stays visible on the left, so you see every background change live around him.",
+      "bg-ascii", notch + name(360, 150) + skin(190, 175) + `<div class="abs box" style="right:0;top:0;bottom:0;width:520px;border-width:0 0 0 1px;padding:80px 36px 36px">${head()}${tiles(2, 120, 12, "margin:26px 0 18px")}${rows}</div>` + dock.replace("left:50%", "left:360px")],
+    ["3 · Bottom sheet", "A sheet rises from the dock and covers only the lower part. All six backgrounds in one row, player still on screen above.",
+      "bg-ascii", notch + name(640, 60) + skin(540, 80, 200, 265) + `<div class="abs box" style="left:0;right:0;bottom:0;height:430px;border-width:1px 0 0;padding:30px 48px">${head()}${tiles(6, 120, 12, "margin:22px 0 14px")}<div style="display:flex;gap:40px"><div class="row" style="flex:1;opacity:.4"><div><b>MOVING GRID</b><span class="s">The grid lines drift slowly</span></div><span class="sw"></span></div><div class="row" style="flex:1.4"><div><b>COLOR</b><span class="s">For animated backgrounds</span></div>${dots()}</div></div></div>` + dock],
+    ["4 · Live filmstrip", "No panel at all: a strip of small previews floats above the dock, the real background behind changes instantly. Lightest option.",
+      "bg-ascii", notch + name(640, 120) + skin(470, 145) + `<div class="abs box" style="left:50%;transform:translateX(-50%);bottom:132px;padding:12px;display:flex;align-items:center;gap:16px"><span class="h2" style="font-size:14px;color:#888;writing-mode:vertical-rl;transform:rotate(180deg)">BG</span>${BGS.map(([id, nm]) => `<div class="tile${id === SEL ? " sel" : ""}" style="width:104px;height:60px"><span class="pv pv-${id}"></span><span class="nm" style="font-size:10px;left:7px;bottom:5px">${nm.toUpperCase()}</span></div>`).join("")}<span style="width:1px;align-self:stretch;background:#2a2a2a"></span>${dots().replace('class="dots"', 'class="dots sm"')}</div>` + dock],
+    ["5 · Preview + list", "Left a big live preview with a mini player, right a clean list with radio buttons. Clear which one is active.",
+      "bg-grid", notch + `<div class="abs box" style="left:80px;right:80px;top:70px;bottom:140px;display:flex">` +
+        `<div style="flex:1.25;padding:32px;border-right:1px solid #1c1c1c;display:flex;flex-direction:column;gap:16px">${head()}<div class="pv pv-ascii" style="flex:1;border:1px solid #2a2a2a;position:relative"><img class="skin" data-skin alt="" style="left:50%;bottom:0;width:150px;height:200px;transform:translateX(-50%)"></div></div>` +
+        `<div style="flex:1;padding:32px 28px;display:flex;flex-direction:column;gap:4px">${BGS.map(([id, nm]) => `<div class="lrow${id === SEL ? " sel" : ""}"><span class="radio"></span><span class="pv pv-${id}"></span><b>${nm.toUpperCase()}</b><i>${["lightning", "ascii", "ferrofluid"].includes(id) ? "animated" : id === "grid" ? "can move" : ""}</i></div>`).join("")}<div style="margin-top:auto">${rows.split('<div class="row">')[1] ? '<div class="row">' + rows.split('<div class="row">')[1] : ""}</div></div></div>` + dock],
+    ["6 · Carousel", "One big preview at a time, arrows to flip through, the name large in the Minecraft font. Feels like choosing a world.",
+      "bg-grid", notch + `<div class="abs" style="left:50%;top:90px;transform:translateX(-50%);display:flex;align-items:center;gap:28px"><span class="arrow">${sv("left")}</span><div class="tile sel" style="width:760px;height:400px"><span class="pv pv-ascii"></span><span class="chk">${sv("check", 3)}</span></div><span class="arrow">${sv("right")}</span></div>` +
+        `<div class="abs" style="left:50%;top:510px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:12px"><div style="font-family:var(--mc);font-size:30px;text-shadow:2px 2px 0 #3f3f3f">ASCII</div><div style="display:flex;gap:8px">${BGS.map(([id]) => `<span style="width:${id === SEL ? 22 : 8}px;height:4px;background:${id === SEL ? "#fff" : "#444"}"></span>`).join("")}</div>${dots()}</div>` + dock],
+    ["7 · Minecraft options", "Exactly like the options screen in the game: stone buttons that cycle through values and a slider. Instantly familiar.",
+      "bg-ascii dim", notch + `<div class="abs" style="left:50%;top:110px;transform:translateX(-50%);font-family:var(--mc);font-size:22px;text-shadow:2px 2px 0 #3f3f3f">Background Settings</div>` +
+        `<div class="abs" style="left:50%;top:190px;transform:translateX(-50%);width:640px;display:grid;grid-template-columns:1fr 1fr;gap:10px 12px"><div class="mcb hv">Background: ASCII</div><div class="mcb" style="opacity:.55">Moving Grid: OFF</div><div class="mcb">Color: Violet</div><div class="mcslide" style="--k:88%"><span>Brightness: 70%</span></div></div>` +
+        `<div class="abs" style="left:50%;top:330px;transform:translateX(-50%);display:flex;gap:10px">${BGS.map(([id]) => `<div class="tile${id === SEL ? " sel" : ""}" style="width:96px;height:58px;border-width:2px;border-color:${id === SEL ? "#fff" : "#000"}"><span class="pv pv-${id}"></span></div>`).join("")}</div>` +
+        `<div class="abs mcb" style="left:50%;top:440px;transform:translateX(-50%);width:400px">Done</div>` + dock],
+    ["8 · Big cards", "Fewer, bigger cards with a short description and a tag (animated, static). More room for the previews to shine.",
+      "bg-grid", notch + `<div class="abs" style="left:110px;right:110px;top:66px">${head()}<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px">${BGS.map(([id, nm]) => `<div class="box${id === SEL ? "" : ""}" style="${id === SEL ? "border:2px solid #fff;" : ""}"><div class="pv pv-${id}" style="height:150px;position:relative"><span class="badge">${["lightning", "ascii", "ferrofluid"].includes(id) ? "ANIMATED" : id === "grid" ? "CAN MOVE" : "STATIC"}</span>${id === SEL ? `<span class="chk">${sv("check", 3)}</span>` : ""}</div><div style="padding:12px 14px"><div style="font-size:15px;letter-spacing:.08em">${nm.toUpperCase()}</div><div class="muted" style="font-size:12px;margin-top:3px">${{ grid: "Thin lines, fades to the edges", gradient: "Soft glow from below", lightning: "Electric bolt, slow flicker", ascii: "Characters rising like a wave", ferrofluid: "Liquid metal spikes", black: "Nothing. Pure focus." }[id]}</div></div></div>`).join("")}</div><div style="display:flex;align-items:center;justify-content:flex-end;gap:16px;margin-top:18px"><span class="muted">Color</span>${dots()}</div></div>` + dock],
+    ["9 · Tabs on top", "A compact panel with tabs as the header, using the dock's white underline. Ready for more categories later without a sidebar.",
+      "bg-grid", notch + `<div class="abs box" style="left:50%;transform:translateX(-50%);top:80px;width:820px;padding:26px 34px 30px"><div class="tabs"><span class="on">BACKGROUND</span><span>SKIN</span><span>LAUNCH</span><span>ABOUT</span></div>${tiles(3, 118, 12, "margin:24px 0 16px")}${rows}</div>` + dock],
+    ["10 · Glass over live", "The panel is see-through glass, so the chosen background keeps moving behind it. Settings feel part of the scene.",
+      "bg-ascii", notch + `<div class="abs glass" style="left:150px;right:150px;top:70px;bottom:140px;padding:36px 40px">${head()}${tiles(3, 140, 14, "margin:26px 0 18px")}${rows.replaceAll("#1c1c1c", "rgba(255,255,255,.08)")}</div>` + dock],
+  ];
+
+  const q = new URLSearchParams(location.search);
+  const row = Number(q.get("row") || 0);
+  const shown = row ? ideas.slice((row - 1) * 2, row * 2) : ideas;
+  const grid = document.getElementById("grid");
+  for (const [t, s, bg, html] of shown) {
+    const c = document.createElement("div");
+    c.innerHTML = `<div class="frame"><div class="win ${bg}">${html}</div></div><div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  }
+  (async () => {
+    const canvas = document.getElementById("src");
+    const viewer = new skinview3d.SkinViewer({ canvas, width: 680, height: 900, preserveDrawingBuffer: true });
+    await viewer.loadSkin("skin.png");
+    viewer.zoom = 0.78;
+    viewer.playerWrapper.rotation.y = -0.55;
+    viewer.render();
+    const url = canvas.toDataURL();
+    for (const img of document.querySelectorAll("img[data-skin]")) img.src = url;
+  })();
+</script>
+</body>
+</html>

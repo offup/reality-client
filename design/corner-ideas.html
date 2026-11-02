@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Top-right corner · 20 ideas</title>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 28px 24px 48px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 6px; letter-spacing: .1em; }
+  .note { font-family: var(--ui); font-size: 13px; color: #666; margin: 0 0 24px; letter-spacing: 0; }
+  #grid { display: grid; grid-template-columns: repeat(2, 640px); gap: 26px 24px; }
+  .lab { font-size: 15px; margin: 8px 0 0; }
+  .lab small { display: block; color: #777; font-size: 12px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; }
+  .pair { display: flex; gap: 8px; }
+  /* One panel = the real top-right corner of the window at 1:1 */
+  .corner { position: relative; width: 316px; height: 230px; overflow: hidden; background: #0a0a0a; border: 1px solid #222; }
+  .corner::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(#141414 1px, transparent 1px), linear-gradient(90deg, #141414 1px, transparent 1px); background-size: 40px 40px; background-position: right top; }
+  .corner .tag { position: absolute; left: 10px; bottom: 8px; font-family: var(--ui); font-size: 11px; color: #555; letter-spacing: 0; }
+
+  .btn { position: absolute; top: 24px; right: 24px; display: flex; align-items: center; justify-content: center; gap: 10px; height: 44px; min-width: 44px; box-sizing: border-box; border: 1px solid #2a2a2a; background: #0c0c0c; color: #aaa; }
+  .btn svg { width: 20px; height: 20px; }
+  .btn.on { color: #fff; background: #161616; border-color: #444; }
+  .menu { position: absolute; top: 76px; right: 24px; width: max-content; padding: 6px; background: #0f0f0f; border: 1px solid #2e2e2e; }
+  .menu .r { display: flex; align-items: center; gap: 12px; padding: 9px 18px 9px 12px; font-family: var(--ui); font-size: 14px; color: #ddd; letter-spacing: 0; }
+  .menu .r svg { width: 18px; height: 18px; color: #999; } .menu .r.hv { background: #1c1c1c; color: #fff; }
+  .menu .r.red { color: #f0a0a0; } .menu .r.red svg { color: #e24b4a; } .menu .s { height: 1px; background: #222; margin: 4px 0; }
+  .menu.sc .r { font-family: var(--sc); font-size: 15px; letter-spacing: .06em; }
+  .row { position: absolute; top: 76px; right: 24px; display: flex; gap: 6px; padding: 6px; background: #0f0f0f; border: 1px solid #2e2e2e; }
+  .row .ib { width: 40px; height: 36px; display: flex; align-items: center; justify-content: center; color: #aaa; } .row .ib svg { width: 18px; height: 18px; }
+  .row .ib.red { color: #e24b4a; } .row .ib.hv { background: #1c1c1c; color: #fff; }
+  .seg { position: absolute; top: 24px; right: 24px; display: flex; border: 1px solid #2a2a2a; background: #0c0c0c; }
+  .seg .s { width: 44px; height: 42px; display: flex; align-items: center; justify-content: center; color: #aaa; } .seg .s svg { width: 18px; height: 18px; }
+  .seg .s + .s { border-left: 1px solid #2a2a2a; } .seg .s.red { background: #e24b4a; color: #fff; } .seg .s.hv { background: #1a1a1a; color: #fff; }
+  .face { width: 26px; height: 26px; image-rendering: pixelated; background: url(skin.png) -26px -26px / 208px 208px; position: relative; flex: none; }
+  .face::after { content: ""; position: absolute; inset: 0; background: url(skin.png) -130px -26px / 208px 208px; image-rendering: pixelated; }
+  .logo { width: 26px; height: 26px; mix-blend-mode: lighten; }
+  .txt { font-size: 15px; letter-spacing: .08em; color: #ddd; }
+  .ver { font-family: var(--mc); font-size: 10px; color: #777; }
+  .mcbtn { position: absolute; top: 24px; right: 24px; width: 44px; height: 44px; box-sizing: border-box; background: #6f6f6f; border: 2px solid #000; box-shadow: inset 2px 2px 0 #a8a8a8, inset -2px -2px 0 #3e3e3e; display: flex; align-items: center; justify-content: center; color: #fff; font-family: var(--mc); font-size: 18px; text-shadow: 2px 2px 0 #3f3f3f; }
+  .mcbtn.on { background: #7e8fbf; box-shadow: inset 2px 2px 0 #b9c4e6, inset -2px -2px 0 #4a5683; }
+  .mcmenu { position: absolute; top: 76px; right: 24px; display: flex; flex-direction: column; gap: 6px; }
+  .mcmenu .m { width: 170px; height: 34px; box-sizing: border-box; background: #6f6f6f; border: 2px solid #000; box-shadow: inset 2px 2px 0 #a8a8a8, inset -2px -2px 0 #3e3e3e; display: flex; align-items: center; justify-content: center; font-family: var(--mc); font-size: 13px; text-shadow: 2px 2px 0 #3f3f3f; }
+  .mcmenu .m.hv { background: #7e8fbf; box-shadow: inset 2px 2px 0 #b9c4e6, inset -2px -2px 0 #4a5683; }
+  .tab { position: absolute; top: 0; right: 24px; height: 40px; padding: 0 14px; display: flex; align-items: center; gap: 10px; border: 1px solid #2a2a2a; border-top: 0; background: #0c0c0c; color: #aaa; }
+  .tab svg { width: 18px; height: 18px; }
+  .tab.on { color: #fff; border-color: #444; }
+</style>
+</head>
+<body>
+<h1>Top-right corner · 20 ideas · real size</h1>
+<p class="note">Each idea: left the corner as it sits on the home screen, right the same corner with the menu open (hover on the first item).</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="menu" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></symbol>
+  <symbol id="min" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="max" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></symbol>
+  <symbol id="sq" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="power" viewBox="0 0 24 24"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="grid4" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></symbol>
+  <symbol id="win" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16"/><path d="M3 9h18"/></symbol>
+  <symbol id="dotsh" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="pix" viewBox="0 0 24 24"><rect x="4" y="10" width="4" height="4" fill="currentColor" stroke="none"/><rect x="10" y="10" width="4" height="4" fill="currentColor" stroke="none"/><rect x="16" y="10" width="4" height="4" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="bars2" viewBox="0 0 24 24"><path d="M5 9h14"/><path d="M5 15h9"/></symbol>
+  <symbol id="hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="M8.5 12h7"/></symbol>
+  <symbol id="cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></symbol>
+</svg>
+<div id="grid"></div>
+<script>
+  const sv = (id) => `<svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  const items = (sc) => `<div class="menu${sc ? " sc" : ""}"><div class="r hv">${sv("min")}Minimize</div><div class="r">${sv("max")}Maximize</div><div class="s"></div><div class="r red">${sv("power")}Quit</div></div>`;
+  const rowMenu = `<div class="row"><span class="ib hv">${sv("min")}</span><span class="ib">${sv("max")}</span><span class="ib red">${sv("power")}</span></div>`;
+  const btn = (inner, on, style = "") => `<div class="btn${on ? " on" : ""}" style="${style}">${inner}</div>`;
+  const pair = (closed, open) => `<div class="pair"><div class="corner">${closed}<span class="tag">closed</span></div><div class="corner">${open}<span class="tag">open</span></div></div>`;
+  const simple = (inner, style, menu = items()) => pair(btn(inner, false, style), btn(inner, true, style) + menu);
+  const ideas = [
+    ["1 · Clover logo", "Your logo in the box. Feels like the app's own menu, not a generic icon.", simple(`<img class="logo" src="logo.png" alt="">`)],
+    ["2 · Player head", "The active account's face in the box; menu could later also hold account things.", simple(`<span class="face"></span>`)],
+    ["3 · Head + name", "Face and player name in one wider box, like a profile chip.", simple(`<span class="face"></span><span class="txt">offup</span>`, "padding:0 14px 0 9px")],
+    ["4 · Three dots, horizontal", "Classic \"more\" icon, lying flat. Calmer than vertical dots.", simple(sv("dotsh"))],
+    ["5 · Pixel dots", "Three small square dots, a nod to Minecraft pixels.", simple(sv("pix"))],
+    ["6 · Two lines", "A reduced menu icon: one long, one short line. Less generic than three lines.", simple(sv("bars2"))],
+    ["7 · Window icon", "A small window frame. Says \"window actions\" directly.", simple(sv("win"))],
+    ["8 · Power", "One power icon; the menu is about quitting and hiding.", simple(sv("power"))],
+    ["9 · Text MENU", "The word in SmallCaps, no icon. Matches LAUNCH in the dock.", simple(`<span class="txt">MENU</span>`, "padding:0 14px")],
+    ["10 · Chevron", "A small arrow down that turns up when open.", pair(btn(sv("chev")), btn(`<span style="transform:rotate(180deg);display:flex">${sv("chev")}</span>`, true) + items())],
+    ["11 · Name + version chip", "\"REALITY\" with the version below, like a title, opens the menu.", simple(`<span style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="txt" style="font-size:14px">REALITY</span><span class="ver">v0.1.0</span></span>`, "padding:0 14px")],
+    ["12 · Segmented trio", "No menu: minimize, maximize, close as one segmented box like the launch group.", pair(`<div class="seg"><span class="s">${sv("min")}</span><span class="s">${sv("sq")}</span><span class="s">${sv("x")}</span></div>`, `<div class="seg"><span class="s">${sv("min")}</span><span class="s hv">${sv("sq")}</span><span class="s red">${sv("x")}</span></div>`)],
+    ["13 · Segmented duo", "Only minimize and close; maximize stays in Windows (Win+↑ / snap).", pair(`<div class="seg"><span class="s">${sv("min")}</span><span class="s">${sv("x")}</span></div>`, `<div class="seg"><span class="s hv">${sv("min")}</span><span class="s red">${sv("x")}</span></div>`)],
+    ["14 · Icon row menu", "The menu opens as a row of icon buttons instead of a list. Compact.", pair(btn(sv("menu")), btn(sv("menu"), true) + rowMenu)],
+    ["15 · Hanging tab", "A tab hanging from the top edge with the logo; no top border.", pair(`<div class="tab"><img class="logo" src="logo.png" alt="" style="width:22px;height:22px">${sv("chev")}</div>`, `<div class="tab on"><img class="logo" src="logo.png" alt="" style="width:22px;height:22px"><span style="transform:rotate(180deg);display:flex">${sv("chev")}</span></div>` + items().replace('class="menu"', 'class="menu" style="top:52px"'))],
+    ["16 · Minecraft button", "A real Minecraft-style stone button; menu as Minecraft buttons too.", pair(`<div class="mcbtn">≡</div>`, `<div class="mcbtn on">≡</div><div class="mcmenu"><div class="m hv">Minimize</div><div class="m">Maximize</div><div class="m">Quit</div></div>`)],
+    ["17 · Grid icon", "Four small squares, like an app menu.", simple(sv("grid4"))],
+    ["18 · Hexagon line", "In the dock icon family: rounded hexagon with a line, like the settings icon.", simple(sv("hex"))],
+    ["19 · Menu in SmallCaps", "Three lines as now, but the menu items in the SmallCaps font like the rest of the UI.", simple(sv("menu"), "", items(true))],
+    ["20 · Logo + chevron", "Clover and a small arrow in one box: clearly clickable, clearly yours.", simple(`<img class="logo" src="logo.png" alt="" style="width:22px;height:22px"><span style="display:flex;color:#777">${sv("chev")}</span>`, "padding:0 10px")],
+  ];
+  const grid = document.getElementById("grid");
+  for (const [t, s, html] of ideas) {
+    const c = document.createElement("div");
+    c.innerHTML = `${html}<div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  }
+</script>
+</body>
+</html>

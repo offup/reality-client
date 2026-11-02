@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Account · nach dem Klick</title>
+<script src="https://unpkg.com/skinview3d@3.1.0/bundles/skinview3d.bundle.js"></script>
+<style>
+  @font-face { font-family: "SmallCaps"; src: url("/fonts/smallcaps.ttf") format("truetype"); }
+  @font-face { font-family: "MinecraftTen"; src: url("/fonts/minecraft.woff2") format("woff2"); }
+  :root { --sc: "SmallCaps", monospace; --mc: "MinecraftTen", sans-serif; --ui: "Segoe UI", system-ui, sans-serif; }
+  html, body { margin: 0; background: #000; color: #fff; font-family: var(--sc); letter-spacing: .03em; }
+  body { padding: 32px 24px 64px; }
+  h1 { font-size: 15px; font-weight: 500; color: #888; margin: 0 0 28px; letter-spacing: .1em; }
+  .card { margin-bottom: 40px; }
+  .card .lab { font-size: 16px; margin: 12px 0 0; }
+  .card .lab small { display: block; color: #777; font-size: 13px; margin-top: 3px; font-family: var(--ui); letter-spacing: 0; }
+  .frame { width: 896px; height: 560px; overflow: hidden; border: 1px solid #2a2a2a; }
+  .win { position: relative; width: 1280px; height: 800px; background: #000; transform: scale(.7); transform-origin: 0 0; overflow: hidden; }
+  .win::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(#161616 1px, transparent 1px), linear-gradient(90deg, #161616 1px, transparent 1px); background-size: 40px 40px; -webkit-mask-image: radial-gradient(ellipse 60% 70% at 50% 45%, #000 20%, transparent 100%); }
+  .logo { position: absolute; left: 36px; top: 36px; display: flex; align-items: center; gap: 14px; }
+  .logo img { width: 40px; height: 40px; }
+  .logo span { font-size: 18px; letter-spacing: .08em; } .logo small { display: block; font-family: var(--mc); font-size: 11px; color: #777; margin-top: 3px; }
+  canvas.skin { position: absolute; left: 50%; top: 150px; transform: translateX(-50%); }
+  canvas.skin.dim { filter: grayscale(1) brightness(.45); opacity: .5; }
+  .pname { position: absolute; left: 50%; top: 118px; transform: translateX(-50%); font-family: var(--mc); font-size: 26px; letter-spacing: .04em; color: #fff; }
+
+  /* Köpfe direkt aus der Skin-Textur */
+  .face { position: relative; width: 32px; height: 32px; flex: none; image-rendering: pixelated; background: url(skin.png) -32px -32px / 256px 256px; }
+  .face::after { content: ""; position: absolute; inset: 0; background: url(skin.png) -160px -32px / 256px 256px; image-rendering: pixelated; }
+  .face.sm { width: 24px; height: 24px; background-size: 192px 192px; background-position: -24px -24px; } .face.sm::after { background-size: 192px 192px; background-position: -120px -24px; }
+
+  /* Dock, identisch zur App */
+  .dock { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); display: flex; align-items: stretch; gap: 8px; padding: 10px; background: #0c0c0c; border: 1px solid #2a2a2a; }
+  .dock .it { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #777; position: relative; }
+  .dock .it.on { color: #fff; } .dock svg { width: 22px; height: 22px; }
+  .dock .ul { position: absolute; left: 0; bottom: 7px; width: 22px; height: 2px; background: #fff; box-shadow: 0 0 8px rgba(255,255,255,.35); }
+  .dock .lg { display: flex; margin: 0 12px; border: 1px solid #555; background: #1a1a1a; position: relative; }
+  .dock .lm { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 200px; padding: 0 32px 0 20px; height: 52px; box-sizing: border-box; }
+  .dock .lt { font-size: 22px; line-height: 1; letter-spacing: .05em; } .dock .ls { font-family: var(--mc); font-size: 11px; line-height: 1; color: #9a9a9a; }
+  .dock .la { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; color: #bbb; border-left: 1px solid #555; box-sizing: border-box; } .dock .la svg { width: 20px; height: 20px; }
+  .dock .add { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; padding-left: 4px; box-sizing: border-box; color: #6a6a6a; }
+  .dock .add .bx { width: 34px; height: 34px; border: 1px dashed #555; background: #1a1a1a; display: flex; align-items: center; justify-content: center; } .dock .add .bx svg { width: 18px; height: 18px; }
+  .dock .add.on { color: #fff; } .dock .add.on .bx { border-color: #9a9a9a; background: #262626; }
+
+  /* Bausteine */
+  .ms { display: flex; align-items: center; justify-content: center; gap: 12px; height: 44px; padding: 0 16px; background: #fff; color: #111; font-family: var(--ui); font-size: 15px; font-weight: 600; letter-spacing: 0; white-space: nowrap; box-sizing: border-box; }
+  .ms i { width: 21px; height: 21px; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; flex: none; }
+  .ms i b { display: block; } .ms i b:nth-child(1) { background: #f25022; } .ms i b:nth-child(2) { background: #7fba00; } .ms i b:nth-child(3) { background: #00a4ef; } .ms i b:nth-child(4) { background: #ffb900; }
+  .ghost { display: flex; align-items: center; justify-content: center; gap: 10px; height: 44px; padding: 0 16px; border: 1px solid #2e2e2e; color: #bbb; font-family: var(--ui); font-size: 14px; letter-spacing: 0; white-space: nowrap; box-sizing: border-box; }
+  .ghost svg { width: 18px; height: 18px; color: #888; }
+  .copy { font-family: var(--ui); font-size: 14px; color: #9a9a9a; letter-spacing: 0; line-height: 1.5; }
+  .ttl { font-size: 24px; letter-spacing: .06em; line-height: 1; }
+  .x { position: absolute; right: 16px; top: 14px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #777; } .x svg { width: 16px; height: 16px; }
+
+  /* 1 Popover */
+  .pop { position: absolute; left: 50%; bottom: 110px; transform: translateX(calc(-50% - 180px)); width: 300px; padding: 14px; background: #0f0f0f; border: 1px solid #2e2e2e; box-shadow: 0 16px 40px rgba(0,0,0,.7); display: flex; flex-direction: column; gap: 10px; }
+  .pop::after { content: ""; position: absolute; left: 32px; bottom: -7px; width: 12px; height: 12px; background: #0f0f0f; border-right: 1px solid #2e2e2e; border-bottom: 1px solid #2e2e2e; transform: rotate(45deg); }
+  .pop .hd { font-size: 13px; color: #777; letter-spacing: .08em; padding: 0 2px 4px; }
+
+  /* 2 Dialog */
+  .dim { position: absolute; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(8px); }
+  .dlg { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 460px; padding: 36px; background: #0f0f0f; border: 1px solid #2e2e2e; box-shadow: 0 30px 80px rgba(0,0,0,.8); display: flex; flex-direction: column; gap: 14px; box-sizing: border-box; }
+  .dlg .ttl { margin-bottom: 2px; } .dlg .copy { margin-bottom: 10px; }
+  .dlg .cancel { text-align: center; font-family: var(--ui); font-size: 13px; color: #777; letter-spacing: 0; margin-top: 6px; }
+
+  /* 3 Launch-Gruppe */
+  .dock .lg.open .lm, .dock .lg.open .la { display: none; }
+  .dock .lg.open .inl { display: flex; align-items: center; gap: 8px; padding: 4px 8px 4px 4px; }
+  .dock .lg.open .ms { height: 42px; font-size: 14px; padding: 0 14px; } .dock .lg.open .ghost { height: 42px; font-size: 13px; padding: 0 14px; }
+  .dock .lg.open .cl { width: 34px; height: 42px; display: flex; align-items: center; justify-content: center; color: #777; } .dock .lg.open .cl svg { width: 16px; height: 16px; }
+
+  /* 4 Gerätecode */
+  .code { position: absolute; left: 50%; top: 150px; transform: translateX(-50%); width: 560px; display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center; }
+  .code .box { display: flex; align-items: stretch; border: 1px solid #3a3a3a; background: #111; }
+  .code .c { font-family: var(--mc); font-size: 46px; letter-spacing: .14em; padding: 20px 30px 16px 40px; white-space: nowrap; }
+  .code .cp { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; width: 92px; border-left: 1px solid #3a3a3a; color: #bbb; font-family: var(--ui); font-size: 12px; letter-spacing: 0; } .code .cp svg { width: 20px; height: 20px; }
+  .code ol { list-style: none; margin: 0; padding: 0; display: flex; gap: 32px; }
+  .code li { display: flex; align-items: center; gap: 10px; font-family: var(--ui); font-size: 14px; color: #777; letter-spacing: 0; }
+  .code li b { width: 26px; height: 26px; border: 1px solid #3a3a3a; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #999; font-weight: 500; }
+  .code li.done b { background: #fff; color: #000; border-color: #fff; } .code li.cur { color: #fff; } .code li.cur b { border-color: #fff; color: #fff; }
+  .code .bar { width: 100%; height: 2px; background: #1e1e1e; position: relative; } .code .bar i { position: absolute; left: 0; top: 0; height: 100%; width: 62%; background: #fff; }
+  .code .meta { display: flex; justify-content: space-between; width: 100%; font-family: var(--ui); font-size: 13px; color: #777; letter-spacing: 0; }
+
+  /* 5 Spielerbereich */
+  .center { position: absolute; left: 50%; top: 290px; transform: translateX(-50%); width: 360px; display: flex; flex-direction: column; align-items: stretch; gap: 12px; text-align: center; }
+  .center .ttl { margin-bottom: 4px; } .center .copy { margin-bottom: 10px; }
+
+  /* 6 Seitenpanel */
+  .sheet { position: absolute; right: 0; top: 0; bottom: 0; width: 400px; background: #0c0c0c; border-left: 1px solid #2a2a2a; box-shadow: -30px 0 60px rgba(0,0,0,.6); padding: 36px 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; }
+  .sheet .ttl { font-size: 22px; margin-bottom: 14px; }
+  .sheet .row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 1px solid #222; font-size: 16px; }
+  .sheet .row.cur { border-color: #444; background: #161616; }
+  .sheet .row .tag { margin-left: auto; font-family: var(--ui); font-size: 11px; letter-spacing: .04em; color: #4ade80; border: 1px solid rgba(74,222,128,.35); padding: 3px 7px; }
+  .sheet .row .more { margin-left: auto; color: #666; font-family: var(--ui); }
+  .sheet .sep { height: 1px; background: #1e1e1e; margin: 14px 0 8px; }
+</style>
+</head>
+<body>
+<h1>Account · was nach dem Klick auf Plus passiert · 6 Abläufe</h1>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M9.90 4.53Q12.00 3.00 14.10 4.53L19.03 8.11Q21.13 9.63 20.33 12.11L18.45 17.89Q17.64 20.37 15.04 20.37L8.96 20.37Q6.36 20.37 5.55 17.89L3.67 12.11Q2.87 9.63 4.97 8.11Z"/><path d="M10 15.5q2 1.5 4 0"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M10.9 3.4 Q12 2.8 13.1 3.4 L19.2 6.85 Q20.3 7.5 20.3 8.75 L20.3 15.25 Q20.3 16.5 19.2 17.15 L13.1 20.6 Q12 21.2 10.9 20.6 L4.8 17.15 Q3.7 16.5 3.7 15.25 L3.7 8.75 Q3.7 7.5 4.8 6.85Z"/><path d="M4 7.5 12 12 20 7.5"/><path d="M12 12v9"/><path d="m8 5.2 8 4.5"/><path d="m6.6 11.3 2.4 1.35"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10.5a6 6 0 0 1 12 0v3.9c0 .7.3 1.3.9 1.7l.6.4c.9.6.5 1.9-.6 1.9H5.1c-1.1 0-1.5-1.3-.6-1.9l.6-.4c.6-.4.9-1 .9-1.7z"/><path d="M10 20.5q2 1.4 4 0"/></symbol>
+  <symbol id="i-hex" viewBox="0 0 24 24"><path d="M3.38 13.57 Q2.5 12 3.38 10.43 L6.12 5.57 Q7 4 8.8 4 L15.2 4 Q17 4 17.88 5.57 L20.62 10.43 Q21.5 12 20.62 13.57 L17.88 18.43 Q17 20 15.2 20 L8.8 20 Q7 20 6.12 18.43Z"/><path d="m9.75 9 4.5 6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+</svg>
+<div id="grid"></div>
+<script>
+  const sv = (id) => `<svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
+  const logo = `<div class="logo"><img src="logo.png" alt=""><div><span>Reality Client</span><small>v0.1.0</small></div></div>`;
+  const ms = `<div class="ms"><i><b></b><b></b><b></b><b></b></i>Mit Microsoft anmelden</div>`;
+  const ghost = `<div class="ghost">${sv("i-user")}Offline mit Spielernamen</div>`;
+  const skin = (dim) => `<canvas class="skin${dim ? " dim" : ""}" data-skin></canvas>`;
+  const dock = (o = {}) => `<div class="dock">
+    <div class="it on">${sv("i-home")}<span class="ul" style="transform:translateX(15px)"></span></div><div class="it">${sv("i-box")}</div>
+    <div class="lg${o.open ? " open" : ""}"><div class="add${o.active ? " on" : ""}"><span class="bx">${sv("i-plus")}</span></div>${o.open ? `<div class="inl">${ms}${ghost}<span class="cl">${sv("i-x")}</span></div>` : ""}<div class="lm"><span class="lt">Launch</span><span class="ls">1.21.4</span></div><div class="la">${sv("i-chev")}</div></div>
+    <div class="it">${sv("i-bell")}</div><div class="it">${sv("i-hex")}</div></div>`;
+  const ideas = [
+    ["1 · Popover über der Box", "Kleines Menü direkt am Plus. Zwei Wege, Klick daneben schließt. Man bleibt im Dock.",
+      logo + skin() + dock({ active: 1 }) + `<div class="pop"><div class="hd">ACCOUNT HINZUFÜGEN</div>${ms}${ghost}</div>`],
+    ["2 · Dialog in der Mitte", "Hintergrund wird dunkel und unscharf. Titel, kurze Erklärung, zwei Wege, Abbrechen.",
+      logo + skin() + dock() + `<div class="dim"></div><div class="dlg"><span class="x">${sv("i-x")}</span><div class="ttl">Account hinzufügen</div><div class="copy">Melde dich mit deinem Microsoft-Konto an, um auf Servern zu spielen. Der Login öffnet sich in deinem Browser.</div>${ms}${ghost}<div class="cancel">Abbrechen</div></div>`],
+    ["3 · Launch-Gruppe klappt auf", "Launch weicht, die Optionen erscheinen direkt in der Gruppe. Das Dock bleibt die Bühne.",
+      logo + skin() + dock({ open: 1, active: 1 })],
+    ["4 · Gerätecode", "Code anzeigen, im Browser auf microsoft.com/link eingeben. Kein eingebettetes Browserfenster, funktioniert auch vom Handy aus.",
+      logo + dock({ active: 1 }) + `<div class="code"><div class="ttl">Bei Microsoft anmelden</div><div class="copy">Öffne <b style="color:#fff;font-weight:500">microsoft.com/link</b> und gib diesen Code ein</div><div class="box"><div class="c">AB7K-QX9F</div><div class="cp">${sv("i-copy")}Kopieren</div></div><ol><li class="done"><b>✓</b>Code kopiert</li><li class="cur"><b>2</b>Im Browser eingeben</li><li><b>3</b>Fertig</li></ol><div class="bar"><i></i></div><div class="meta"><span>Warte auf Anmeldung …</span><span>Läuft ab in 12:40</span></div><div class="ghost" style="width:220px">${sv("i-ext")}Browser öffnen</div></div>`],
+    ["5 · Spielerbereich übernimmt", "Der ausgegraute Spieler bleibt sichtbar, die Anmeldung legt sich davor. Nach dem Login steht dort der eigene Skin.",
+      logo + skin(true) + dock({ active: 1 }) + `<div class="center"><div class="ttl">Wer bist du?</div><div class="copy">Dein Skin erscheint hier, sobald du angemeldet bist.</div>${ms}${ghost}</div>`],
+    ["6 · Seitenpanel", "Panel von rechts mit allen Accounts. Wechseln, hinzufügen und abmelden an einem Ort. Gut ab dem zweiten Account.",
+      logo + skin() + dock({ active: 1 }) + `<div class="sheet"><div class="ttl">Accounts</div><div class="row cur"><span class="face"></span>lettner<span class="tag">AKTIV</span></div><div class="row"><span class="face" style="filter:hue-rotate(150deg)"></span>lettner_alt<span class="more">⋯</span></div><div class="sep"></div>${ms}${ghost}</div>`],
+  ];
+  const grid = document.getElementById("grid");
+  for (const [t, s, html] of ideas) {
+    const c = document.createElement("div"); c.className = "card";
+    c.innerHTML = `<div class="frame"><div class="win">${html}</div></div><div class="lab">${t}<small>${s}</small></div>`;
+    grid.appendChild(c);
+  }
+  for (const canvas of document.querySelectorAll("canvas[data-skin]")) {
+    const viewer = new skinview3d.SkinViewer({ canvas, width: 320, height: 420, skin: "skin.png" });
+    viewer.zoom = 0.85;
+    viewer.controls.enableZoom = false;
+    viewer.controls.enableRotate = false;
+    viewer.animation = new skinview3d.IdleAnimation();
+    viewer.animation.speed = 0.6;
+    viewer.playerObject.rotation.y = -0.35;
+  }
+</script>
+</body>
+</html>
