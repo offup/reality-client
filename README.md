@@ -1,10 +1,10 @@
 # Reality Client
 
-A Minecraft launcher for Windows: sign in with Microsoft, create instances and play on Fabric.
+A Minecraft launcher for Windows and macOS: sign in with Microsoft, create instances and play on Fabric.
 
 ## Download
 
-Get the latest **Reality-Client_x.y.z_x64-setup.exe** from the [public releases](https://github.com/offup/reality-client-releases/releases/latest) and run it.
+Get the latest download from the [public releases](https://github.com/offup/reality-client-releases/releases/latest) and run it.
 The launcher updates itself: when a new version is out, a notice appears at the top left, one click installs it.
 
 Windows may warn about an unknown publisher because the installer is not code-signed yet.

@@ -23,6 +23,40 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tauri::{AppHandle, Emitter, Manager};
 
+// ---------------------------------------------------------------- platform
+
+/// What differs between Windows and macOS: names in Mojang's files, where Java lives, path separator
+#[cfg(target_os = "windows")]
+mod platform {
+    pub const OS_NAME: &str = "windows";
+    pub const JAVA_PLATFORM: &str = "windows-x64";
+    pub const CLASSPATH_SEPARATOR: &str = ";";
+    /// javaw has no console window
+    pub const JAVA_BINARY: &str = "bin/javaw.exe";
+}
+
+#[cfg(target_os = "macos")]
+mod platform {
+    pub const OS_NAME: &str = "osx";
+    #[cfg(target_arch = "aarch64")]
+    pub const JAVA_PLATFORM: &str = "mac-os-arm64";
+    #[cfg(not(target_arch = "aarch64"))]
+    pub const JAVA_PLATFORM: &str = "mac-os";
+    pub const CLASSPATH_SEPARATOR: &str = ":";
+    pub const JAVA_BINARY: &str = "jre.bundle/Contents/Home/bin/java";
+}
+
+#[cfg(not(any(target_os = "windows", target_os = "macos")))]
+mod platform {
+    pub const OS_NAME: &str = "linux";
+    pub const JAVA_PLATFORM: &str = "linux";
+    pub const CLASSPATH_SEPARATOR: &str = ":";
+    pub const JAVA_BINARY: &str = "bin/java";
+}
+
+/// Mojang's arch names: "x86" means 32-bit (never us), "arm64" Apple silicon / ARM
+const ARCH: &str = if cfg!(target_arch = "aarch64") { "arm64" } else { "x86_64" };
+
 const VERSION_MANIFEST: &str = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
 const JAVA_MANIFEST: &str = "https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json";
 const FABRIC_META: &str = "https://meta.fabricmc.net/v2";
@@ -82,7 +116,7 @@ fn real_path(path: &Path) -> Result<PathBuf, String> {
 
 /// Paths from Mojang/Fabric use "/"; keep everything in Windows form so every tool sees the same string
 fn native(rel: &str) -> String {
-    rel.replace('/', "\\")
+    if cfg!(windows) { rel.replace('/', "\\") } else { rel.to_string() }
 }
 
 /// Every instance has its own game folder (saves, mods, options); runtime, libraries and assets are shared
@@ -338,8 +372,8 @@ fn rules_allow(rules: Option<&Value>) -> bool {
                 features.values().all(|v| v.as_bool() == Some(false))
             });
         let os_applies = rule.get("os").map_or(true, |os| {
-            os["name"].as_str().map_or(true, |name| name == "windows")
-                && os["arch"].as_str() != Some("x86")
+            os["name"].as_str().map_or(true, |name| name == platform::OS_NAME)
+                && os["arch"].as_str().map_or(true, |arch| arch == ARCH)
         });
         if features_apply && os_applies {
             allowed = allow;
@@ -467,17 +501,17 @@ async fn ensure_java(
 ) -> Result<PathBuf, String> {
     reporter.stage("Checking Java", 0);
     let all = get_json(client, JAVA_MANIFEST).await?;
-    let entry = all["windows-x64"][component]
+    let entry = all[platform::JAVA_PLATFORM][component]
         .as_array()
         .and_then(|list| list.first())
-        .ok_or(format!("No Java runtime \"{component}\" for Windows"))?;
+        .ok_or(format!("No Java runtime \"{component}\" for this system"))?;
     let manifest_url = entry["manifest"]["url"]
         .as_str()
         .ok_or("Java manifest missing")?;
     let manifest_sha1 = entry["manifest"]["sha1"].as_str().unwrap_or_default();
 
     let dir = root.join("runtime").join(component);
-    let javaw = dir.join("bin").join("javaw.exe");
+    let javaw = dir.join(native(platform::JAVA_BINARY));
     let marker = dir.join(".installed");
     if javaw.exists() && fs::read_to_string(&marker).ok().as_deref() == Some(manifest_sha1) {
         return Ok(javaw);
@@ -504,11 +538,42 @@ async fn ensure_java(
         }
     }
     download_all(client, tasks, reporter, "Downloading Java").await?;
+    finish_java_files(&dir, &manifest)?;
     if !javaw.exists() {
         return Err("Java could not be installed".into());
     }
     fs::write(&marker, manifest_sha1).map_err(|e| e.to_string())?;
     Ok(javaw)
+}
+
+/// macOS / Linux: the runtime needs executable bits and its symlinks; Windows needs neither
+#[cfg(unix)]
+fn finish_java_files(dir: &Path, manifest: &Value) -> Result<(), String> {
+    use std::os::unix::fs::PermissionsExt;
+    for (rel, info) in manifest["files"].as_object().into_iter().flatten() {
+        let path = dir.join(rel);
+        match info["type"].as_str() {
+            Some("file") if info["executable"].as_bool() == Some(true) => {
+                fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).map_err(|e| e.to_string())?;
+            }
+            Some("link") => {
+                if let Some(target) = info["target"].as_str() {
+                    if let Some(parent) = path.parent() {
+                        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+                    }
+                    let _ = fs::remove_file(&path);
+                    std::os::unix::fs::symlink(target, &path).map_err(|e| e.to_string())?;
+                }
+            }
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
+#[cfg(not(unix))]
+fn finish_java_files(_dir: &Path, _manifest: &Value) -> Result<(), String> {
+    Ok(())
 }
 
 // ---------------------------------------------------------------- launch
@@ -700,7 +765,7 @@ async fn prepare(
         .iter()
         .map(|p| p.to_string_lossy().into_owned())
         .collect::<Vec<_>>()
-        .join(";");
+        .join(platform::CLASSPATH_SEPARATOR);
     let vars: HashMap<&str, String> = HashMap::from([
         ("auth_player_name", session.name.clone()),
         ("version_name", version_id.clone()),
@@ -717,7 +782,7 @@ async fn prepare(
         ("launcher_name", LAUNCHER_NAME.to_string()),
         ("launcher_version", LAUNCHER_VERSION.to_string()),
         ("classpath", classpath),
-        ("classpath_separator", ";".to_string()),
+        ("classpath_separator", platform::CLASSPATH_SEPARATOR.to_string()),
         ("library_directory", lib_dir.to_string_lossy().into_owned()),
     ]);
 
@@ -751,7 +816,7 @@ fn spawn_game(javaw: &Path, args: &[String], game: &Path) -> Result<std::process
         .map_err(|e| format!("Could not start Java: {e}"))
 }
 
-#[cfg(test)]
+#[cfg(all(test, windows))]
 mod tests {
     use super::*;
 
