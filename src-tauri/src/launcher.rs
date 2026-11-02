@@ -541,7 +541,7 @@ async fn ensure_java(
     Ok(javaw)
 }
 
-/// macOS / Linux: the runtime needs executable bits and its symlinks; Windows needs neither
+/// macOS: the runtime needs executable bits and its symlinks; Windows needs neither
 #[cfg(unix)]
 fn finish_java_files(dir: &Path, manifest: &Value) -> Result<(), String> {
     use std::os::unix::fs::PermissionsExt;
