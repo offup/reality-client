@@ -120,9 +120,7 @@ writeFileSync(
         "windows-x86_64": windows,
         "windows-x86_64-nsis": windows,
         "darwin-aarch64": mac,
-        "darwin-x86_64": mac,
         "darwin-aarch64-app": mac,
-        "darwin-x86_64-app": mac,
       },
     },
     null,
@@ -134,7 +132,7 @@ const body = [
   notes,
   "",
   `**Windows:** ${setupName}`,
-  `**macOS:** ${dmgName} (Apple silicon and Intel)`,
+  `**macOS:** ${dmgName} (Apple silicon, M1 and newer)`,
   "",
   "Already installed? The launcher shows the update at the top left, one click installs it.",
 ].join("\n");

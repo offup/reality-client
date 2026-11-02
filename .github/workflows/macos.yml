@@ -1,4 +1,4 @@
-# Builds the macOS app (one universal build for Apple silicon and Intel) for every version tag.
+# Builds the macOS app for Apple silicon (M1 and newer) for every version tag.
 # The release script downloads the result and publishes it together with the Windows installer.
 name: macOS build
 
@@ -20,7 +20,7 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-apple-darwin,x86_64-apple-darwin
+          targets: aarch64-apple-darwin
 
       - uses: swatinem/rust-cache@v2
         with:
@@ -29,17 +29,20 @@ jobs:
       - run: npm ci
 
       - name: Build
-        run: npm run tauri build -- --target universal-apple-darwin --bundles app,dmg
+        run: npm run tauri build -- --target aarch64-apple-darwin --bundles app,dmg
         env:
           # Signs the update so installed launchers accept it
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
+          # Faster build: skip the slow whole-program optimization (app gets slightly bigger)
+          CARGO_PROFILE_RELEASE_LTO: "false"
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
 
       - uses: actions/upload-artifact@v4
         with:
           name: macos
           if-no-files-found: error
           path: |
-            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
-            src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app.tar.gz
-            src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app.tar.gz.sig
+            src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+            src-tauri/target/aarch64-apple-darwin/release/bundle/macos/*.app.tar.gz
+            src-tauri/target/aarch64-apple-darwin/release/bundle/macos/*.app.tar.gz.sig
