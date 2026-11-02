@@ -47,12 +47,7 @@ mod platform {
 }
 
 #[cfg(not(any(target_os = "windows", target_os = "macos")))]
-mod platform {
-    pub const OS_NAME: &str = "linux";
-    pub const JAVA_PLATFORM: &str = "linux";
-    pub const CLASSPATH_SEPARATOR: &str = ":";
-    pub const JAVA_BINARY: &str = "bin/java";
-}
+compile_error!("Reality Client supports Windows and macOS only");
 
 /// Mojang's arch names: "x86" means 32-bit (never us), "arm64" Apple silicon / ARM
 const ARCH: &str = if cfg!(target_arch = "aarch64") { "arm64" } else { "x86_64" };
